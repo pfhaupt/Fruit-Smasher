@@ -85,10 +85,19 @@ class Text extends BaseUIBlock {
 }
 
 class Image extends BaseUIBlock {
-  constructor(name, x, y, w, h) {
+  constructor(name, x, y, w, h, squareMode = true) {
     super(x, y, w, h);
     let n = "/Fruit-Smasher/images/"+name;
-    this.img = createImg(n, "");
+    this.img = createImg(n, "If you can read this something went wrong.");
+    this.squareMode = squareMode;
+  }
+
+  resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
+    let ratio = parentWAbs / parentHAbs;
+    this.xAbsToScreen = parentXAbs + parentWAbs * this.xRelToParent;
+    this.yAbsToScreen = parentYAbs + parentHAbs * this.yRelToParent;
+    this.wAbsToScreen = parentWAbs * this.wRelToParent;
+    this.hAbsToScreen = parentHAbs * this.hRelToParent * ratio;
   }
 
   display() {
