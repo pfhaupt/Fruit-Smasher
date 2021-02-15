@@ -13,7 +13,7 @@ function disableDraw() {
 var img;
 
 function preload() {
-  let name = "data:image/png;/images/boss.png";
+  let name = "images/boss.png";
   console.log(name);
   img = loadImage(name);
   //let img = loadImage("http://localhost:8000/images/boss.png")
