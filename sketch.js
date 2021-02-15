@@ -10,8 +10,9 @@ function disableDraw() {
   drawing = false;
 }
 
-var img;
+/* Testing Image Loading
 
+var img;
 function preload() {
   let name = "/Fruit-Smasher/images/boss.png";
   console.log(name);
@@ -19,6 +20,7 @@ function preload() {
   //let img = loadImage("http://localhost:8000/images/boss.png")
   //var test = new Image("boss.png", 0, 0, 0, 0);
 }
+*/
 
 function setup() {
   textSize(defaultFontSize);
