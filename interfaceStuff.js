@@ -87,8 +87,14 @@ class Text extends BaseUIBlock {
 class Image extends BaseUIBlock {
   constructor(name, x, y, w, h) {
     super(x, y, w, h);
-    let n = "images/"+name;
+    let n = "/Fruit-Smasher/images/"+name;
     this.img = loadImage(n);
+  }
+  
+  display() {
+    push();
+    image(this.img, this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+    pop();
   }
 }
 
