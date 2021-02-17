@@ -1,4 +1,5 @@
-var defaultFontSize = 24;
+var realDefaultFontSize = 24;
+var defaultFontSize = Math.min(realDefaultFontSize, Math.max(screen.width, screen.height) / 3);
 
 class BaseUIBlock {
   constructor(x, y, w, h) {
@@ -59,6 +60,10 @@ class Text extends BaseUIBlock {
     this.alignX = aX;
     this.alignY = aY;
     this.format = format;
+  }
+  resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
+    super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
+    this.txtSize = defaultFontSize;
   }
 
   display() {
