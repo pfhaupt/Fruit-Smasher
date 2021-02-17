@@ -87,9 +87,16 @@ class Text extends BaseUIBlock {
 class Image extends BaseUIBlock {
   constructor(name, x, y, w, h, squareMode = true) {
     super(x, y, w, h);
-    let n = "/Fruit-Smasher/images/"+name;
-    this.img = createImg(n, "");
+    this.img = createImg(name, "");
     this.squareMode = squareMode;
+  }
+
+  hide() {
+    this.img.hide();
+  }
+
+  show() {
+    this.img.show();
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
@@ -101,9 +108,8 @@ class Image extends BaseUIBlock {
   }
 
   display() {
-    push();
-    image(this.img, this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-    pop();
+    this.img.position(this.xAbsToScreen, this.yAbsToScreen);
+    this.img.size(this.wAbsToScreen, this.hAbsToScreen);
   }
 }
 

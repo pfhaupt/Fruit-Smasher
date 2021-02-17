@@ -9,7 +9,7 @@ class FieldMenu extends MenuTemplate {
     this.children.push(new Button("Next", 0.6, 0.6, 0.1, 0.1, nextEnemy));
 
     //Anzeige Gegner
-    this.children.push(new Image("boss.png", 0.65, 0.1, 0.2, 0.2));
+    this.children.push(new Image("/Fruit-Smasher/images/boss.png", 0.65, 0.1, 0.2, 0.2));
     this.children.push(new Text("Enemy HP: ", "enemy.hp", 0.65, 0.40, 0.2, 0.2));
     this.children.push(new Text("Enemy Dmg: ", "enemy.dmg", 0.65, 0.42, 0.2, 0.2));
 
