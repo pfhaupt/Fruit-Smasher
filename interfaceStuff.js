@@ -88,7 +88,7 @@ class Image extends BaseUIBlock {
   constructor(name, x, y, w, h, squareMode = true) {
     super(x, y, w, h);
     let n = "/Fruit-Smasher/images/"+name;
-    this.img = createImg(n, "If you can read this something went wrong.");
+    this.img = createImg(n, "");
     this.squareMode = squareMode;
   }
 
