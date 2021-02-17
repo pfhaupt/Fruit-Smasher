@@ -21,43 +21,31 @@ class BaseUIBlock {
   }
 
   display() {
-
+    this.content.position(this.xAbsToScreen, this.yAbsToScreen);
+    this.content.size(this.wAbsToScreen, this.hAbsToScreen);
   }
 
   hide() {
-    this.hidden = true;
+    this.content.hide();
   }
 
   show() {
-    this.hidden = false;
+    this.content.show();
   }
 }
 
 class Button extends BaseUIBlock {
   constructor(name, x, y, w, h, fun, s = defaultFontSize) {
     super(x, y, w, h);
-    this.b = createButton(name);
-    this.b.mouseReleased(fun);
+    this.content = createButton(name);
+    this.content.mouseReleased(fun);
     this.txtSize = s;
-    this.b.style('font-size', this.txtSize + 'px');
-  }
-
-  hide() {
-    this.b.hide();
-  }
-
-  show() {
-    this.b.show();
-  }
-
-  display() {
-    this.b.position(this.xAbsToScreen, this.yAbsToScreen);
-    this.b.size(this.wAbsToScreen, this.hAbsToScreen);
+    this.content.style('font-size', this.txtSize + 'px');
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
     this.txtSize = Math.min(defaultFontSize, Math.max(this.wAbsToScreen, this.hAbsToScreen) / 3);
-    this.b.style('font-size', this.txtSize + 'px');
+    this.content.style('font-size', this.txtSize + 'px');
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
   }
 }
@@ -87,16 +75,8 @@ class Text extends BaseUIBlock {
 class Image extends BaseUIBlock {
   constructor(name, x, y, w, h, squareMode = true) {
     super(x, y, w, h);
-    this.img = createImg(name, "");
+    this.content = createImg(name, "");
     this.squareMode = squareMode;
-  }
-
-  hide() {
-    this.img.hide();
-  }
-
-  show() {
-    this.img.show();
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
@@ -105,11 +85,6 @@ class Image extends BaseUIBlock {
     this.yAbsToScreen = parentYAbs + parentHAbs * this.yRelToParent;
     this.wAbsToScreen = parentWAbs * this.wRelToParent;
     this.hAbsToScreen = parentHAbs * this.hRelToParent * ratio;
-  }
-
-  display() {
-    this.img.position(this.xAbsToScreen, this.yAbsToScreen);
-    this.img.size(this.wAbsToScreen, this.hAbsToScreen);
   }
 }
 
