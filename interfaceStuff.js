@@ -63,7 +63,7 @@ class Button extends BaseUIBlock {
 }
 
 class Text extends BaseUIBlock {
-  constructor(message, sMessage, x, y, w, h, s = defaultFontSize, aX = CENTER, aY = CENTER, format = true) {
+  constructor(sMessage, message, x, y, w, h, s = defaultFontSize, aX = CENTER, aY = CENTER, format = true) {
     super(x, y, w, h);
     this.message = message;
     this.secondaryMessage = sMessage;
