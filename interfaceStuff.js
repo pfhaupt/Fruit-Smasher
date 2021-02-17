@@ -12,6 +12,7 @@ class BaseUIBlock {
     this.wAbsToScreen = 0;
     this.hAbsToScreen = 0;
     this.hidden = true;
+    this.content = null;
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
