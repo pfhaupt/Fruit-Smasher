@@ -10,10 +10,12 @@ class FieldMenu extends MenuTemplate {
 
     //Anzeige Gegner
     this.children.push(new Image("/Fruit-Smasher/images/boss.png", 0.65, 0.1, 0.2, 0.2));
+    this.children.push(new Text("Enemy Lvl: ", "enemy.level", 0.65, 0.38, 0.2, 0.2));
     this.children.push(new Text("Enemy HP: ", "enemy.hp", 0.65, 0.40, 0.2, 0.2));
     this.children.push(new Text("Enemy Dmg: ", "enemy.dmg", 0.65, 0.42, 0.2, 0.2));
 
     //Anzeige Spieler
+    this.children.push(new Text("Player Lvl: ", "player.level", 0.15, 0.38, 0.2, 0.2));
     this.children.push(new Text("Player HP: ", "player.hp", 0.15, 0.40, 0.2, 0.2));
     this.children.push(new Text("Player Dmg: ", "player.dmg", 0.15, 0.42, 0.2, 0.2));
   }

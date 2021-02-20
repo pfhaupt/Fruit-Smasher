@@ -60,7 +60,7 @@ function nextZone() {
 function spawnEnemy() {
   let minLevel = currentZone * 10;
   let maxLevel = minLevel + 9;
-  let enemyLevel = random(minLevel, Math.max(minLevel, Math.min(player.level, maxLevel)));
+  let enemyLevel = Math.floor(random(minLevel, Math.max(minLevel, Math.min(player.level, maxLevel))));
   let hp = 20 + 5 * enemyLevel;
   let dmg = 1 + 1 * enemyLevel;
   let regen = 0.1 * enemyLevel;

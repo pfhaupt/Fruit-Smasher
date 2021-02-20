@@ -24,10 +24,14 @@ class Player extends BaseEntity {
     let i = this.expIncrease;
     let e = this.experience;
     let c = this.level;
+    //New Level r after calculating e experience at level c
     let r = floor((sqrt(4*b*b+4*b*(2*c-1)*i+i*(pow(1-2*c, 2)*i+8*e))-2*b+i)/(2*i));
 
+    //Getting XP cost for a given Level l
+    //totalXP=BaseXP*l+IncreasePerLevel/2((l-1)^2+(l-1))
     let xpCostCurrent = b*c+i/2*((c-1)*(c-1)+(c-1));
     let xpCostResult = b*r+i/2*((r-1)*(r-1)+(r-1));
+    //Experience cost to get from current level to new level
     let totalXP = xpCostResult - xpCostCurrent;
     this.experience -= totalXP;
     this.level = r;
