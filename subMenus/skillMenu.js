@@ -16,7 +16,7 @@ class SkillMenu extends MenuTemplate {
 
 class SkillBlock extends MenuTemplate {
   constructor(name, x, y, w, h, col) {
-    super(name, x, y, w, h, col)
+    super(name, x, y, w, h, col);
 
     this.children.push(new Button("-MAX", 0, 0, 0.075, 1, () => {
       doStuff(100);
