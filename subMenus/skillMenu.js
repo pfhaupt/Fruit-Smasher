@@ -29,8 +29,8 @@ class SkillBlock extends MenuTemplate {
     this.children.push(new Button("-1", 0.225, 0, 0.075, 1, () => {
       doStuff(10);
     }));
-    this.children.push(new Text("Damage Boost: ", "player.skill[dmg].value", 0.3, 0, 0.2, 1));
-    this.children.push(new Text("Level: ", "player.skill[dmg].level", 0.5, 0, 0.2, 1));
+    this.children.push(new Text("Damage Boost: ", "player.skill['dmg'].value", 0.3, 0, 0.2, 1));
+    this.children.push(new Text("Level: ", "player.skill['dmg'].level", 0.5, 0, 0.2, 1));
     this.children.push(new Button("+1", 0.7, 0, 0.075, 1, () => {
       doStuff(10);
     }));
