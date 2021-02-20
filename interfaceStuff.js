@@ -1,4 +1,4 @@
-var realDefaultFontSize = 24;
+var realDefaultFontSize = 32;
 var defaultFontSize = Math.min(realDefaultFontSize, Math.max(screen.width, screen.height) / 3);
 var debug = true;
 
