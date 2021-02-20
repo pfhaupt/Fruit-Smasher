@@ -23,10 +23,10 @@ class BaseUIBlock {
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
-    this.tempX = this.xAbsToScreen;
-    this.tempY = this.yAbsToScreen;
-    this.tempW = this.wAbsToScreen;
-    this.tempH = this.hAbsToScreen;
+  this.tempX = this.xAbsToScreen;
+  this.tempY = this.yAbsToScreen;
+  this.tempW = this.wAbsToScreen;
+  this.tempH = this.hAbsToScreen;
     this.xAbsToScreen = parentXAbs + parentWAbs * this.xRelToParent;
     this.yAbsToScreen = parentYAbs + parentHAbs * this.yRelToParent;
     this.wAbsToScreen = parentWAbs * this.wRelToParent;
@@ -34,12 +34,10 @@ class BaseUIBlock {
     if (this.aspectRatio !== 0) {
       if (parentWAbs / this.aspectRatio > parentHAbs) {
         let oldW = this.wAbsToScreen;
-        this.tempW = oldW;
         this.wAbsToScreen = this.hAbsToScreen * this.aspectRatio;
         this.xAbsToScreen = this.xAbsToScreen + (oldW - this.wAbsToScreen) / 2.0;
       } else {
         let oldH = this.hAbsToScreen;
-        this.tempH = oldH;
         this.hAbsToScreen = this.wAbsToScreen / this.aspectRatio;
         this.yAbsToScreen = this.yAbsToScreen + (oldH - this.hAbsToScreen) / 2.0;
       }
