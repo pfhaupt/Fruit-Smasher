@@ -95,8 +95,7 @@ class Text extends BaseUIBlock {
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
     this.content.style('font-size', this.txtSize + 'px');
-    this.content.style('vertical-align', 'middle');
-    this.content.style('horizontal-align', 'middle');
+    this.content.style('text-align', 'center');
     this.txtSize = defaultFontSize;
     //this.content.center();
   }
