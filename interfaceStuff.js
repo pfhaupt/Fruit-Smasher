@@ -82,21 +82,20 @@ class Button extends BaseUIBlock {
 }
 
 class Text extends BaseUIBlock {
-  constructor(sMessage, message, x, y, w, h, s = defaultFontSize, aX = CENTER, aY = CENTER, format = true) {
+  constructor(sMessage, message, x, y, w, h, s = defaultFontSize, a = 'center', format = true) {
     super(x, y, w, h);
     this.content = createP("");
     this.message = message;
     this.secondaryMessage = sMessage;
     this.txtSize = s;
-    this.alignX = aX;
-    this.alignY = aY;
+    this.align = a;
     this.format = format;
   }
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
     this.content.style('font-size', this.txtSize + 'px');
     this.content.style('line-height', this.hAbsToScreen+'px');
-    this.content.style('text-align', 'center');
+    this.content.style('text-align', this.align);
     this.txtSize = defaultFontSize;
     //this.content.center();
   }
