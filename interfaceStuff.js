@@ -34,10 +34,10 @@ class BaseUIBlock {
     this.tempH = this.hAbsToScreen;
       if (parentWAbs / this.aspectRatio > parentHAbs) {
         this.wAbsToScreen = this.hAbsToScreen * this.aspectRatio;
-        this.xAbsToScreen = this.xAbsToScreen + (oldW - this.wAbsToScreen) / 2.0;
+        this.xAbsToScreen = this.xAbsToScreen + (this.tempW - this.wAbsToScreen) / 2.0;
       } else {
         this.hAbsToScreen = this.wAbsToScreen / this.aspectRatio;
-        this.yAbsToScreen = this.yAbsToScreen + (oldH - this.hAbsToScreen) / 2.0;
+        this.yAbsToScreen = this.yAbsToScreen + (this.tempH - this.hAbsToScreen) / 2.0;
       }
     }
   }
