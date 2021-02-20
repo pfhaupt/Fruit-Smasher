@@ -8,7 +8,7 @@ class SkillMenu extends MenuTemplate {
     let h1 = (1 - this.children[0].hRelToParent) / blockCount;
 
     for (let i = 0; i < blockCount; i++) {
-      this.children.push(new Skillblock("", 0, this.children[0].hRelToParent + i * h1, 1, h1, col));
+      this.children.push(new SkillBlock("", 0, this.children[0].hRelToParent + i * h1, 1, h1, col));
     }
   }
 }
