@@ -98,7 +98,7 @@ class Text extends BaseUIBlock {
     this.content.style('vertical-align', 'middle');
     this.content.style('horizontal-align', 'middle');
     this.txtSize = defaultFontSize;
-    this.content.center();
+    //this.content.center();
   }
 
   display() {
