@@ -73,7 +73,7 @@ class Text extends BaseUIBlock {
   }
 
   show() {
-    
+
   }
 
   display() {
@@ -102,7 +102,6 @@ class Image extends BaseUIBlock {
     this.hAbsToScreen = parentHAbs * this.hRelToParent * ratio;
   }
 }
-
 
 class MainMenuButton extends Button {
   constructor(name, x, y, w, h, id) {

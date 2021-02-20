@@ -31,7 +31,6 @@ function setup() {
 
 function drawStuff() {
   if (drawing) requestAnimationFrame(drawStuff);
-  resizeEverything();
   background(255);
   mainWindow.display();
 }
