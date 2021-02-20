@@ -28,7 +28,7 @@ function setup() {
   mainWindow = new MainWindow();
   let ratio = Math.min(windowHeight / windowWidth, windowWidth / windowHeight);
   defaultFontSize = realDefaultFontSize * ratio;
-  mainWindow.resize();
+  mainWindow.resize(true);
   requestAnimationFrame(drawStuff);
 }
 
