@@ -28,10 +28,10 @@ class BaseUIBlock {
     this.wAbsToScreen = parentWAbs * this.wRelToParent;
     this.hAbsToScreen = parentHAbs * this.hRelToParent;
     if (this.aspectRatio !== 0) {
-    this.tempX = this.xAbsToScreen;
-    this.tempY = this.yAbsToScreen;
-    this.tempW = this.wAbsToScreen;
-    this.tempH = this.hAbsToScreen;
+      this.tempX = this.xAbsToScreen;
+      this.tempY = this.yAbsToScreen;
+      this.tempW = this.wAbsToScreen;
+      this.tempH = this.hAbsToScreen;
       if (parentWAbs / this.aspectRatio > parentHAbs) {
         this.wAbsToScreen = this.hAbsToScreen * this.aspectRatio;
         this.xAbsToScreen = this.xAbsToScreen + (this.tempW - this.wAbsToScreen) / 2.0;
@@ -84,6 +84,7 @@ class Button extends BaseUIBlock {
 class Text extends BaseUIBlock {
   constructor(sMessage, message, x, y, w, h, s = defaultFontSize, aX = CENTER, aY = CENTER, format = true) {
     super(x, y, w, h);
+    this.content = createP("");
     this.message = message;
     this.secondaryMessage = sMessage;
     this.txtSize = s;
@@ -91,28 +92,25 @@ class Text extends BaseUIBlock {
     this.alignY = aY;
     this.format = format;
   }
-
-  resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
-    super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
-    this.txtSize = defaultFontSize;
-  }
-
-  hide() {
-
-  }
-
-  show() {
-
-  }
+  /*
+    resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
+      super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
+      this.txtSize = defaultFontSize;
+    }
+    */
 
   display() {
     let txt = this.secondaryMessage;
+    if (this.format) txt += prettify(eval(this.message), 2);
+    this.content.html(txt);
+    super.display();
+    /*let txt = this.secondaryMessage;
     if (this.format) txt += prettify(eval(this.message), 2);
     push();
     textSize(this.txtSize);
     textAlign(this.alignX, this.alignY);
     text(txt, this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-    pop();
+    pop();*/
   }
 }
 
