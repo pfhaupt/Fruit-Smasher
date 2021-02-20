@@ -95,14 +95,13 @@ class Text extends BaseUIBlock {
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
     this.txtSize = defaultFontSize;
     this.content.style('font-size', this.txtSize + 'px');
-    this.content.style('line-height', (this.hAbsToScreen-2*this.txtSize)+'px');
+    if (this.format) this.content.style('line-height', (this.hAbsToScreen-2*this.txtSize)+'px');
     this.content.style('text-align', this.align);
     //this.content.center();
   }
 
   display() {
-    let txt = this.secondaryMessage;
-    if (this.format) txt += prettify(eval(this.message), 2);
+    let txt = this.secondaryMessage + prettify(eval(this.message), 2);
     this.content.html(txt);
     super.display();
     /*let txt = this.secondaryMessage;
