@@ -1,5 +1,7 @@
 var realDefaultFontSize = 24;
 var defaultFontSize = Math.min(realDefaultFontSize, Math.max(screen.width, screen.height) / 3);
+var debug = false;
+
 
 class BaseUIBlock {
   constructor(x, y, w, h) {
@@ -23,6 +25,12 @@ class BaseUIBlock {
   }
 
   display() {
+    if (debug) {
+      push();
+      noFill();
+      rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+      pop();
+    }
     this.content.position(this.xAbsToScreen, this.yAbsToScreen);
     this.content.size(this.wAbsToScreen, this.hAbsToScreen);
   }
