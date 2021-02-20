@@ -13,9 +13,9 @@ class MainWindow {
 
     this.subMenus = [
       new FieldMenu("Field", 0, mainMenuHeight, 1, 1, color(255, 163, 0)),
-      new StatsMenu("Stats", 0, mainMenuHeight, 1, 1, color(0, 255, 0)),
+      new SkillMenu("Skills", 0, mainMenuHeight, 1, 1, color(100, 0, 57)),
       new LootMenu("Loot", 0, mainMenuHeight, 1, 1, color(255, 0, 255)),
-
+      new StatsMenu("Stats", 0, mainMenuHeight, 1, 1, color(0, 255, 0)),
     ];
     this.mainMenu = new MainMenu(0, 0, 1, mainMenuHeight, this.subMenus);
     this.currentSubMenu = this.subMenus[0];
