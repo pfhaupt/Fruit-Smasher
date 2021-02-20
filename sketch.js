@@ -26,6 +26,8 @@ function setup() {
   textSize(defaultFontSize);
   createCanvas(windowWidth, windowHeight);
   mainWindow = new MainWindow();
+  let ratio = Math.min(windowHeight / windowWidth, windowWidth / windowHeight);
+  defaultFontSize = realDefaultFontSize * ratio;
   mainWindow.resize();
   requestAnimationFrame(drawStuff);
 }
