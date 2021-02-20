@@ -9,7 +9,7 @@ class MainWindow {
     this.wAbsToScreen = 0;
     this.hAbsToScreen = 0;
 
-    let mainMenuHeight = 0.1;
+    let mainMenuHeight = 0.15;
 
     this.subMenus = [
       new FieldMenu("Field", 0, mainMenuHeight, 1, 1, color(255, 163, 0)),
