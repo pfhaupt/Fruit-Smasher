@@ -5,7 +5,7 @@ class FieldMenu extends MenuTemplate {
 
     //Unten Navigator
     this.children.push(new Button("Previous", 0.3, 0.6, 0.1, 0.1, previousEnemy));
-    this.children.push(new Text("Level: ", "enemyLevel", 0.4, 0.6, 0.2, 0.1, 30));
+    this.children.push(new Text("Zone: ", "currentZone", 0.4, 0.6, 0.2, 0.1, 30));
     this.children.push(new Button("Next", 0.6, 0.6, 0.1, 0.1, nextEnemy));
 
     //Anzeige Gegner

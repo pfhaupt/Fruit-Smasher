@@ -6,7 +6,8 @@ var updatesPerSecond = 20,
 var looping = true;
 var mainLoop = setTimeout(gameLoop, refreshTime);
 
-var enemyLevel = 0;
+var currentZone = 0;
+var maxZone = 7;
 
 function enableGameLoop() {
   looping = true;
@@ -37,29 +38,32 @@ function update(dt) {
   player.update(enemy, dt);
   enemy.update(player, dt);
   if (enemy.checkDeath()) {
-    player.addExperience(enemyLevel);
-    spawnEnemy(enemyLevel);
+    player.addExperience(enemy.level);
+    spawnEnemy();
   }
   if (player.checkDeath()) {
     player.respawn();
-    spawnEnemy(enemyLevel);
+    spawnEnemy();
   }
 }
 
-function previousEnemy() {
-  enemyLevel = Math.max(0, --enemyLevel);
-  spawnEnemy(enemyLevel);
+function previousZone() {
+  currentZone = Math.max(0, --currentZone);
+  spawnEnemy();
 }
 
 function nextEnemy() {
-  enemyLevel = Math.min(++enemyLevel, 100);
-  spawnEnemy(enemyLevel);
+  currentZone = Math.min(++currentZone, maxZone);
+  spawnEnemy();
 }
 
-function spawnEnemy(lvl) {
-  let hp = 20 + 5 * lvl;
-  let dmg = 1 + 1 * lvl;
-  let regen = 0.1 * lvl;
-  let atkSpeed = 1 + Math.floor(lvl / 10);
-  enemy = new Enemy(lvl, hp, dmg, regen, atkSpeed);
+function spawnEnemy() {
+  let minLevel = currentZone * 10;
+  let maxLevel = minLevel + 9;
+  let enemyLevel = random(minLevel, Math.max(minLevel, Math.min(player.level, maxLevel)));
+  let hp = 20 + 5 * enemyLevel;
+  let dmg = 1 + 1 * enemyLevel;
+  let regen = 0.1 * enemyLevel;
+  let atkSpeed = 1 + Math.floor(enemyLevel / 10);
+  enemy = new Enemy(enemyLevel, hp, dmg, regen, atkSpeed);
 }
