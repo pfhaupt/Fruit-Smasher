@@ -26,6 +26,7 @@ function setup() {
   textSize(defaultFontSize);
   createCanvas(windowWidth, windowHeight);
   mainWindow = new MainWindow();
+  mainWindow.resize();
   requestAnimationFrame(drawStuff);
 }
 
