@@ -95,11 +95,11 @@ class Image extends BaseUIBlock {
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
-    let ratio = parentWAbs / parentHAbs;
+    let s = Math.min(parentWAbs, parentHAbs);
     this.xAbsToScreen = parentXAbs + parentWAbs * this.xRelToParent;
     this.yAbsToScreen = parentYAbs + parentHAbs * this.yRelToParent;
-    this.wAbsToScreen = parentWAbs * this.wRelToParent;
-    this.hAbsToScreen = parentHAbs * this.hRelToParent * ratio;
+    this.wAbsToScreen = s * this.wRelToParent;
+    this.hAbsToScreen = s * this.hRelToParent;
   }
 }
 
