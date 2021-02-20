@@ -110,9 +110,8 @@ class Text extends BaseUIBlock {
 class Image extends BaseUIBlock {
   constructor(name, x, y, w, h, ar = 1) {
     super(x, y, w, h);
-    debugger;
     this.content = createImg(name, "");
-    this.aspectRatio = ar;
+    this.aspectRatio = this.content.width / this.content.height;
   }
 }
 
