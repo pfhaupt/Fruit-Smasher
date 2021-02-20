@@ -52,7 +52,7 @@ function previousZone() {
   spawnEnemy();
 }
 
-function nextEnemy() {
+function nextZone() {
   currentZone = Math.min(++currentZone, maxZone);
   spawnEnemy();
 }
