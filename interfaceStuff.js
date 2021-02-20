@@ -13,12 +13,20 @@ class BaseUIBlock {
     this.yAbsToScreen = 0;
     this.wAbsToScreen = 0;
     this.hAbsToScreen = 0;
+    this.tempY = 0;
+    this.tempX = 0;
+    this.tempW = 0;
+    this.tempH = 0;
     this.hidden = true;
     this.aspectRatio = 0;
     this.content = null;
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
+  this.tempX = this.xAbsToScreen;
+  this.tempY = this.yAbsToScreen;
+  this.tempW = this.wAbsToScreen;
+  this.tempH = this.hAbsToScreen;
     this.xAbsToScreen = parentXAbs + parentWAbs * this.xRelToParent;
     this.yAbsToScreen = parentYAbs + parentHAbs * this.yRelToParent;
     this.wAbsToScreen = parentWAbs * this.wRelToParent;
@@ -40,6 +48,9 @@ class BaseUIBlock {
     if (debug) {
       push();
       noFill();
+      stroke(255, 0, 0);
+      rect(this.tempX, this.tempY, this.tempW, this.tempH);
+      stroke(0, 255, 0);
       rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
       pop();
     }
