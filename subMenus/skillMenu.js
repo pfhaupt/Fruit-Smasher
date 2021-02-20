@@ -5,10 +5,10 @@ class SkillMenu extends MenuTemplate {
     this.children.push(new Text("Current Skill Points: ", "player.skillPoints", 0, 0, 1, 0.1));
 
     let blockCount = 5;
-    let h = (1 - this.children[0].hRelToParent) / blockCount;
+    let h1 = (1 - this.children[0].hRelToParent) / blockCount;
 
     for (let i = 0; i < blockCount; i++) {
-      this.children.push(new Skillblock("", 0, this.children[0].hRelToParent + i * h, 1, h, col));
+      this.children.push(new Skillblock("", 0, this.children[0].hRelToParent + i * h1, 1, h1, col));
     }
   }
 }
