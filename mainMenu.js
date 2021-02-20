@@ -8,8 +8,8 @@ class MainMenu extends MenuTemplate {
     for (var i = 0; i < sub.length; i++) {
       this.children.push(new MainMenuButton(sub[i].name, i * offs, 0.6, offs, 0.4, i));
     }
-    this.children.push(new Text("Level: ", "player.level", 0, 0, 0.5, 0.225, 20, 'left'));
-    this.children.push(new Text("Experience: ", "player.experience", 0, 0.2, 0.5, 0.25, 20, 'left'));
-    this.children.push(new Text("Experience needed: ", "player.expForLvlUp", 0, 0.4, 0.5, 0.25, 20, 'left'));
+    this.children.push(new Text("Level: ", "player.level", 0, 0, 0.5, 0.1, 20, 'left'));
+    this.children.push(new Text("Experience: ", "player.experience", 0, 0.2, 0.5, 0.1, 20, 'left'));
+    this.children.push(new Text("Experience needed: ", "player.expForLvlUp", 0, 0.4, 0.5, 0.1, 20, 'left'));
   }
 }
