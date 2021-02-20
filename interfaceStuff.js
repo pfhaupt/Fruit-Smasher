@@ -101,8 +101,8 @@ class Text extends BaseUIBlock {
   }
 
   display() {
-    let txt = this.secondaryMessage + prettify(eval(this.message), 2);
-    this.content.html(txt);
+    //let txt = this.secondaryMessage + prettify(eval(this.message), 2);
+    //this.content.html(txt);
     super.display();
     /*let txt = this.secondaryMessage;
     if (this.format) txt += prettify(eval(this.message), 2);
