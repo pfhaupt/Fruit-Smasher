@@ -92,12 +92,11 @@ class Text extends BaseUIBlock {
     this.alignY = aY;
     this.format = format;
   }
-  /*
     resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
       super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
       this.txtSize = defaultFontSize;
+      this.content.center();
     }
-    */
 
   display() {
     let txt = this.secondaryMessage;
