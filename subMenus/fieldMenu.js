@@ -15,8 +15,8 @@ class FieldMenu extends MenuTemplate {
     this.children.push(new Text("Enemy Dmg: ", "enemy.dmg", 0.65, 0.42, 0.3, 0.2));
 
     //Anzeige Spieler
-    this.children.push(new Text("Player Lvl: ", "player.level", 0.15, 0.38, 0.3, 0.2));
-    this.children.push(new Text("Player HP: ", "player.hp", 0.15, 0.40, 0.3, 0.2));
-    this.children.push(new Text("Player Dmg: ", "player.dmg", 0.15, 0.42, 0.3, 0.2));
+    this.children.push(new Text("Player Lvl: ", "player.level", 0.05, 0.38, 0.3, 0.2));
+    this.children.push(new Text("Player HP: ", "player.hp", 0.05, 0.40, 0.3, 0.2));
+    this.children.push(new Text("Player Dmg: ", "player.dmg", 0.05, 0.42, 0.3, 0.2));
   }
 }
