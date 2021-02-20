@@ -36,7 +36,7 @@ function drawStuff() {
   mainWindow.display();
 }
 
-function resizeEverything() {
+function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   let ratio = Math.min(windowHeight / windowWidth, windowWidth / windowHeight);
   defaultFontSize = realDefaultFontSize * ratio;
