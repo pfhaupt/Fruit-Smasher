@@ -7,6 +7,13 @@ class Player extends BaseEntity {
     this.expIncrease = 10;
     this.skillPoints = 0;
     this.skillPointsPerLevel = 5;
+
+    this.skill = {
+      dmg: {
+        level: 0,
+        value: 0
+      }
+    }
   }
 
   addExperience(enemyLvl) {
