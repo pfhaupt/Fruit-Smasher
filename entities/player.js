@@ -5,6 +5,8 @@ class Player extends BaseEntity {
     this.expForLevel1 = 100;
     this.expForLvlUp = this.expForLevel1;
     this.expIncrease = 10;
+    this.skillPoints = 0;
+    this.skillPointsPerLevel = 5;
   }
 
   addExperience(enemyLvl) {
@@ -36,6 +38,7 @@ class Player extends BaseEntity {
     this.experience -= totalXP;
     this.level = r;
     this.expForLvlUp = this.expForLevel1 + this.expIncrease * this.level;
+    this.skillPoints += this.skillPointsPerLevel * (r - c);
     this.maxHP = 100 + 10 * this.level;
     this.dmg = 2 + 1 * this.level;
     this.regen = 0.25 * (this.level + 1);
