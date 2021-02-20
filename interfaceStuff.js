@@ -1,6 +1,6 @@
 var realDefaultFontSize = 24;
 var defaultFontSize = Math.min(realDefaultFontSize, Math.max(screen.width, screen.height) / 3);
-var debug = false;
+var debug = true;
 
 
 class BaseUIBlock {
