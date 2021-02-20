@@ -26,12 +26,12 @@ class BaseUIBlock {
     if (this.aspectRatio !== 0) {
       if (parentWAbs / this.aspectRatio > parentHAbs) {
         let oldW = this.wAbsToScreen;
-        this.wAbsToScreen = oldW * this.aspectRatio;
+        this.wAbsToScreen = this.hAbsToScreen * this.aspectRatio;
         this.xAbsToScreen = this.xAbsToScreen + (oldW - this.wAbsToScreen) / 2.0;
       } else {
-          let oldH = this.hAbsToScreen;
-          this.hAbsToScreen = oldH * this.aspectRatio;
-          this.yAbsToScreen = this.yAbsToScreen + (oldH - this.hAbsToScreen) / 2.0;
+        let oldH = this.hAbsToScreen;
+        this.hAbsToScreen = this.wAbsToScreen / this.aspectRatio;
+        this.yAbsToScreen = this.yAbsToScreen + (oldH - this.hAbsToScreen) / 2.0;
       }
     }
   }
