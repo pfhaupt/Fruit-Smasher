@@ -84,13 +84,14 @@ class Button extends BaseUIBlock {
 class Text extends BaseUIBlock {
   constructor(sMessage, message, x, y, w, h, s = defaultFontSize, a = 'center', format = true) {
     super(x, y, w, h);
-    this.content = createP(this.secondaryMessage + prettify(eval(this.message), 2));
     this.message = message;
     this.secondaryMessage = sMessage;
     this.txtSize = s;
     this.align = a;
     this.format = format;
+    this.content = createP(this.secondaryMessage + prettify(eval(this.message), 2));
   }
+  
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
     this.txtSize = defaultFontSize;
