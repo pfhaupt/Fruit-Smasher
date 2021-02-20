@@ -17,6 +17,7 @@ class MainWindow {
       new LootMenu("Loot", 0, mainMenuHeight, 1, 1, color(255, 0, 255)),
       new StatsMenu("Stats", 0, mainMenuHeight, 1, 1, color(0, 255, 0)),
     ];
+    for (var s of this.subMenus) s.hide();
     this.mainMenu = new MainMenu(0, 0, 1, mainMenuHeight, this.subMenus);
     this.currentSubMenu = this.subMenus[0];
     this.currentSubMenu.show();

@@ -1,7 +1,6 @@
 class FieldMenu extends MenuTemplate {
   constructor(name, x, y, w, h, col) {
     super(name, x, y, w, h, col);
-    this.resize();
 
     //Unten Navigator
     this.children.push(new Button("Previous", 0.3, 0.6, 0.1, 0.1, previousZone));
