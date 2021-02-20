@@ -14,6 +14,7 @@ class BaseUIBlock {
     this.wAbsToScreen = 0;
     this.hAbsToScreen = 0;
     this.hidden = true;
+    this.aspectRatio = 0;
     this.content = null;
   }
 
@@ -22,6 +23,17 @@ class BaseUIBlock {
     this.yAbsToScreen = parentYAbs + parentHAbs * this.yRelToParent;
     this.wAbsToScreen = parentWAbs * this.wRelToParent;
     this.hAbsToScreen = parentHAbs * this.hRelToParent;
+    if (this.aspectRatio !== 0) {
+      if (parentWAbs / this.aspectRatio > parentHAbs) {
+        let oldW = this.wAbsToScreen;
+        this.wAbsToScreen = oldW * this.aspectRatio;
+        this.xAbsToScreen = this.xAbsToScreen + (oldW - this.wAbsToScreen) / 2.0;
+      } else {
+          let oldH = this.hAbsToScreen;
+          this.hAbsToScreen = oldH * this.aspectRatio;
+          this.yAbsToScreen = this.yAbsToScreen + (oldH - this.hAbsToScreen) / 2.0;
+      }
+    }
   }
 
   display() {
@@ -96,19 +108,11 @@ class Text extends BaseUIBlock {
 }
 
 class Image extends BaseUIBlock {
-  constructor(name, x, y, w, h, squareMode = true) {
+  constructor(name, x, y, w, h, ar = 1) {
     super(x, y, w, h);
+    debugger;
     this.content = createImg(name, "");
-    this.squareMode = squareMode;
-  }
-
-  resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
-    let s = Math.min(parentWAbs, parentHAbs);
-    this.xAbsToScreen = parentXAbs + parentWAbs * this.xRelToParent;
-    this.yAbsToScreen = parentYAbs + parentHAbs * this.yRelToParent;
-    this.wAbsToScreen = s * this.wRelToParent;
-    this.hAbsToScreen = s * this.hRelToParent;
-    this.content.center();
+    this.aspectRatio = ar;
   }
 }
 
