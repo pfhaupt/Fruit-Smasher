@@ -107,6 +107,7 @@ class MainMenuButton extends Button {
   constructor(name, x, y, w, h, id) {
     super(name, x, y, w, h, function() {
       mainWindow.showMenu(id);
+      mainWindow.resize();
     });
   }
 }

@@ -27,7 +27,7 @@ class MainWindow {
     this.currentSubMenu.display();
   }
 
-  resize(firstTime = false) {
+  resize() {
     this.xAbsToScreen = 0;
     this.yAbsToScreen = 0;
     this.wAbsToScreen = windowWidth;
@@ -35,7 +35,6 @@ class MainWindow {
 
     this.mainMenu.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
     this.currentSubMenu.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-    if (firstTime) for (var c of this.children) c.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
   }
 
   showMenu(id) {
