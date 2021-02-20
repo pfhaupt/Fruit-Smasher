@@ -108,6 +108,7 @@ class Image extends BaseUIBlock {
     this.yAbsToScreen = parentYAbs + parentHAbs * this.yRelToParent;
     this.wAbsToScreen = s * this.wRelToParent;
     this.hAbsToScreen = s * this.hRelToParent;
+    this.content.center();
   }
 }
 
