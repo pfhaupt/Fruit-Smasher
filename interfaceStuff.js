@@ -46,6 +46,7 @@ class Button extends BaseUIBlock {
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
+    debugger;
     this.txtSize = Math.min(defaultFontSize, Math.max(this.wAbsToScreen, this.hAbsToScreen) / 3);
     this.content.style('font-size', this.txtSize + 'px');
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
