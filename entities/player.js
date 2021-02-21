@@ -4,7 +4,7 @@ class Player {
     this.experience = 0;
     this.expForLevel1 = 100;
     this.expForLvlUp = this.expForLevel1;
-    this.expIncrease = 1.01;
+    this.expIncrease = 1.05;
     this.skillPoints = 0;
     this.skillPointsPerLevel = 5;
 
