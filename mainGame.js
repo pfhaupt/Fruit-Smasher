@@ -35,8 +35,10 @@ var player = new Player();
 var enemy = new Enemy();
 
 function update(dt) {
-  player.update(enemy, dt);
-  enemy.update(player, dt);
+  player.attack(enemy, dt);
+  enemy.attack(player, dt);
+  player.regenerate(dt);
+  enemy.regenerate(dt);
   if (enemy.checkDeath()) {
     player.addExperience(enemy.level);
     spawnEnemy();
