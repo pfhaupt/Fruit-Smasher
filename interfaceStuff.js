@@ -89,7 +89,7 @@ class Text extends BaseUIBlock {
     this.txtSize = s;
     this.align = a;
     this.format = format;
-    this.content = createP(this.secondaryMessage + roundToSpecificDecimalLength((eval(this.message), 2));
+    this.content = createP(this.secondaryMessage + roundToSpecificDecimalLength(eval(this.message), 2));
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
@@ -104,7 +104,7 @@ class Text extends BaseUIBlock {
 
   display() {
     let txt = this.secondaryMessage +
-    toFixedDecimalLength(roundToSpecificDecimalLength(eval(this.message), 3), 3);
+      toFixedDecimalLength(roundToSpecificDecimalLength(eval(this.message), 3), 3);
     this.content.html(txt);
     super.display();
     /*let txt = this.secondaryMessage;
