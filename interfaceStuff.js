@@ -94,7 +94,7 @@ class Text extends BaseUIBlock {
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
-    this.txtSize = Math.min(this.hAbsToScreen, defaultFontSize-1);
+    this.txtSize = Math.min(this.hAbsToScreen, defaultFontSize - 1);
     this.content.style('font-size', this.txtSize + 'px');
     this.content.style('line-height', '0px');
     this.content.style('margin', (this.hAbsToScreen / 2) + 'px 0px');
@@ -103,7 +103,8 @@ class Text extends BaseUIBlock {
   }
 
   display() {
-    let txt = this.secondaryMessage + prettify(eval(this.message), 2);
+    let txt = this.secondaryMessage +
+    toFixedDecimalLength(roundToSpecificDecimalLength(eval(this.message), 3), 3);
     this.content.html(txt);
     super.display();
     /*let txt = this.secondaryMessage;
@@ -133,9 +134,21 @@ class MainMenuButton extends Button {
   }
 }
 
-function prettify(val, digits) {
+function roundToSpecificDecimalLength(val, digits) {
   if (isNaN(val)) return;
   if (val === 0) return 0;
   var powOf10 = pow(10, digits);
   return round(val * powOf10) / powOf10;
+}
+
+var replacementChar = "0";
+
+function toFixedDecimalLength(val, digits) {
+  var splitted = (val + "").split(".");
+  var s;
+  if (splitted.length === 1)
+    s = (splitted[0] + ".") + replacementChar.repeat(digits);
+  else
+    s = splitted[0] + "." + splitted[1].padEnd(digits, "0");
+  return s;
 }
