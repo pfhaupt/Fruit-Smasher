@@ -65,7 +65,7 @@ class Player {
   calculateTotalAttributes() {
     for (var a in this.attributes) {
       this.attributes[a].total = this.attributes[a].fromLevel + this.attributes[a].fromSkill;
-      console.log(a, a.total);
+      console.log(a, this.attributes[a].total);
     }
   }
 
