@@ -1,6 +1,5 @@
-class Player extends BaseEntity {
+class Player {
   constructor(h = 100, d = 2, r = 0.25, s = 2) {
-    super(0, h, d, r, s);
     this.experience = 0;
     this.expForLevel1 = 100;
     this.expForLvlUp = this.expForLevel1;
@@ -8,27 +7,67 @@ class Player extends BaseEntity {
     this.skillPoints = 0;
     this.skillPointsPerLevel = 5;
 
-    this.skill = {
-      dmg: {
-        level: 0,
-        value: 0
-      }
+    this.attributes = {
+      damage: {
+        fromLevel: d,
+        fromSkill: 0,
+        total: 0,
+      },
+      maxHP: {
+        fromLevel: h,
+        fromSkill: 0,
+        total: 0,
+      },
+      regen: {
+        fromLevel: r,
+        fromSkill: 0,
+        total: 0,
+      },
+      atkSpeed: {
+        fromLevel: s,
+        fromSkill: 0,
+        total: 0,
+      },
+      expBoost: {
+        fromLevel: 1,
+        fromSkill: 0,
+        total: 0,
+      },
+    }
+
+    this.hp = h;
+  }
+
+  checkDeath() {
+    return this.hp <= 0;
+  }
+
+  update(other, dt) {
+    this.attack(other, dt);
+    this.regenerate(dt);
+  }
+
+  attack(other, dt) {
+    other.hp -= this.attributes.damage.total * this.attributes.atkSpeed.total * dt;
+  }
+
+  regenerate(dt) {
+    this.hp = constrain(this.hp + this.attributes.regen.total * dt, 0, this.attributes.maxHP.total);
+  }
+
+  calculateTotalAttributes() {
+    for (let a of this.attributes) {
+      a.total = a.fromLevel + a.fromSkill;
+      console.log(a, a.total);
     }
   }
 
   addExperience(enemyLvl) {
-    this.experience += (enemyLvl + 1) * 5;
+    this.experience += (enemyLvl + 1) * 5 * this.attributes.expBoost.total;
     if (this.experience >= this.expForLvlUp) this.levelUp();
   }
 
   levelUp() {
-    /*
-    while (this.experience >= this.expForLvlUp) {
-      this.experience -= this.expForLvlUp;
-      this.expForLvlUp += 10;
-      this.level++;
-    }
-    */
     let b = this.expForLevel1;
     let i = this.expIncrease;
     let e = this.experience;
@@ -46,14 +85,15 @@ class Player extends BaseEntity {
     this.level = r;
     this.expForLvlUp = this.expForLevel1 + this.expIncrease * this.level;
     this.skillPoints += this.skillPointsPerLevel * (r - c);
-    this.maxHP = 100 + 10 * this.level;
-    this.dmg = 2 + 1 * this.level;
-    this.regen = 0.25 * (this.level + 1);
-    this.atkSpeed = Math.ceil(this.level / 10);
+    this.attributes.damage.fromLevel = 2 + 1 * this.level;
+    this.attributes.maxHP.fromLevel = 100 + 10 * this.level;
+    this.attributes.regen.fromLevel = 0.25 * (this.level + 1);
+    this.attributes.atkSpeed.fromLevel = Math.ceil(this.level / 10);
+    this.attributes.maxHP.fromLevel = 100 + 10 * this.level;
   }
 
   respawn() {
-    this.hp = this.maxHP;
+    this.hp = this.attributes.maxHP.total;
     this.experience = Math.floor(this.experience * 0.9);
     console.log("You died");
   }
