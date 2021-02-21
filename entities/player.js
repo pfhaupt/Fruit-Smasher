@@ -107,19 +107,23 @@ class Player {
     this.level = r;
     this.expForLvlUp = this.expForLevel1 + this.expIncrease * this.level;
     */
-    let e = this.experience;
-    let i = this.expIncrease;
-    let b = this.expForLevel1;
-    let c = this.level;
-    //New Level r after calculating e experience at level c (exponential growth)
+    if (this.experience === this.expForLvlUp) {
+      this.experience -= this.expForLvlUp;
+      this.level++;
+    } else {
+      let e = this.experience;
+      let i = this.expIncrease;
+      let b = this.expForLevel1;
+      let c = this.level;
+      //New Level r after calculating e experience at level c (exponential growth)
 
-    let xpForCurrentLevel = b * (1 - pow(i, c)) / (1 - i);
-    let r = floor(log(1 + (e + xpForCurrentLevel) * (i - 1) / b) / log(i));
-    let xpForResultLevel = b * (1 - pow(i, r)) / (1 - i);
-    let totalXP = xpForResultLevel - xpForCurrentLevel;
-
-    this.experience -= totalXP;
-    this.level = r;
+      let xpForCurrentLevel = b * (1 - pow(i, c)) / (1 - i);
+      let r = floor(log(1 + (e + xpForCurrentLevel) * (i - 1) / b) / log(i)+0.001);
+      let xpForResultLevel = b * (1 - pow(i, r)) / (1 - i);
+      let totalXP = xpForResultLevel - xpForCurrentLevel;
+      this.experience -= totalXP;
+      this.level = r;
+    }
     this.expForLvlUp = this.expForLevel1 * pow(this.expIncrease, this.level);
     this.skillPoints += this.skillPointsPerLevel * (r - c);
     this.attributes.damage.fromLevel = 2 + 1 * this.level;
