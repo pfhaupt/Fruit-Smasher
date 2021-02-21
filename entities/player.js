@@ -42,7 +42,7 @@ class Player {
     }
 
     this.hp = h;
-    calculateTotalAttributes();
+    this.calculateTotalAttributes();
   }
 
   checkDeath() {
