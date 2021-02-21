@@ -107,6 +107,7 @@ class Player {
     this.level = r;
     this.expForLvlUp = this.expForLevel1 + this.expIncrease * this.level;
     */
+    let c = this.level;
     let r = this.level + 1;
     if (this.experience === this.expForLvlUp) {
       this.experience -= this.expForLvlUp;
@@ -115,7 +116,6 @@ class Player {
       let e = this.experience;
       let i = this.expIncrease;
       let b = this.expForLevel1;
-      let c = this.level;
       //New Level r after calculating e experience at level c (exponential growth)
 
       let xpForCurrentLevel = b * (1 - pow(i, c)) / (1 - i);
