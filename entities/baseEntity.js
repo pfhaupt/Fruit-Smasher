@@ -23,6 +23,6 @@ class BaseEntity {
   }
 
   regenerate(dt) {
-    this.hp = constrain(this.hp + this.regen * dt, this.hp, this.maxHP);
+    this.hp = Math.min(this.hp + this.regen * dt, this.maxHP);
   }
 }
