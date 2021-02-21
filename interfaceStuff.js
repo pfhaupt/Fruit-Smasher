@@ -89,66 +89,66 @@ class Text extends BaseUIBlock {
     this.txtSize = s;
     this.align = a;
     this.format = format;
-    this.content = createP(this.secondaryMessage + roundToSpecificDecimalLength((eval(this.message), 2));
+    this.content = createP(this.secondaryMessage + roundToSpecificDecimalLength(eval(this.message), 2));
+    }
+
+    resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
+      super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
+      this.txtSize = Math.min(this.hAbsToScreen, defaultFontSize - 1);
+      this.content.style('font-size', this.txtSize + 'px');
+      this.content.style('line-height', '0px');
+      this.content.style('margin', (this.hAbsToScreen / 2) + 'px 0px');
+      this.content.style('text-align', this.align);
+      //this.content.center();
+    }
+
+    display() {
+      let txt = this.secondaryMessage +
+        toFixedDecimalLength(roundToSpecificDecimalLength(eval(this.message), 3), 3);
+      this.content.html(txt);
+      super.display();
+      /*let txt = this.secondaryMessage;
+      if (this.format) txt += prettify(eval(this.message), 2);
+      push();
+      textSize(this.txtSize);
+      textAlign(this.alignX, this.alignY);
+      text(txt, this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+      pop();*/
+    }
   }
 
-  resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
-    super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
-    this.txtSize = Math.min(this.hAbsToScreen, defaultFontSize - 1);
-    this.content.style('font-size', this.txtSize + 'px');
-    this.content.style('line-height', '0px');
-    this.content.style('margin', (this.hAbsToScreen / 2) + 'px 0px');
-    this.content.style('text-align', this.align);
-    //this.content.center();
+  class Image extends BaseUIBlock {
+    constructor(name, x, y, w, h, ar = 1) {
+      super(x, y, w, h);
+      this.content = createImg(name, "");
+      this.aspectRatio = ar;
+    }
   }
 
-  display() {
-    let txt = this.secondaryMessage +
-    toFixedDecimalLength(roundToSpecificDecimalLength(eval(this.message), 3), 3);
-    this.content.html(txt);
-    super.display();
-    /*let txt = this.secondaryMessage;
-    if (this.format) txt += prettify(eval(this.message), 2);
-    push();
-    textSize(this.txtSize);
-    textAlign(this.alignX, this.alignY);
-    text(txt, this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-    pop();*/
+  class MainMenuButton extends Button {
+    constructor(name, x, y, w, h, id) {
+      super(name, x, y, w, h, function() {
+        mainWindow.showMenu(id);
+        mainWindow.resize();
+      });
+    }
   }
-}
 
-class Image extends BaseUIBlock {
-  constructor(name, x, y, w, h, ar = 1) {
-    super(x, y, w, h);
-    this.content = createImg(name, "");
-    this.aspectRatio = ar;
+  function roundToSpecificDecimalLength(val, digits) {
+    if (isNaN(val)) return;
+    if (val === 0) return 0;
+    var powOf10 = pow(10, digits);
+    return round(val * powOf10) / powOf10;
   }
-}
 
-class MainMenuButton extends Button {
-  constructor(name, x, y, w, h, id) {
-    super(name, x, y, w, h, function() {
-      mainWindow.showMenu(id);
-      mainWindow.resize();
-    });
+  var replacementChar = "0";
+
+  function toFixedDecimalLength(val, digits) {
+    var splitted = (val + "").split(".");
+    var s;
+    if (splitted.length === 1)
+      s = (splitted[0] + ".") + replacementChar.repeat(digits);
+    else
+      s = splitted[0] + "." + splitted[1].padEnd(digits, "0");
+    return s;
   }
-}
-
-function roundToSpecificDecimalLength(val, digits) {
-  if (isNaN(val)) return;
-  if (val === 0) return 0;
-  var powOf10 = pow(10, digits);
-  return round(val * powOf10) / powOf10;
-}
-
-var replacementChar = "0";
-
-function toFixedDecimalLength(val, digits) {
-  var splitted = (val + "").split(".");
-  var s;
-  if (splitted.length === 1)
-    s = (splitted[0] + ".") + replacementChar.repeat(digits);
-  else
-    s = splitted[0] + "." + splitted[1].padEnd(digits, "0");
-  return s;
-}
