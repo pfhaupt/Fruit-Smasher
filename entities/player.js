@@ -10,30 +10,36 @@ class Player {
     this.attributes = {
       damage: {
         fromLevel: d,
+        skillLevel: 0,
         fromSkill: 0,
         total: 0,
       },
       maxHP: {
         fromLevel: h,
+        skillLevel: 0,
         fromSkill: 0,
         total: 0,
       },
       regen: {
         fromLevel: r,
+        skillLevel: 0,
         fromSkill: 0,
         total: 0,
       },
       atkSpeed: {
         fromLevel: s,
+        skillLevel: 0,
         fromSkill: 0,
         total: 0,
       },
       expBoost: {
         fromLevel: 1,
+        skillLevel: 0,
         fromSkill: 0,
         total: 0,
       },
     }
+
 
     this.hp = h;
   }
