@@ -32,7 +32,7 @@ class SkillBlock extends MenuTemplate {
     this.children.push(new Button("-1", 0.225, 0, 0.075, 1, () => {
       player.removeAttribute(att, 1);
     }));
-    this.children.push(new Text(name + " Boost: ", "player.attributes."+att+".fromSkill", 0.3, 0, 0.2, 1));
+    this.children.push(new Text(name + " Boost: +", "player.attributes."+att+".fromSkill", 0.3, 0, 0.2, 1));
     this.children.push(new Text("Level: ", "player.attributes."+att+".skillLevel", 0.5, 0, 0.2, 1));
     this.children.push(new Button("+1", 0.7, 0, 0.075, 1, () => {
       player.addAttribute(att, 1);
