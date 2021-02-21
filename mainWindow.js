@@ -12,10 +12,10 @@ class MainWindow {
     let mainMenuHeight = 0.15;
 
     this.subMenus = [
-      new FieldMenu("Field", 0, mainMenuHeight, 1, 1, color(255, 163, 0)),
-      new SkillMenu("Skills", 0, mainMenuHeight, 1, 1, color(255, 0, 145)),
-      new LootMenu("Loot", 0, mainMenuHeight, 1, 1, color(255, 0, 255)),
-      new StatsMenu("Stats", 0, mainMenuHeight, 1, 1, color(0, 255, 0)),
+      new FieldMenu("Field", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(255, 163, 0)),
+      new SkillMenu("Skills", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(255, 0, 145)),
+      new LootMenu("Loot", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(255, 0, 255)),
+      new StatsMenu("Stats", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(0, 255, 0)),
     ];
     for (var s of this.subMenus) s.hide();
     this.mainMenu = new MainMenu(0, 0, 1, mainMenuHeight, this.subMenus);
