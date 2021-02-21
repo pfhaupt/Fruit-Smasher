@@ -82,11 +82,11 @@ class Button extends BaseUIBlock {
 }
 
 class Text extends BaseUIBlock {
-  constructor(sMessage, message, x, y, w, h, s = defaultFontSize, a = 'center', format = true) {
+  constructor(sMessage, message, x, y, w, h, a = 'center', format = true) {
     super(x, y, w, h);
     this.message = message;
     this.secondaryMessage = sMessage;
-    this.txtSize = s;
+    this.txtSize = defaultFontSize;
     this.align = a;
     this.format = format;
     this.content = createP(this.secondaryMessage + roundToSpecificDecimalLength(eval(this.message), 2));
@@ -103,17 +103,12 @@ class Text extends BaseUIBlock {
   }
 
   display() {
-    let txt = this.secondaryMessage +
-      toFixedDecimalLength(roundToSpecificDecimalLength(eval(this.message), 3), 3);
+    let digits = 2;
+    let valText = roundToSpecificDecimalLength(eval(this.message), digits);
+    if (this.format) valText = toFixedDecimalLength(valText, digits);
+    let txt = this.secondaryMessage + valText;
     this.content.html(txt);
     super.display();
-    /*let txt = this.secondaryMessage;
-    if (this.format) txt += prettify(eval(this.message), 2);
-    push();
-    textSize(this.txtSize);
-    textAlign(this.alignX, this.alignY);
-    text(txt, this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-    pop();*/
   }
 }
 
@@ -147,8 +142,8 @@ function toFixedDecimalLength(val, digits) {
   var splitted = (val + "").split(".");
   var s;
   if (splitted.length === 1)
-    s = (splitted[0] + ".") + replacementChar.repeat(digits);
+    s = splitted[0];
   else
-    s = splitted[0] + "." + splitted[1].padEnd(digits, "0");
+    s = splitted[0] + "." + splitted[1].padEnd(digits, replacementChar);
   return s;
 }
