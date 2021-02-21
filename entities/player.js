@@ -97,6 +97,8 @@ class Player {
     this.attributes.regen.fromLevel = 0.25 * (this.level + 1);
     this.attributes.atkSpeed.fromLevel = Math.ceil(this.level / 10);
     this.attributes.maxHP.fromLevel = 100 + 10 * this.level;
+
+    this.calculateTotalAttributes();
   }
 
   respawn() {
