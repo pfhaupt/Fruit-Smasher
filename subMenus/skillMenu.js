@@ -21,7 +21,7 @@ class SkillBlock extends MenuTemplate {
     this.attribute = att;
 
     this.children.push(new Button("-MAX", 0, 0, 0.075, 1, () => {
-      player.removeAttribute(att, 9999);
+      player.removeAttribute(att, 100000);
     }));
     this.children.push(new Button("-100", 0.075, 0, 0.075, 1, () => {
       player.removeAttribute(att, 100);
@@ -44,7 +44,7 @@ class SkillBlock extends MenuTemplate {
       player.addAttribute(att, 100);
     }));
     this.children.push(new Button("+MAX", 0.925, 0, 0.075, 1, () => {
-      player.addAttribute(att, 9999);
+      player.addAttribute(att, 100000);
     }));
   }
 }
