@@ -18,6 +18,7 @@ class SkillMenu extends MenuTemplate {
 class SkillBlock extends MenuTemplate {
   constructor(name, att, x, y, w, h, col) {
     super(name, x, y, w, h, col);
+    this.attribute = att;
 
     this.children.push(new Button("-MAX", 0, 0, 0.075, 1, () => {
       player.removeAttribute(att, -9999);
