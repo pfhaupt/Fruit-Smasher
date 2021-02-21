@@ -13,6 +13,7 @@ class Player {
         name: "Damage",
         fromLevel: d,
         skillLevel: 0,
+        boostPerSkillLevel: 0.1,
         fromSkill: 0,
         total: 0,
       },
@@ -20,6 +21,7 @@ class Player {
         name: "Hitpoint",
         fromLevel: h,
         skillLevel: 0,
+        boostPerSkillLevel: 5,
         fromSkill: 0,
         total: 0,
       },
@@ -27,6 +29,7 @@ class Player {
         name: "Regen",
         fromLevel: r,
         skillLevel: 0,
+        boostPerSkillLevel: 0.02,
         fromSkill: 0,
         total: 0,
       },
@@ -34,13 +37,15 @@ class Player {
         name: "Speed",
         fromLevel: s,
         skillLevel: 0,
+        boostPerSkillLevel: 0.1,
         fromSkill: 0,
         total: 0,
       },
       expBoost: {
-        name: "Experience", 
+        name: "Experience",
         fromLevel: 1,
         skillLevel: 0,
+        boostPerSkillLevel: 0.05,
         fromSkill: 0,
         total: 0,
       },
@@ -67,6 +72,10 @@ class Player {
     this.hp = constrain(this.hp + this.attributes.regen.total * dt, 0, this.attributes.maxHP.total);
   }
 
+  calculateSkillBoost(att) {
+    this.attribute[att].fromSkill = this.attributes[att].skillLevel * this.attributes[att].boostPerSkillLevel;
+  }
+
   calculateTotalAttributes() {
     for (var a in this.attributes) {
       this.attributes[a].total = this.attributes[a].fromLevel + this.attributes[a].fromSkill;
@@ -85,12 +94,12 @@ class Player {
     let e = this.experience;
     let c = this.level;
     //New Level r after calculating e experience at level c
-    let r = floor((sqrt(4*b*b+4*b*(2*c-1)*i+i*(pow(1-2*c, 2)*i+8*e))-2*b+i)/(2*i));
+    let r = floor((sqrt(4 * b * b + 4 * b * (2 * c - 1) * i + i * (pow(1 - 2 * c, 2) * i + 8 * e)) - 2 * b + i) / (2 * i));
 
     //Getting XP cost for a given Level l
     //totalXP=BaseXP*l+IncreasePerLevel/2((l-1)^2+(l-1))
-    let xpCostCurrent = b*c+i/2*((c-1)*(c-1)+(c-1));
-    let xpCostResult = b*r+i/2*((r-1)*(r-1)+(r-1));
+    let xpCostCurrent = b * c + i / 2 * ((c - 1) * (c - 1) + (c - 1));
+    let xpCostResult = b * r + i / 2 * ((r - 1) * (r - 1) + (r - 1));
     //Experience cost to get from current level to new level
     let totalXP = xpCostResult - xpCostCurrent;
     this.experience -= totalXP;
@@ -110,6 +119,23 @@ class Player {
     this.hp = this.attributes.maxHP.total;
     this.experience = Math.floor(this.experience * 0.9);
     console.log("You died");
+  }
+
+  addAttribute(att, count) {
+    let possibleLevels = Math.min(count, this.skillPoints);
+
+    this.attributes[att].skillLevel += possibleLevels;
+    this.skillPoints -= possibleLevels;
+    this.calculateSkillBoost(att);
+    this.calculateTotalAttributes();
+  }
+
+  removeAttribute(att, count) {
+    let possibleLevels = Math.min(count, this.attributes[att].skillLevel);
+    this.attributes[att].skillLevel -= possibleLevels;
+    this.skillPoints += possibleLevels;
+    this.calculateSkillBoost(att);
+    this.calculateTotalAttributes();
   }
 }
 
