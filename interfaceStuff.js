@@ -142,7 +142,7 @@ function toFixedDecimalLength(val, digits) {
   var splitted = (val + "").split(".");
   var s;
   if (splitted.length === 1)
-    s = splitted[0];
+    s = splitted[0] + "." + replacementChar.repeat(digits);
   else
     s = splitted[0] + "." + splitted[1].padEnd(digits, replacementChar);
   return s;
