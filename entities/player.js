@@ -73,7 +73,7 @@ class Player {
   }
 
   calculateSkillBoost(att) {
-    this.attribute[att].fromSkill = this.attributes[att].skillLevel * this.attributes[att].boostPerSkillLevel;
+    this.attributes[att].fromSkill = this.attributes[att].skillLevel * this.attributes[att].boostPerSkillLevel;
   }
 
   calculateTotalAttributes() {
