@@ -119,7 +119,7 @@ class Player {
     let totalXP = xpCostResult - xpCostCurrent;
     this.experience -= totalXP;
     this.level = r;
-    this.expForLvlUp = this.expForLevel1 + pow(this.expIncrease, this.level);
+    this.expForLvlUp = this.expForLevel1 * pow(this.expIncrease, this.level);
     this.skillPoints += this.skillPointsPerLevel * (r - c);
     this.attributes.damage.fromLevel = 2 + 1 * this.level;
     this.attributes.maxHP.fromLevel = 100 + 10 * this.level;
