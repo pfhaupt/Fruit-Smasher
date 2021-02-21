@@ -4,7 +4,7 @@ class Player {
     this.experience = 0;
     this.expForLevel1 = 100;
     this.expForLvlUp = this.expForLevel1;
-    this.expIncrease = 10;
+    this.expIncrease = 1.05;
     this.skillPoints = 0;
     this.skillPointsPerLevel = 5;
 
@@ -89,11 +89,13 @@ class Player {
   }
 
   levelUp() {
+
+    /*
     let b = this.expForLevel1;
     let i = this.expIncrease;
     let e = this.experience;
     let c = this.level;
-    //New Level r after calculating e experience at level c
+    //New Level r after calculating e experience at level c (linear growth)
     let r = floor((sqrt(4 * b * b + 4 * b * (2 * c - 1) * i + i * (pow(1 - 2 * c, 2) * i + 8 * e)) - 2 * b + i) / (2 * i));
 
     //Getting XP cost for a given Level l
@@ -101,6 +103,16 @@ class Player {
     let xpCostCurrent = b * c + i / 2 * ((c - 1) * (c - 1) + (c - 1));
     let xpCostResult = b * r + i / 2 * ((r - 1) * (r - 1) + (r - 1));
     //Experience cost to get from current level to new level
+    let totalXP = xpCostResult - xpCostCurrent;
+    */
+    let e = this.experience;
+    let i = this.expIncrease;
+    let b = this.expForLevel1;
+    let c = this.level;
+    //New Level r after calculating e experience at level c (exponential growth)
+    let r = floor(log(xp * log(i) / b + pow(i, c)) / log(i));
+    let xpCostCurrent = b / log(i) * (pow(i, c) - 1);
+    let xpCostResult = b / log(i) * (pow(i, r) - 1);
     let totalXP = xpCostResult - xpCostCurrent;
     this.experience -= totalXP;
     this.level = r;
@@ -141,6 +153,8 @@ class Player {
 
 
 /*
+linear exp increase per level
+-----------------------------
 totalXP=100L+5((L-1)^2+(L-1))
 totalXP(lowLevel, highLevel) = (100*highLevel+5*((highLevel-1)^2+(highLevel-1)))
                               -(100*lowLevel+5*((lowLevel-1)^2+(lowLevel-1)))
@@ -151,4 +165,11 @@ baseXP*result+XPincrease/2*((result-1)^2+(result-1))
 
 r = (sqrt(4*b^2+4*b*(2*c-1)*i+i*((1-2*c)^2*i+8*e))-2*b+i)((2*i))
 
+exponential exp increase per level
+----------------------------------
+function levelsFromGivenXP(xp, currentLevel) {
+  var bruch = xp * log(i) / b;
+  var expr = bruch + pow(i, currentLevel);
+  return floor(log(expr)/log(i));
+}
 */
