@@ -1,6 +1,6 @@
 class Player {
   constructor(h = 100, d = 2, r = 0.25, s = 2) {
-    player.level = 0;
+    this.level = 0;
     this.experience = 0;
     this.expForLevel1 = 100;
     this.expForLvlUp = this.expForLevel1;
