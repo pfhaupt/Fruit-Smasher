@@ -3,9 +3,9 @@ class FieldMenu extends MenuTemplate {
     super(name, x, y, w, h, col);
 
     //Unten Navigator
-    this.children.push(new Button("Previous", 0.3, 0.7, 0.1, 0.1, previousZone));
-    this.children.push(new Text(["Zone: ", "currentZone"], 0.4, 0.7, 0.2, 0.1, 'center', false));
-    this.children.push(new Button("Next", 0.6, 0.7, 0.1, 0.1, nextZone));
+    this.children.push(new Button("Previous", 0.3, 0.8, 0.1, 0.1, previousZone));
+    this.children.push(new Text(["Zone: ", "currentZone"], 0.4, 0.78, 0.2, 0.1, 'center', false));
+    this.children.push(new Button("Next", 0.6, 0.8, 0.1, 0.1, nextZone));
 
     //Anzeige Gegner
     this.children.push(new Image("/Fruit-Smasher/images/boss.png", 0.65, 0.1, 0.3, 0.3));
