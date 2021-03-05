@@ -175,6 +175,10 @@ class Player {
     if (chestLevel === -1) return;
     this.chestCount[4 * zone + chestLevel]++;
   }
+
+  openChests(chestLevel) {
+    console.log(chestLevel);
+  }
 }
 
 
