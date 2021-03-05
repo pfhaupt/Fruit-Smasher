@@ -16,16 +16,16 @@ class ChestMenu extends MenuTemplate {
     this.children.push(new Text(["Silver Chests: ", "player.chestCount[4 * currentChestZone + 2]"], 0.25, 0.4, 0.4, 0.15, 'center', false));
     this.children.push(new Text(["Golden Chests: ", "player.chestCount[4 * currentChestZone + 3]"], 0.25, 0.55, 0.4, 0.15, 'center', false));
 
-    this.children.push(new Button("Open", 0.65, 0.1, 0.2, 0.15, () => {
+    this.children.push(new Button("Open", 0.65, 0.125, 0.2, 0.1, () => {
       player.openChests(0);
     }));
-    this.children.push(new Button("Open", 0.65, 0.25, 0.2, 0.15, () => {
+    this.children.push(new Button("Open", 0.65, 0.275, 0.2, 0.1, () => {
       player.openChests(1);
     }));
-    this.children.push(new Button("Open", 0.65, 0.4, 0.2, 0.15, () => {
+    this.children.push(new Button("Open", 0.65, 0.425, 0.2, 0.1, () => {
       player.openChests(2);
     }));
-    this.children.push(new Button("Open", 0.65, 0.55, 0.2, 0.15, () => {
+    this.children.push(new Button("Open", 0.65, 0.575, 0.2, 0.1, () => {
       player.openChests(3);
     }));
   }
