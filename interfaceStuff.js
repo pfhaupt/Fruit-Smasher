@@ -82,10 +82,9 @@ class Button extends BaseUIBlock {
 }
 
 class Text extends BaseUIBlock {
-  constructor(sMessage, message, x, y, w, h, a = 'center', format = true) {
+  constructor(messageArray, x, y, w, h, a = 'center', format = true) {
     super(x, y, w, h);
-    this.message = message;
-    this.secondaryMessage = sMessage;
+    this.message = messageArray;
     this.txtSize = defaultFontSize;
     this.align = a;
     this.format = format;
@@ -104,10 +103,18 @@ class Text extends BaseUIBlock {
 
   display() {
     let digits = 2;
-    let valText = roundToSpecificDecimalLength(eval(this.message), digits);
-    if (this.format) valText = toFixedDecimalLength(valText, digits);
-    let txt = this.secondaryMessage + valText;
-    this.content.html(txt);
+    let resultString = "";
+    for (let i = 0; i < this.message.length; i++) {
+      let msg = this.message[i];
+      try {
+        let valText = roundToSpecificDecimalLength(eval(msg), digits);
+        valText = toFixedDecimalLength(valText, digits);
+        resultString += valText;
+      } catch (e) {
+        resultString += msg;
+      }
+    }
+    this.content.html(resultString);
     super.display();
   }
 }
