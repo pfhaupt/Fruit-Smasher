@@ -6,6 +6,7 @@ class Enemy {
     this.dmg = d;
     this.regen = r;
     this.atkSpeed = s;
+    this.experience = (this.level + 1) * 5;
   }
 
 

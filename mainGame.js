@@ -40,7 +40,7 @@ function update(dt) {
   player.regenerate(dt);
   enemy.regenerate(dt);
   if (enemy.checkDeath()) {
-    player.addExperience(enemy.level);
+    player.addExperience(enemy);
     spawnEnemy();
   }
   if (player.checkDeath()) {

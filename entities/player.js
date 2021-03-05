@@ -83,8 +83,8 @@ class Player {
     }
   }
 
-  addExperience(enemyLvl) {
-    this.experience += (enemyLvl + 1) * 5 * this.attributes.expBoost.total;
+  addExperience(enemy) {
+    this.experience += enemy.experience * this.attributes.expBoost.total;
     if (this.experience >= this.expForLvlUp) this.levelUp();
   }
 
