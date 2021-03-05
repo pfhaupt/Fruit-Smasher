@@ -49,7 +49,10 @@ class Player {
         fromSkill: 0,
         total: 0,
       },
-    }
+    };
+
+    this.chestCount = [];
+    for (var i = 0; i < 4 * maxZone; i++) this.chestCount[i] = 0;
 
     this.hp = h;
     this.calculateTotalAttributes();
@@ -157,6 +160,20 @@ class Player {
     this.skillPoints += possibleLevels;
     this.calculateSkillBoost(att);
     this.calculateTotalAttributes();
+  }
+
+  checkChestDrop(enemy) {
+    if (random(1) < 0.25) {
+      let z = floor(enemy.level / 10);
+      let l = floor(enemy.level % 10);
+      this.addChest(z, l);
+    }
+  }
+
+  addChest(zone, level) {
+    let chestLevel = floor(level / 2) - 1;
+    if (chestLevel === -1) return;
+    this.chestCount[4 * zone + chestLevel]++;
   }
 }
 

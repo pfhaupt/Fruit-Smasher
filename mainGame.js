@@ -41,6 +41,7 @@ function update(dt) {
   enemy.regenerate(dt);
   if (enemy.checkDeath()) {
     player.addExperience(enemy);
+    player.checkChestDrop(enemy);
     spawnEnemy();
   }
   if (player.checkDeath()) {
