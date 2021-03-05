@@ -10,6 +10,7 @@ class ChestMenu extends MenuTemplate {
     this.children.push(new Button("--->", 0.6, 0.8, 0.1, 0.1, this.nextZone));
 
     this.children.push(new Image("/Fruit-Smasher/images/stonedChest.png", 0.2, 0.1, 0.15, 0.15));
+    this.children.push(new Image("/Fruit-Smasher/images/goldenChest.png", 0.2, 0.55, 0.15, 0.15));
 
     this.children.push(new Text(["Stoned Chests: ", "player.chestCount[4 * currentChestZone]"], 0.35, 0.1, 0.2, 0.15, 'center', false));
     this.children.push(new Text(["Bronze Chests: ", "player.chestCount[4 * currentChestZone + 1]"], 0.35, 0.25, 0.2, 0.15, 'center', false));
