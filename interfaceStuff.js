@@ -108,7 +108,7 @@ class Text extends BaseUIBlock {
       let msg = this.message[i];
       try {
         let valText = roundToSpecificDecimalLength(eval(msg), digits);
-        valText = toFixedDecimalLength(valText, digits);
+        if (this.format) valText = toFixedDecimalLength(valText, digits);
         resultString += valText;
       } catch (e) {
         resultString += msg;
