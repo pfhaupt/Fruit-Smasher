@@ -9,21 +9,23 @@ class ChestMenu extends MenuTemplate {
     this.children.push(new Text(["Zone: ", "currentChestZone"], 0.4, 0.7, 0.2, 0.1, 'center', false));
     this.children.push(new Button("--->", 0.6, 0.7, 0.1, 0.1, this.nextZone));
 
-    this.children.push(new Text(["Stoned Chests: ", "player.chestCount[4 * currentChestZone]"], 0.2, 0.15, 0.4, 0.1, 'center', false));
-    this.children.push(new Text(["Bronze Chests: ", "player.chestCount[4 * currentChestZone + 1]"], 0.2, 0.25, 0.4, 0.1, 'center', false));
-    this.children.push(new Text(["Silver Chests: ", "player.chestCount[4 * currentChestZone + 2]"], 0.2, 0.35, 0.4, 0.1, 'center', false));
-    this.children.push(new Text(["Golden Chests: ", "player.chestCount[4 * currentChestZone + 3]"], 0.2, 0.45, 0.4, 0.1, 'center', false));
+    this.children.push(new Image("/Fruit-Smasher/images/stonedChest.png", 0.15, 0.15, 0.1, 0.1));
 
-    this.children.push(new Button("Open", 0.6, 0.15, 0.2, 0.1, () => {
+    this.children.push(new Text(["Stoned Chests: ", "player.chestCount[4 * currentChestZone]"], 0.25, 0.15, 0.4, 0.1, 'center', false));
+    this.children.push(new Text(["Bronze Chests: ", "player.chestCount[4 * currentChestZone + 1]"], 0.25, 0.25, 0.4, 0.1, 'center', false));
+    this.children.push(new Text(["Silver Chests: ", "player.chestCount[4 * currentChestZone + 2]"], 0.25, 0.35, 0.4, 0.1, 'center', false));
+    this.children.push(new Text(["Golden Chests: ", "player.chestCount[4 * currentChestZone + 3]"], 0.25, 0.45, 0.4, 0.1, 'center', false));
+
+    this.children.push(new Button("Open", 0.65, 0.15, 0.2, 0.1, () => {
       player.openChests(0);
     }));
-    this.children.push(new Button("Open", 0.6, 0.25, 0.2, 0.1, () => {
+    this.children.push(new Button("Open", 0.65, 0.25, 0.2, 0.1, () => {
       player.openChests(1);
     }));
-    this.children.push(new Button("Open", 0.6, 0.35, 0.2, 0.1, () => {
+    this.children.push(new Button("Open", 0.65, 0.35, 0.2, 0.1, () => {
       player.openChests(2);
     }));
-    this.children.push(new Button("Open", 0.6, 0.45, 0.2, 0.1, () => {
+    this.children.push(new Button("Open", 0.65, 0.45, 0.2, 0.1, () => {
       player.openChests(3);
     }));
   }
