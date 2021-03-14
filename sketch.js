@@ -1,5 +1,5 @@
-var mainWindow;
-var drawing = true;
+let mainWindow;
+let drawing = true;
 
 function enableDraw() {
   drawing = true;
@@ -9,18 +9,6 @@ function enableDraw() {
 function disableDraw() {
   drawing = false;
 }
-
-/* Testing Image Loading
-
-var img;
-function preload() {
-  let name = "/Fruit-Smasher/images/boss.png";
-  console.log(name);
-  img = createImg(name, "Blergh");
-  //let img = loadImage("http://localhost:8000/images/boss.png")
-  //var test = new Image("boss.png", 0, 0, 0, 0);
-}
-*/
 
 function setup() {
   textSize(defaultFontSize);

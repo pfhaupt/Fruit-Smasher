@@ -15,12 +15,12 @@ class MainWindow {
       new FieldMenu("Field", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(255, 163, 0)),
       new SkillMenu("Skills", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(255, 0, 145)),
       new ChestMenu("Chests", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(145, 71, 0)),
-      new LootMenu("Inventory", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(255, 0, 255)),
+      new InventoryMenu("Inventory", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(0, 255, 255)),
       new StatsMenu("Stats", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(0, 255, 0)),
     ];
     for (var s of this.subMenus) s.hide();
     this.mainMenu = new MainMenu(0, 0, 1, mainMenuHeight, this.subMenus);
-    this.currentSubMenu = this.subMenus[0];
+    this.currentSubMenu = this.subMenus[3];
     this.currentSubMenu.show();
   }
 

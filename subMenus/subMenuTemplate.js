@@ -14,12 +14,6 @@ class MenuTemplate {
     this.hidden = true;
   }
 
-  //x und y zwischen 0 und 1
-  //relative Koordinaten im Bereich des Submenüs
-  placeAtRelativePos(x, y) {
-
-  }
-
   display() {
     if (this.hidden) return;
     push();

@@ -1,7 +1,6 @@
-var realDefaultFontSize = 32;
-var defaultFontSize = Math.min(realDefaultFontSize, Math.max(screen.width, screen.height) / 3);
-var debug = true;
-
+let realDefaultFontSize = 32;
+let defaultFontSize = Math.min(realDefaultFontSize, Math.max(screen.width, screen.height) / 3);
+let debug = true;
 
 class BaseUIBlock {
   constructor(x, y, w, h) {
@@ -32,7 +31,7 @@ class BaseUIBlock {
       this.tempY = this.yAbsToScreen;
       this.tempW = this.wAbsToScreen;
       this.tempH = this.hAbsToScreen;
-      if (parentWAbs / this.aspectRatio > parentHAbs) {
+      if (this.wAbsToScreen / this.aspectRatio > this.hAbsToScreen) {
         this.wAbsToScreen = this.hAbsToScreen * this.aspectRatio;
         this.xAbsToScreen = this.xAbsToScreen + (this.tempW - this.wAbsToScreen) / 2.0;
       } else {
@@ -143,7 +142,7 @@ function roundToSpecificDecimalLength(val, digits) {
   return round(val * powOf10) / powOf10;
 }
 
-var replacementChar = "0";
+let replacementChar = "0";
 
 function toFixedDecimalLength(val, digits) {
   var splitted = (val + "").split(".");

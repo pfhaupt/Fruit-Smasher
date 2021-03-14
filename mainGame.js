@@ -1,13 +1,13 @@
-var lastUpdate = Date.now();
+let lastUpdate = Date.now();
 
-var updatesPerSecond = 20,
+let updatesPerSecond = 20,
   refreshTime = 1000 / updatesPerSecond;
 
-var looping = true;
-var mainLoop = setTimeout(gameLoop, refreshTime);
+let looping = true;
+let mainLoop = setTimeout(gameLoop, refreshTime);
 
-var currentZone = 0;
-var maxZone = 7;
+let currentZone = 0;
+let maxZone = 7;
 
 function enableGameLoop() {
   looping = true;
