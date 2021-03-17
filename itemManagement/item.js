@@ -1,4 +1,4 @@
-let itemsPerZone = 11;
+let itemsPerZone = 10;
 
 let itemWeight = [
   [100, 100, 25, 50, 10, 10, 1, 1, 1, 1],
@@ -45,7 +45,7 @@ class Item {
     s += "Item level " + this.level + " of " + this.maxLevel;
     s += "\n";
     for (let i = 0; i < this.boost.length; i++) {
-      let symbol = this.effect[i] === 0 ? "+" : "*";
+      let symbol = this.effect[i] === 0 ? "+" : "x";
       s += (this.boost[i][0].toUpperCase() + this.boost[i].substr(1)) + " Boost: " + symbol + this.currentBonus[i] + "\n";
     }
 

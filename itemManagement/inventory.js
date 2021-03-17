@@ -2,10 +2,10 @@ class Inventory extends MenuTemplate {
   constructor(name, x, y, w, h, col) {
     super(name, x, y, w, h, col);
     this.itemList = new Array(maxZone * itemsPerZone);
-    this.itemList[0] = new Item(0, "hallo", "/images/placeholder.png", 0, 100, ["damage"], [5], [0]);
-    this.itemList[1] = new Item(0, "hallo", "/images/placeholder.png", 0, 100, ["damage"], [5], [0]);
-    this.itemList[2] = new Item(0, "hallo", "/images/placeholder.png", 0, 100, ["damage"], [5], [0]);
-    this.itemList[3] = new Item(0, "hallo", "/images/placeholder.png", 0, 100, ["damage"], [5], [0]);
+    this.itemList[0] = new Item(0, "hallo", "/Fruit-Smasher/images/placeholder.png", 0, 100, ["damage", "regen"], [5, 1.2], [0, 1]);
+    this.itemList[1] = new Item(0, "hallo", "/Fruit-Smasher/images/placeholder.png", 0, 100, ["damage", "maxHP"], [5, 100], [0, 0]);
+    this.itemList[2] = new Item(0, "hallo", "/Fruit-Smasher/images/placeholder.png", 0, 100, ["damage", "damage"], [10, 1], [0, 1]);
+    this.itemList[3] = new Item(0, "hallo", "/Fruit-Smasher/images/placeholder.png", 0, 100, ["damage", "maxHP", "regen"], [5, -10, 0.1], [0, 0, 0]);
 
     this.itemsPerLine = 10;
     this.itemsPerPage = this.itemsPerLine ** 2;
@@ -69,7 +69,6 @@ class Inventory extends MenuTemplate {
     }
 
     for (let c of this.children) c.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-
 
     let rectSize = Math.min(this.wAbsToScreen, this.hAbsToScreen) / this.itemsPerLine;
     for (let i = 0; i < this.itemList.length; i++) {
