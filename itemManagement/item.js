@@ -42,7 +42,9 @@ class Item {
 
   createTooltip() {
     let s = "";
-    s += "Item level " + this.level + " of " + this.maxLevel;
+    s += "Item Name: " + this.name;
+    s += "\n";
+    s += "Item Level " + this.level + " of " + this.maxLevel;
     s += "\n";
     for (let i = 0; i < this.boost.length; i++) {
       let symbol = this.effect[i] === 0 ? "+" : "x";

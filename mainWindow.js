@@ -12,7 +12,7 @@ class MainWindow {
     let mainMenuHeight = 0.15;
 
     this.subMenus = [
-      new FieldMenu("Field", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(255, 163, 0)),
+      new FieldMenu("Field", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(255, 163, 0)), //  0  0.15  1  0.85
       new SkillMenu("Skills", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(255, 0, 145)),
       new ChestMenu("Chests", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(145, 71, 0)),
       new InventoryMenu("Inventory", 0, mainMenuHeight, 1, 1 - mainMenuHeight, color(0, 255, 255)),

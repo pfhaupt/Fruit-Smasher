@@ -122,7 +122,7 @@ class Player {
       //New Level r after calculating e experience at level c (exponential growth)
 
       let xpForCurrentLevel = b * (1 - pow(i, c)) / (1 - i);
-      r = floor(log(1 + (e + xpForCurrentLevel) * (i - 1) / b) / log(i)+0.001);
+      r = floor(log(1 + (e + xpForCurrentLevel) * (i - 1) / b) / log(i) + 0.001);
       let xpForResultLevel = b * (1 - pow(i, r)) / (1 - i);
       let totalXP = xpForResultLevel - xpForCurrentLevel;
       this.experience -= totalXP;
@@ -185,6 +185,11 @@ class Player {
 /*
 linear exp increase per level
 -----------------------------
+
+a(n+1) = a(n) + d
+
+von level 5 bis level 7 = total(7) - total(5)
+
 totalXP=100L+5((L-1)^2+(L-1))
 totalXP(lowLevel, highLevel) = (100*highLevel+5*((highLevel-1)^2+(highLevel-1)))
                               -(100*lowLevel+5*((lowLevel-1)^2+(lowLevel-1)))
@@ -197,6 +202,9 @@ r = (sqrt(4*b^2+4*b*(2*c-1)*i+i*((1-2*c)^2*i+8*e))-2*b+i)((2*i))
 
 exponential exp increase per level
 ----------------------------------
+
+a(n+1) = a(n) * q
+
 function levelsFromGivenXP(xp, currentLevel) {
   var bruch = xp * log(i) / b;
   var expr = bruch + pow(i, currentLevel);
