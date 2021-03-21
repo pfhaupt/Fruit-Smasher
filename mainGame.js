@@ -4,10 +4,9 @@ let updatesPerSecond = 20,
   refreshTime = 1000 / updatesPerSecond;
 
 let looping = true;
-let mainLoop = setTimeout(gameLoop, refreshTime);
+let mainLoop = setTimeout(gameLoop, refreshTime);;
 
 let currentZone = 0;
-let maxZone = 7;
 
 function enableGameLoop() {
   looping = true;
@@ -63,7 +62,7 @@ function nextZone() {
 function spawnEnemy() {
   let minLevel = currentZone * 10;
   let maxLevel = minLevel + 9;
-  let enemyLevel = Math.floor(random(minLevel, Math.max(minLevel, Math.min(player.level, maxLevel))+1));
+  let enemyLevel = Math.floor(random(minLevel, Math.max(minLevel, Math.min(player.level, maxLevel)) + 1));
   let hp = 20 + 5 * enemyLevel;
   let dmg = 1 + 1 * enemyLevel;
   let regen = 0.1 * enemyLevel;

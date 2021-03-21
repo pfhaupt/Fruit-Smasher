@@ -139,12 +139,38 @@ class MainMenuButton extends Button {
 }
 
 class ItemSlot extends BaseUIBlock {
-  constructor(x, y, w, h, item) {
+  constructor(id, x, y, w, h, item, itemTypeID = -1) {
     super(x, y, w, h);
+    this.slotID = id;
     this.item = item ?? null;
+    this.itemID = item?.id ?? -1;
+    this.itemTypeID = itemTypeID;
+    this.mouseOver = false;
     if (item === null || item.img === null) this.content = null;
     else this.content = item.img;
+    this.setMouseEvents();
     this.createTooltip();
+  }
+
+  setMouseEvents() {
+    //if (this.item === null || typeof this.item === "undefined") return;
+    //if (this.item.img === null || typeof this.item.img === "undefined") return;
+    if (this.content === null) return;
+    this.content.attribute("draggable", false);
+    this.content.style("user-select", "none");
+    this.content.mousePressed(() => {
+      currentlySelectedSlotID = this.slotID;
+      currentlySelectedItemID = this.itemID;
+      console.log(currentlySelectedSlotID);
+    });
+    this.content.mouseOver(() => {
+      currentlySelectedItemID = this.itemID;
+      this.mouseOver = true;
+    });
+    this.content.mouseOut(() => {
+      currentlySelectedItemID = -1;
+      this.mouseOver = false;
+    });
   }
 
   setItem(item) {
@@ -153,27 +179,117 @@ class ItemSlot extends BaseUIBlock {
       return;
     }
     this.item = item;
+    this.itemID = item.id;
     this.content = item.img;
+    this.itemTypeID = item.itemType;
+    this.setMouseEvents();
     this.createTooltip();
+  }
+
+  setItemByID(i) {
+    if (i === -1) {
+      this.item = null;
+      this.itemID = -1;
+      this.content = null;
+      if (this.slotID < itemCount) this.itemTypeID = -1;
+      this.mouseOver = false;
+      return;
+    }
+    this.item = itemList[i];
+    this.itemID = itemList[i].id;
+    this.content = itemList[i].img;
+    this.itemTypeID = itemList[i].itemType;
+    this.mouseOver = false;
+    this.setMouseEvents();
   }
 
   display() {
     push();
     strokeWeight(0.3);
     stroke(0);
-    fill(255);
+    if (this.mouseOver) {
+      fill(200);
+    } else {
+      if (currentlySelectedItemID !== -1 && itemList[currentlySelectedItemID].itemType === this.itemTypeID) {
+        fill(0, 255, 0);
+      } else {
+        fill(255);
+      }
+    }
     rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-
     pop();
+
     if (this.content) {
-      this.content.position(this.xAbsToScreen, this.yAbsToScreen);
-      this.content.size(this.wAbsToScreen, this.hAbsToScreen);
+      let x = this.xAbsToScreen;
+      let y = this.yAbsToScreen;
+      let s = this.hAbsToScreen;
+      let newS = s * (1 + 0.2 * this.mouseOver);
+      let off = (newS - s) / 2;
+      x = x - off;
+      y = y - off;
+      this.content.position(x, y);
+      this.content.size(newS, newS);
     }
   }
 
   createTooltip() {
     if (this.content === null || this.item === null) return;
     this.content.attribute("title", this.item.getTooltip());
+  }
+}
+
+function swapItems(id1, id2) {
+  //debugger;
+  let inv = mainWindow.currentSubMenu;
+  let slot1, slot2;
+  let item1, item2;
+
+  console.log("Swapping Items", id1, id2);
+  if (id1 < 0 || id2 < 0 || id1 > itemCount + 17 || id2 > itemCount + 17) {
+    console.log("Something went wrong!");
+    return;
+  }
+  //Get both ItemSlots
+  if (id1 < itemCount && id2 < itemCount) {
+    //Both Items in Inventory
+    slot1 = inv.children[0].children[id1];
+    slot2 = inv.children[0].children[id2];
+    item1 = slot1.itemID;
+    item2 = slot2.itemID;
+    slot1.setItemByID(item2);
+    slot2.setItemByID(item1);
+    return;
+  } else if (id1 < itemCount && id2 >= itemCount) {
+    //Item One in Inventory, Item Two in Equipment
+    slot1 = inv.children[0].children[id1];
+    slot2 = inv.children[1].children[id2 - itemCount];
+  } else if (id1 >= itemCount && id2 < itemCount) {
+    //Item One in Equipment, Item Two in Inventory
+    slot1 = inv.children[1].children[id1 - itemCount];
+    slot2 = inv.children[0].children[id2];
+  } else if (id1 >= itemCount && id2 >= itemCount) {
+    //Both Items in Equipment
+    slot1 = inv.children[1].children[id1 - itemCount];
+    slot2 = inv.children[1].children[id2 - itemCount];
+  }
+
+  //Is swapping Items possible? (E.g. can you equip a Sword in the Shield slot?)
+  let itemTypeID1 = slot1.itemTypeID;
+  let itemTypeID2 = slot2.itemTypeID;
+  if (itemTypeID2 === -1) {
+    //Moving Item to empty (non-equipment) slot
+    item1 = slot1.itemID;
+    item2 = slot2.itemID;
+    slot1.setItemByID(item2);
+    slot2.setItemByID(item1);
+    return;
+  }
+  if (itemTypeID1 === itemTypeID2) {
+    //Same item type in both slots, swap possible
+    item1 = slot1.itemID;
+    item2 = slot2.itemID;
+    slot1.setItemByID(item2);
+    slot2.setItemByID(item1);
   }
 }
 
