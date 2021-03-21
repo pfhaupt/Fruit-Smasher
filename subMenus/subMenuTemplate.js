@@ -12,6 +12,7 @@ class MenuTemplate {
     this.col = col;
     this.children = []; //Alle Elemente eines Fensters hier rein, wenn möglich
     this.hidden = true;
+    this.aspectRatio = 0;
   }
 
   display() {
@@ -20,19 +21,23 @@ class MenuTemplate {
     fill(this.col);
     rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
     pop();
-    for (var c of this.children) {
-      c.display();
-    }
+    for (var c of this.children)
+      if (typeof c !== "undefined" && c !== null)
+        c.display();
   }
 
   show() {
     this.hidden = false;
-    for (let c of this.children) c.show();
+    for (let c of this.children)
+      if (typeof c !== "undefined" && c !== null)
+        c.show();
   }
 
   hide() {
     this.hidden = true;
-    for (let c of this.children) c.hide();
+    for (let c of this.children)
+      if (typeof c !== "undefined" && c !== null)
+        c.hide();
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
@@ -40,8 +45,22 @@ class MenuTemplate {
     this.yAbsToScreen = parentYAbs + parentHAbs * this.yRelToParent;
     this.wAbsToScreen = parentWAbs * this.wRelToParent;
     this.hAbsToScreen = parentHAbs * this.hRelToParent;
-    for (var c of this.children) {
-      c.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+    if (this.aspectRatio !== 0) {
+      this.tempX = this.xAbsToScreen;
+      this.tempY = this.yAbsToScreen;
+      this.tempW = this.wAbsToScreen;
+      this.tempH = this.hAbsToScreen;
+      if (this.wAbsToScreen / this.aspectRatio > this.hAbsToScreen) {
+        this.wAbsToScreen = this.hAbsToScreen * this.aspectRatio;
+        this.xAbsToScreen = this.xAbsToScreen + (this.tempW - this.wAbsToScreen) / 2.0;
+      } else {
+        this.hAbsToScreen = this.wAbsToScreen / this.aspectRatio;
+        this.yAbsToScreen = this.yAbsToScreen + (this.tempH - this.hAbsToScreen) / 2.0;
+      }
     }
+    for (var c of this.children)
+      if (typeof c !== "undefined" && c !== null)
+        c.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+
   }
 }

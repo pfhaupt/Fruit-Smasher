@@ -51,15 +51,18 @@ class BaseUIBlock {
       rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
       pop();
     }
+    if (this.content === null) return;
     this.content.position(this.xAbsToScreen, this.yAbsToScreen);
     this.content.size(this.wAbsToScreen, this.hAbsToScreen);
   }
 
   hide() {
+    if (this.content === null) return;
     this.content.hide();
   }
 
   show() {
+    if (this.content === null) return;
     this.content.show();
   }
 }
@@ -132,6 +135,45 @@ class MainMenuButton extends Button {
       mainWindow.showMenu(id);
       mainWindow.resize();
     });
+  }
+}
+
+class ItemSlot extends BaseUIBlock {
+  constructor(x, y, w, h, item) {
+    super(x, y, w, h);
+    this.item = item ?? null;
+    if (item === null || item.img === null) this.content = null;
+    else this.content = item.img;
+    this.createTooltip();
+  }
+
+  setItem(item) {
+    if (item === null || typeof item === "undefined") {
+      console.log("Attempted to set an undefined item.");
+      return;
+    }
+    this.item = item;
+    this.content = item.img;
+    this.createTooltip();
+  }
+
+  display() {
+    push();
+    strokeWeight(0.3);
+    stroke(0);
+    fill(255);
+    rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+
+    pop();
+    if (this.content) {
+      this.content.position(this.xAbsToScreen, this.yAbsToScreen);
+      this.content.size(this.wAbsToScreen, this.hAbsToScreen);
+    }
+  }
+
+  createTooltip() {
+    if (this.content === null || this.item === null) return;
+    this.content.attribute("title", this.item.getTooltip());
   }
 }
 

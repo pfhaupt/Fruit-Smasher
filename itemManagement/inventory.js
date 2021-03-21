@@ -1,18 +1,35 @@
 class Inventory extends MenuTemplate {
   constructor(name, x, y, w, h, col) {
     super(name, x, y, w, h, col);
-    this.itemList = new Array(maxZone * itemsPerZone);
-    this.itemList[0] = new Item(0, "Riesiger Drache aus dem Keller eines Kobolds", "/Fruit-Smasher/images/placeholder.png", 0, 100, ["damage", "regen"], [5, 1.2], [0, 1]);
-    this.itemList[1] = new Item(0, "hallo", "/Fruit-Smasher/images/placeholder.png", 0, 100, ["damage", "maxHP"], [5, 100], [0, 0]);
-    this.itemList[2] = new Item(0, "hallo", "/Fruit-Smasher/images/placeholder.png", 0, 100, ["damage", "damage"], [10, 1], [0, 1]);
-    this.itemList[3] = new Item(0, "hallo", "/Fruit-Smasher/images/placeholder.png", 0, 100, ["damage", "maxHP", "regen"], [5, -10, 0.1], [0, 0, 0]);
+    let itemCount = maxZone * itemsPerZone;
+    this.itemList = new Array(itemCount);
+    this.itemList[0] = new Item(0, "hallo", "/images/placeholder.png", itemType.Helmet, 100, ["damage", "regen"], [5, 1.2], [0, 1]);
+    this.itemList[1] = new Item(1, "hallo", "/images/placeholder.png", itemType.Pants, 100, ["damage", "maxHP"], [5, 100], [0, 0]);
+    this.itemList[2] = new Item(2, "hallo", "/images/placeholder.png", itemType.Ring, 100, ["damage", "damage"], [10, 1], [0, 1]);
+    this.itemList[3] = new Item(3, "hallo", "/images/placeholder.png", itemType.Other, 100, ["damage", "maxHP", "regen"], [5, -10, 0.1], [0, 0, 0]);
 
     this.itemsPerLine = 10;
     this.itemsPerPage = this.itemsPerLine ** 2;
-    this.aspectRatio = 1;
+    this.aspectRatio = 1 / (Math.min(itemCount, this.itemsPerPage) / this.itemsPerPage);
+
+    this.children = new Array(itemCount);
+    let w1 = 1.0 / this.itemsPerLine;
+    let h1 = w1 * this.aspectRatio;
+    for (let i = 0; i < itemCount; i++) {
+      let x = i % this.itemsPerLine;
+      let y = floor(i / this.itemsPerLine);
+      this.children[i] = new ItemSlot(x * w1, y * h1, w1, h1, null);
+    }
+    for (let i = 0; i < itemCount; i++) {
+      if (typeof this.itemList[i] !== "undefined" && this.itemList[i] !== null) {
+        this.children[i].setItem(this.itemList[i]);
+      }
+    }
+
   }
 
   hide() {
+    this.hidden = true;
     for (let i of this.itemList)
       if (typeof i !== 'undefined')
         if (typeof i.img !== 'undefined')
@@ -20,72 +37,10 @@ class Inventory extends MenuTemplate {
   }
 
   show() {
+    this.hidden = false;
     for (let i of this.itemList)
       if (typeof i !== 'undefined')
         if (typeof i.img !== 'undefined')
           i.img.show();
-  }
-
-  display() {
-    super.display();
-    let rectSize = Math.min(this.wAbsToScreen, this.hAbsToScreen) / this.itemsPerLine;
-    for (let i = 0; i < this.itemList.length; i++) {
-      let x = i % this.itemsPerLine;
-      let y = floor(i / this.itemsPerLine);
-
-      //Always draw white rectangle
-      fill(255, 255, 255);
-      rect(this.xAbsToScreen + x * rectSize, this.yAbsToScreen + y * rectSize, rectSize, rectSize);
-      let item = this.itemList[i] ?? null;
-      if (item !== null) {
-        let xPos = this.xAbsToScreen + x * rectSize;
-        let yPos = this.yAbsToScreen + y * rectSize;
-        //Draw Image at position
-        let img = this.itemList[i].img;
-        if (img !== null) {
-          img.show();
-
-          //image(img, this.xAbsToScreen + x * rectSize, this.yAbsToScreen + y * rectSize, rectSize, rectSize);
-        }
-      }
-    }
-  }
-
-  resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
-    this.xAbsToScreen = parentXAbs + parentWAbs * this.xRelToParent;
-    this.yAbsToScreen = parentYAbs + parentHAbs * this.yRelToParent;
-    this.wAbsToScreen = parentWAbs * this.wRelToParent;
-    this.hAbsToScreen = parentHAbs * this.hRelToParent;
-    this.tempX = this.xAbsToScreen;
-    this.tempY = this.yAbsToScreen;
-    this.tempW = this.wAbsToScreen;
-    this.tempH = this.hAbsToScreen;
-
-    if (this.wAbsToScreen / this.aspectRatio > this.hAbsToScreen) {
-      this.wAbsToScreen = this.hAbsToScreen * this.aspectRatio;
-      this.xAbsToScreen = this.xAbsToScreen + (this.tempW - this.wAbsToScreen) / 2.0;
-    } else {
-      this.hAbsToScreen = this.wAbsToScreen / this.aspectRatio;
-      this.yAbsToScreen = this.yAbsToScreen + (this.tempH - this.hAbsToScreen) / 2.0;
-    }
-
-    for (let c of this.children) c.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-
-    let rectSize = Math.min(this.wAbsToScreen, this.hAbsToScreen) / this.itemsPerLine;
-    for (let i = 0; i < this.itemList.length; i++) {
-      let x = i % this.itemsPerLine;
-      let y = floor(i / this.itemsPerLine);
-      let item = this.itemList[i] ?? null;
-      if (item !== null) {
-        let xPos = this.xAbsToScreen + x * rectSize;
-        let yPos = this.yAbsToScreen + y * rectSize;
-        let img = this.itemList[i].img;
-        if (img !== null) {
-          img.position(xPos, yPos);
-          img.size(rectSize, rectSize);
-          continue;
-        }
-      }
-    }
   }
 }
