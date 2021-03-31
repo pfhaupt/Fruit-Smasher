@@ -125,6 +125,7 @@ class Image extends BaseUIBlock {
   constructor(name, x, y, w, h, ar = 1) {
     super(x, y, w, h);
     this.content = createImg(name, "");
+    this.content.hide();
     this.aspectRatio = ar;
   }
 }

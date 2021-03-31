@@ -22,6 +22,10 @@ function setup() {
   defaultFontSize = realDefaultFontSize * ratio;
   mainWindow.resize();
   requestAnimationFrame(drawStuff);
+
+  //loadImages();
+  //map = loadMap(currentZone);
+  //generateMinimap();
 }
 
 function drawStuff() {
@@ -61,4 +65,28 @@ function mouseReleased() {
   }
   currentlySelectedSlotID = -1;
   currentlySelectedItemID = -1;
+}
+
+function keyPressed() {
+  if (mainWindow.currentSubMenu.name === "Field") {
+    let map = mainWindow.currentSubMenu.children[0];
+    switch (keyCode) {
+      case 37: //LEFT ARROW
+        player.position.x--;
+        map.updateImages(1, 0);
+        break;
+      case 38: //UP ARROW
+        player.position.y--;
+        map.updateImages(0, 1);
+        break;
+      case 39: //RIGHT ARROW
+        player.position.x++;
+        map.updateImages(-1, 0);
+        break;
+      case 40: //DOWN ARROW
+        player.position.y++;
+        map.updateImages(0, -1);
+        break;
+    }
+  }
 }

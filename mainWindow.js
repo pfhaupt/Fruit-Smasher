@@ -20,7 +20,7 @@ class MainWindow {
     ];
     for (var s of this.subMenus) s.hide();
     this.mainMenu = new MainMenu(0, 0, 1, mainMenuHeight, this.subMenus);
-    this.currentSubMenu = this.subMenus[3];
+    this.currentSubMenu = this.subMenus[0];
     this.currentSubMenu.show();
   }
 

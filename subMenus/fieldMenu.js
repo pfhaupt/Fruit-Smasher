@@ -2,6 +2,7 @@ class FieldMenu extends MenuTemplate {
   constructor(name, x, y, w, h, col) {
     super(name, x, y, w, h, col);
 
+    /*
     //Unten Navigator
     this.children.push(new Button("Previous", 0.3, 0.8, 0.1, 0.1, previousZone));
     this.children.push(new Text(["Zone: ", "currentZone"], 0.4, 0.8, 0.2, 0.1, 'center', false));
@@ -17,5 +18,9 @@ class FieldMenu extends MenuTemplate {
     this.children.push(new Text(["Player Lvl: ", "player.level"], 0.05, 0.47, 0.3, 0.03, 'center', false));
     this.children.push(new Text(["Player HP: ", "player.hp"], 0.05, 0.5, 0.3, 0.03));
     this.children.push(new Text(["Player Dmg: ", "player.attributes.damage.total"], 0.05, 0.53, 0.3, 0.03));
+
+    */
+
+    this.children.push(new Map(dim, 0, true, 0.05, 0.05, 0.5, 0.9));
   }
 }

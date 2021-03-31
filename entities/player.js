@@ -1,5 +1,10 @@
 class Player {
   constructor(h = 100, d = 2, r = 0.25, s = 2) {
+    this.position = {
+      x: 5,
+      y: 5,
+    };
+
     this.level = 0;
     this.experience = 0;
     this.expForLevel1 = 100;
@@ -46,6 +51,14 @@ class Player {
         fromLevel: 1,
         skillLevel: 0,
         boostPerSkillLevel: 0.002,
+        fromSkill: 0,
+        total: 0,
+      },
+      sight: {
+        name: "Sight",
+        fromLevel: 5,
+        skillLevel: 0,
+        boostPerSkillLevel: 0.1,
         fromSkill: 0,
         total: 0,
       },
