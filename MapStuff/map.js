@@ -11,70 +11,73 @@ let textureList = [];
 
 //let upd = setInterval(generateMinimap, 100);
 
-function generateDefaultMap(dim, x, y, w, h) {
-  return new Map(dim, 0, false, x, y, w, h).tiles;
+function generateDefaultMap() {
+  console.log("Didn't find a map file, generating default map.");
+  dim = 10;
+  tileSize = mapSize / dim;
+
+  let m = mainWindow.subMenus[0].children[0];
+  let xrel = m.xRelToParent;
+  let yrel = m.yRelToParent;
+  let hrel = m.hRelToParent;
+  let wrel = m.wRelToParent;
+  mainWindow.subMenus[0].children[0] = new Map(10, 0, 0, 0, 0, 0);
+  mainWindow.subMenus[0].children[0].xRelToParent = xrel;
+  mainWindow.subMenus[0].children[0].yRelToParent = yrel;
+  mainWindow.subMenus[0].children[0].hRelToParent = hrel;
+  mainWindow.subMenus[0].children[0].wRelToParent = wrel;
+  mainWindow.subMenus[0].children[0].updateImages(0, 0);
 }
 
-function loadMap(zone, x, y, w, h) {
-  let saveName = defaultSaveName + zone;
-  let storedSave = localStorage.getItem(saveName);
-  if (storedSave === null || typeof storedSave === "undefined") {
-    console.log("Nothing to load!");
-    return generateDefaultMap(100, x, y, w, h);
+function loadActualMap(sav) {
+  let newMap = new Map(0, 0);
+  let mapFile = sav;
+  dim = mapFile.width;
+  tileSize = mapSize / dim;
+  newMap.width = dim;
+  newMap.height = dim;
+
+  let d = dim;
+
+  console.log(mapFile);
+
+  let getID = (a) => {
+    return {
+      tileID: round((a - (a % 10)) / 10),
+      entityID: a % 10
+    };
+  };
+
+  sav.loadPixels();
+  newMap.tiles = new Array(d);
+  for (let x = 0; x < d; x++) {
+    newMap.tiles[x] = [];
+    for (let y = 0; y < d; y++) {
+      newMap.tiles[x][y] = new TileSet(x, y);
+      let id = mapFile.pixels[(y * dim + x) * 4];
+      let ids = getID(id);
+      if (ids.tileID !== 0) newMap.tiles[x][y].set(ids.tileID);
+      if (ids.entityID !== 0) newMap.tiles[x][y].setEntity(ids.entityID);
+    }
   }
-  let decodeSave = atob(storedSave);
-  let parsedSave = JSON.parse(decodeSave);
-  let save = parsedSave;
+  let m = mainWindow.subMenus[0].children[0];
+  let xrel = m.xRelToParent;
+  let yrel = m.yRelToParent;
+  let hrel = m.hRelToParent;
+  let wrel = m.wRelToParent;
+  mainWindow.subMenus[0].children[0] = newMap;
+  mainWindow.subMenus[0].children[0].xRelToParent = xrel;
+  mainWindow.subMenus[0].children[0].yRelToParent = yrel;
+  mainWindow.subMenus[0].children[0].hRelToParent = hrel;
+  mainWindow.subMenus[0].children[0].wRelToParent = wrel;
+  mainWindow.subMenus[0].children[0].updateImages(0, 0);
+}
 
-  console.log("Found ", save);
-
-  let mapWidth, mapHeight, mapDim;
-  let defaultDim = 32;
-
-  if (save.tiles === null || typeof save.tiles === 'undefined') {
-    console.log("No tiles given, setting default Map.");
-    save.tiles = [];
-  }
-
-  if (save.dim === null || typeof save.dim === 'undefined') {
-    console.log("No dimension given, setting to default.");
-    mapDim = defaultDim;
-  } else {
-    console.log("Setting dimension to " + save.dim + ".");
-    mapDim = save.dim;
-  }
-  if (save.xSize === null || typeof save.xSize === 'undefined') {
-    console.log("No map width given, setting to default.");
-    mapWidth = mapSize / defaultDim;
-  } else {
-    console.log("Setting map width to " + save.xSize + ".");
-    mapWidth = save.xSize;
-  }
-  if (save.ySize === null || typeof save.ySize === 'undefined') {
-    console.log("No map height given, setting to default.");
-    mapHeight = mapSize / defaultDim;
-  } else {
-    console.log("Setting map height to " + save.ySize + ".");
-    mapHeight = save.ySize;
-  }
-
-  tileSize = mapSize / mapDim;
-
-  console.log("Initializing new Map");
-  let newMap = new Map(mapDim, -1, false, x, y, w, h);
-
-  dim = mapDim;
-
-  console.log("Filling new Map");
-  for (let t of save.tiles) {
-    //console.log("Loaded tile at (" + t.xPos + "," + t.yPos + ") with an ID of " + t.tileID);
-    if (t.index) newMap.set(t.xPos, t.yPos, t.index);
-    if (t.tileID) newMap.set(t.xPos, t.yPos, t.tileID);
-    if (t.entityID) newMap.setEntity(t.xPos, t.yPos, t.entityID);
-  }
-
-  console.log(newMap);
-  return newMap.tiles;
+function loadMap(zone) {
+  mainWindow.subMenus[0].children[0].hide();
+  let saveName = "MapStuff/maps/test" + zone + ".png";
+  loadImage(saveName, loadActualMap, generateDefaultMap);
+  mainWindow.subMenus[0].children[0].show();
 }
 
 function generateMinimap() {
@@ -102,34 +105,28 @@ function loadImages() {
   textureList[1] = "/MapStuff/usedTextures/textures/sand.jpg";
   textureList[2] = "/MapStuff/usedTextures/textures/water.jpg";
 
-  entityList[0] = "/MapStuff/usedTextures/entities/enemy0.png";
-  entityList[1] = "/MapStuff/usedTextures/entities/enemy1.png";
-  entityList[2] = "/MapStuff/usedTextures/entities/boss.png";
-  entityList[3] = "/MapStuff/usedTextures/entities/key.png";
-  entityList[4] = "/MapStuff/usedTextures/entities/trap.png";
-  entityList[5] = "/MapStuff/usedTextures/entities/portal.png";
-  entityList[6] = "/MapStuff/usedTextures/entities/player.png";
+  entityList[0] = "/MapStuff/usedTextures/entities/none.png";
+  entityList[1] = "/MapStuff/usedTextures/entities/enemy0.png";
+  entityList[2] = "/MapStuff/usedTextures/entities/enemy1.png";
+  entityList[3] = "/MapStuff/usedTextures/entities/boss.png";
+  entityList[4] = "/MapStuff/usedTextures/entities/key.png";
+  entityList[5] = "/MapStuff/usedTextures/entities/trap.png";
+  entityList[6] = "/MapStuff/usedTextures/entities/portal.png";
+  entityList[7] = "/MapStuff/usedTextures/entities/player.png";
 }
 
 class Map extends BaseUIBlock {
-  constructor(dim, zone, load, x, y, w, h) {
+  constructor(dim, zone, x, y, w, h) {
     super(x, y, w, h);
-    loadImages();
     this.aspectRatio = 1;
     this.tiles = [];
     this.width = dim;
     this.height = dim;
-    if (!load) {
-      for (let i = 0; i < dim; i++) {
-        this.tiles[i] = [];
-        for (let j = 0; j < dim; j++) {
-          this.tiles[i][j] = new TileSet(i, j);
-        }
+    for (let i = 0; i < this.width; i++) {
+      this.tiles[i] = [];
+      for (let j = 0; j < this.height; j++) {
+        this.tiles[i][j] = new TileSet(i, j);
       }
-    } else {
-      this.tiles = loadMap(zone);
-      this.width = this.tiles.length;
-      this.height = this.tiles[0].length;
     }
     this.cachedTiles = [];
     let w1 = 1 / player.attributes.sight.total;
@@ -137,17 +134,18 @@ class Map extends BaseUIBlock {
       this.cachedTiles[i] = [];
       for (let j = 0; j < player.attributes.sight.total; j++) {
         this.cachedTiles[i][j] = {
-          tile: new Image(textureList[0], i * w1, j * w1, w1, w1),
-          entity: null,
+          tile: new CustomImage(textureList[0], i * w1, j * w1, w1, w1),
+          entity: new CustomImage(entityList[0], i * w1, j * w1, w1, w1),
           hide() {
-            if (this.tile) this.tile.hide();
-            if (this.entity) this.entity.hide();
+            this.tile.hide();
+            this.entity.hide();
           },
           show() {
-            if (this.tile) this.tile.show();
-            if (this.entity) this.entity.show();
+            this.tile.show();
+            this.entity.show();
           }
         };
+        this.cachedTiles[i][j].hide();
       }
     }
   }
@@ -178,8 +176,7 @@ class Map extends BaseUIBlock {
     this.hidden = false;
     for (let i = 0; i < this.cachedTiles.length; i++) {
       for (let j = 0; j < this.cachedTiles[i].length; j++) {
-        let t = this.cachedTiles[i][j];
-        if (t) t.show();
+        this.cachedTiles[i][j].show();
       }
     }
   }
@@ -188,8 +185,8 @@ class Map extends BaseUIBlock {
     this.hidden = true;
     for (let i = 0; i < this.cachedTiles.length; i++) {
       for (let j = 0; j < this.cachedTiles[i].length; j++) {
-        let t = this.cachedTiles[i][j];
-        if (t) t.hide();
+        this.cachedTiles[i][j].tile.hide();
+        this.cachedTiles[i][j].entity.hide();
       }
     }
   }
@@ -225,17 +222,18 @@ class Map extends BaseUIBlock {
         let tile = null;
         let entity = null;
         if (xPos + i > this.width - 1 || xPos + i < 0 || yPos + j > this.height - 1 || yPos + j < 0) {
-          tile = new Image("/MapStuff/usedTextures/textures/void.png", i * w1, j * w1, w1, w1);
+          tile = new CustomImage("/MapStuff/usedTextures/textures/void.png", i * w1, j * w1, w1, w1);
+          entity = new CustomImage("/MapStuff/usedTextures/entities/none.png", i * w1, j * w1, w1, w1);
         } else {
           let t = this.tiles[xPos + i][yPos + j];
-          tile = new Image(textureList[t.tileID], i * w1, j * w1, w1, w1);
-          if (t.entityID !== -1) entity = new Image(entityList[t.entityID], i * w1, j * w1, w1, w1);
+          tile = new CustomImage(textureList[t.tileID], i * w1, j * w1, w1, w1);
+          entity = new CustomImage(entityList[t.entityID], i * w1, j * w1, w1, w1);
         }
         this.cachedTiles[i][j].tile = tile;
         this.cachedTiles[i][j].entity = entity;
         this.cachedTiles[i][j].show();
         this.cachedTiles[i][j].tile.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-        if (this.cachedTiles[i][j].entity) this.cachedTiles[i][j].entity.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+        this.cachedTiles[i][j].entity.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
 
       }
     }
@@ -285,7 +283,7 @@ class TileSet {
     this.x = i;
     this.y = j;
     this.tileID = 0;
-    this.entityID = -1;
+    this.entityID = 0;
     this.visible = false;
     //this.img.size(dim, dim);
   }

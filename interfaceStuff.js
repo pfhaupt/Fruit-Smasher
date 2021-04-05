@@ -121,10 +121,10 @@ class Text extends BaseUIBlock {
   }
 }
 
-class Image extends BaseUIBlock {
-  constructor(name, x, y, w, h, ar = 1) {
+class CustomImage extends BaseUIBlock {
+  constructor(n, x, y, w, h, ar = 1) {
     super(x, y, w, h);
-    this.content = createImg(name, "");
+    this.content = createImg(n, "");
     this.content.hide();
     this.aspectRatio = ar;
   }

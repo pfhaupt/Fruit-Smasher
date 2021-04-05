@@ -21,6 +21,6 @@ class FieldMenu extends MenuTemplate {
 
     */
 
-    this.children.push(new Map(dim, 0, true, 0.05, 0.05, 0.5, 0.9));
+    this.children.push(new Map(dim, 0, 0.05, 0.05, 0.5, 0.9));
   }
 }

@@ -13,6 +13,10 @@ function disableDraw() {
   drawing = false;
 }
 
+function preload() {
+  loadImages();
+}
+
 function setup() {
   textSize(defaultFontSize);
   createCanvas(windowWidth, windowHeight);
@@ -22,6 +26,8 @@ function setup() {
   defaultFontSize = realDefaultFontSize * ratio;
   mainWindow.resize();
   requestAnimationFrame(drawStuff);
+
+  loadMap(1);
 
   //loadImages();
   //map = loadMap(currentZone);
