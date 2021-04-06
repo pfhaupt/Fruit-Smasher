@@ -121,7 +121,7 @@ function loadActualMap(sav) {
 
 function loadMap(zone) {
   mainWindow.subMenus[0].children[0].children[0].hide();
-  let saveName = "Fruit-Smasher/MapStuff/maps/test" + zone + ".png";
+  let saveName = "MapStuff/maps/test" + zone + ".png";
   loadImage(saveName, loadActualMap, generateDefaultMap);
 }
 
