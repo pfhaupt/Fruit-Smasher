@@ -1,4 +1,4 @@
-let realDefaultFontSize = 32;
+let realDefaultFontSize = 50;
 let defaultFontSize = Math.min(realDefaultFontSize, Math.max(screen.width, screen.height) / 3);
 let debug = true;
 

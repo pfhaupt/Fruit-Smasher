@@ -22,7 +22,7 @@ function gameLoop() {
   var dt = now - lastUpdate;
   lastUpdate = now;
 
-  update(dt / 1000);
+  //update(dt / 1000);
 
   if (looping) {
     refreshTime = 1000 / updatesPerSecond;
@@ -58,10 +58,10 @@ function nextZone() {
   currentZone = Math.min(++currentZone, maxZone);
   spawnEnemy();
 }
-
+let minLevel = currentZone * 10, maxLevel = minLevel + 9;
 function spawnEnemy() {
-  let minLevel = currentZone * 10;
-  let maxLevel = minLevel + 9;
+  minLevel = currentZone * 10;
+  maxLevel = minLevel + 9;
   let enemyLevel = Math.floor(random(minLevel, Math.max(minLevel, Math.min(player.level, maxLevel)) + 1));
   let hp = 20 + 5 * enemyLevel;
   let dmg = 1 + 1 * enemyLevel;

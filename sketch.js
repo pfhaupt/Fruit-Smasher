@@ -27,7 +27,7 @@ function setup() {
   mainWindow.resize();
   requestAnimationFrame(drawStuff);
 
-  loadMap(1);
+  loadMap("t");
 
   //loadImages();
   //map = loadMap(currentZone);
@@ -75,24 +75,48 @@ function mouseReleased() {
 
 function keyPressed() {
   if (mainWindow.currentSubMenu.name === "Field") {
-    let map = mainWindow.currentSubMenu.children[0];
+    let map = mainWindow.currentSubMenu.children[0].children[0];
+    let prevX = player.position.x;
+    let prevY = player.position.y;
+    let dir = {
+      x: 0,
+      y: 0
+    };
     switch (keyCode) {
       case 37: //LEFT ARROW
-        player.position.x--;
-        map.updateImages(1, 0);
+        dir.x--;
         break;
       case 38: //UP ARROW
-        player.position.y--;
-        map.updateImages(0, 1);
+        dir.y--;
         break;
       case 39: //RIGHT ARROW
-        player.position.x++;
-        map.updateImages(-1, 0);
+        dir.x++;
         break;
       case 40: //DOWN ARROW
-        player.position.y++;
-        map.updateImages(0, -1);
+        dir.y++;
         break;
     }
+    //Set Player on Map
+    let newX = prevX + dir.x;
+    let newY = prevY + dir.y;
+    map.tiles[prevX][prevY].setEntity(0);
+    map.tiles[newX][newY].setEntity(7);
+
+    //Set Player on Minimap
+    mainWindow.currentSubMenu.children[0].children[1].updatePixels(prevX, prevY);
+    mainWindow.currentSubMenu.children[0].children[1].updatePixels(newX, newY);
+    //Set Player in Cache
+    let middleX = floor(player.attributes.sight.total / 2);
+    let middleY = floor(player.attributes.sight.total / 2);
+    let offs = 1 / player.attributes.sight.total;
+    map.cachedTiles[middleX][middleY].entity.hide();
+    map.cachedTiles[middleX + dir.x][middleY + dir.y].entity.hide();
+    map.cachedTiles[middleX][middleY].entity = new CustomImage(entityList[0], 0, 0, offs, offs);
+    map.cachedTiles[middleX + dir.x][middleY + dir.y].entity = new CustomImage(entityList[7], 0, 0, offs, offs);
+    //Update Cache
+    map.updateImages(dir.x, dir.y);
+    //Update real Player pos
+    player.position.x = prevX + dir.x;
+    player.position.y = prevY + dir.y;
   }
 }

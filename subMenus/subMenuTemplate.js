@@ -18,6 +18,7 @@ class MenuTemplate {
   display() {
     if (this.hidden) return;
     push();
+    //noStroke();
     fill(this.col);
     rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
     pop();
@@ -61,6 +62,5 @@ class MenuTemplate {
     for (var c of this.children)
       if (typeof c !== "undefined" && c !== null)
         c.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-
   }
 }
