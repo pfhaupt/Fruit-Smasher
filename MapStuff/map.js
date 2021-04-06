@@ -157,9 +157,9 @@ function getAverageColor(img, i, t) {
 function loadImages() {
   let alpha = 255;
 
-  textureList[0] = "MapStuff/usedTextures/textures/grass.jpg";
-  textureList[1] = "MapStuff/usedTextures/textures/sand.jpg";
-  textureList[2] = "MapStuff/usedTextures/textures/water.jpg";
+  textureList[0] = "MapStuff/usedTextures/textures/grass.png";
+  textureList[1] = "MapStuff/usedTextures/textures/sand.png";
+  textureList[2] = "MapStuff/usedTextures/textures/water.png";
 
   for (let i = 0; i < textureList.length; i++) {
     loadImage(textureList[i], (img) => {
