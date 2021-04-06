@@ -121,7 +121,7 @@ function loadActualMap(sav) {
 
 function loadMap(zone) {
   mainWindow.subMenus[0].children[0].children[0].hide();
-  let saveName = "MapStuff/maps/test" + zone + ".png";
+  let saveName = "Fruit-Smasher/MapStuff/maps/test" + zone + ".png";
   loadImage(saveName, loadActualMap, generateDefaultMap);
 }
 
@@ -157,23 +157,23 @@ function getAverageColor(img, i, t) {
 function loadImages() {
   let alpha = 255;
 
-  textureList[0] = "/MapStuff/usedTextures/textures/grass.jpg";
-  textureList[1] = "/MapStuff/usedTextures/textures/sand.jpg";
-  textureList[2] = "/MapStuff/usedTextures/textures/water.jpg";
+  textureList[0] = "Fruit-Smasher//MapStuff/usedTextures/textures/grass.jpg";
+  textureList[1] = "Fruit-Smasher//MapStuff/usedTextures/textures/sand.jpg";
+  textureList[2] = "Fruit-Smasher//MapStuff/usedTextures/textures/water.jpg";
 
   for (let i = 0; i < textureList.length; i++) {
     loadImage(textureList[i], (img) => {
       getAverageColor(img, i, 0);
     });
   }
-  entityList[0] = "/MapStuff/usedTextures/entities/none.png";
-  entityList[1] = "/MapStuff/usedTextures/entities/enemy0.png";
-  entityList[2] = "/MapStuff/usedTextures/entities/enemy1.png";
-  entityList[3] = "/MapStuff/usedTextures/entities/boss.png";
-  entityList[4] = "/MapStuff/usedTextures/entities/key.png";
-  entityList[5] = "/MapStuff/usedTextures/entities/trap.png";
-  entityList[6] = "/MapStuff/usedTextures/entities/portal.png";
-  entityList[7] = "/MapStuff/usedTextures/entities/player.png";
+  entityList[0] = "Fruit-Smasher//MapStuff/usedTextures/entities/none.png";
+  entityList[1] = "Fruit-Smasher//MapStuff/usedTextures/entities/enemy0.png";
+  entityList[2] = "Fruit-Smasher//MapStuff/usedTextures/entities/enemy1.png";
+  entityList[3] = "Fruit-Smasher//MapStuff/usedTextures/entities/boss.png";
+  entityList[4] = "Fruit-Smasher//MapStuff/usedTextures/entities/key.png";
+  entityList[5] = "Fruit-Smasher//MapStuff/usedTextures/entities/trap.png";
+  entityList[6] = "Fruit-Smasher//MapStuff/usedTextures/entities/portal.png";
+  entityList[7] = "Fruit-Smasher//MapStuff/usedTextures/entities/player.png";
   for (let i = 0; i < entityList.length; i++) {
     loadImage(entityList[i], (img) => {
       getAverageColor(img, i, 1);
