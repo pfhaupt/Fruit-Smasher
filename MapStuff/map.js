@@ -133,6 +133,7 @@ function loadActualMap(sav) {
 function loadMap(zone) {
   mainWindow.subMenus[0].children[0].children[0].hide();
   let saveName = "MapStuff/maps/test" + zone + ".png";
+  if (!isLocalhost) saveName = "Fruit-Smasher/" + saveName;
   loadImage(saveName, loadActualMap, generateDefaultMap);
 }
 
@@ -182,14 +183,14 @@ function loadImages() {
     });
   }
 
-  entityList[0] = "MapStuff/usedTextures/entities/none.png";
-  entityList[1] = "MapStuff/usedTextures/entities/enemy0.png";
-  entityList[2] = "MapStuff/usedTextures/entities/enemy1.png";
-  entityList[3] = "MapStuff/usedTextures/entities/boss.png";
-  entityList[4] = "MapStuff/usedTextures/entities/key.png";
-  entityList[5] = "MapStuff/usedTextures/entities/trap.png";
-  entityList[6] = "MapStuff/usedTextures/entities/portal.png";
-  entityList[7] = "MapStuff/usedTextures/entities/player.png";
+  entityList[0] = mapDir + "entities/none.png";
+  entityList[1] = mapDir + "entities/enemy0.png";
+  entityList[2] = mapDir + "entities/enemy1.png";
+  entityList[3] = mapDir + "entities/boss.png";
+  entityList[4] = mapDir + "entities/key.png";
+  entityList[5] = mapDir + "entities/trap.png";
+  entityList[6] = mapDir + "entities/portal.png";
+  entityList[7] = mapDir + "entities/player.png";
   for (let i = 0; i < entityList.length; i++) {
     loadImage(entityList[i], (img) => {
       getAverageColor(img, i, 1);
