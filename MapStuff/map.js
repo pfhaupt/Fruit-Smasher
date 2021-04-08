@@ -1,4 +1,15 @@
-let defaultSaveName = "CustomMapForGame_";
+// isLocalhost will be True if you site is hosted on localhost. Otherwise it will be False.
+var isLocalhost = Boolean(window.location.hostname === 'localhost' ||
+    // [::1] is the IPv6 localhost address.
+    window.location.hostname === '[::1]' ||
+    // 127.0.0.1/8 is considered localhost for IPv4.
+    window.location.hostname.match(
+        /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
+    )
+);
+
+let mapDir = "MapStuff/usedTextures/";
+if (!isLocalhost) mapDir = "Fruit-Smasher/" + mapDir;
 let dim = 10;
 let mapSize = 1000;
 let tileSize = mapSize / dim;
@@ -106,10 +117,10 @@ function loadActualMap(sav) {
         mainWindow.subMenus[0].children[0].children[1].updatePixels(posWithOffX, posWithOffY);
         let tID = t.tileID;
         let eID = t.entityID;
-        mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].tile = new CustomImage(textureList[tID], 0, 0, w1, w1);
+        mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].tile = new CustomImage(textureList[tID][0], 0, 0, w1, w1);
         mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].entity = new CustomImage(entityList[eID], 0, 0, w1, w1);
       } else {
-        mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].tile = new CustomImage("MapStuff/usedTextures/textures/void.png", 0, 0, w1, w1);
+        mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].tile = new CustomImage(mapDir + "textures/other_tiles/void.png", 0, 0, w1, w1);
         mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].entity = new CustomImage(entityList[0], 0, 0, w1, w1);
       }
       mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].hide();
@@ -157,15 +168,20 @@ function getAverageColor(img, i, t) {
 function loadImages() {
   let alpha = 255;
 
-  textureList[0] = "MapStuff/usedTextures/textures/grass.png";
-  textureList[1] = "MapStuff/usedTextures/textures/sand.png";
-  textureList[2] = "MapStuff/usedTextures/textures/water.png";
+  let n = ["grass", "sand", "water"];
+  for (let i = 0; i < 3; i++) {
+    textureList[i] = [];
+    for (let j = 0; j < 4; j++) {
+      textureList[i][j] = mapDir + "textures/" + n[i] + "_tiles/" + n[i] + "" + j + ".png";
+    }
+  }
 
   for (let i = 0; i < textureList.length; i++) {
-    loadImage(textureList[i], (img) => {
+    loadImage(textureList[i][0], (img) => {
       getAverageColor(img, i, 0);
     });
   }
+
   entityList[0] = "MapStuff/usedTextures/entities/none.png";
   entityList[1] = "MapStuff/usedTextures/entities/enemy0.png";
   entityList[2] = "MapStuff/usedTextures/entities/enemy1.png";
@@ -279,7 +295,7 @@ class Map extends BaseUIBlock {
       this.cachedTiles[i] = [];
       for (let j = 0; j < player.attributes.sight.total; j++) {
         this.cachedTiles[i][j] = {
-          tile: new CustomImage(textureList[0], i * w1, j * w1, w1, w1),
+          tile: new CustomImage(textureList[0][0], i * w1, j * w1, w1, w1),
           entity: new CustomImage(entityList[0], i * w1, j * w1, w1, w1),
           hide() {
             this.tile.hide();
@@ -405,12 +421,12 @@ class Map extends BaseUIBlock {
             let newY = yPos + j + y;
             let tID = this.tiles[newX][newY].tileID;
             let eID = this.tiles[newX][newY].entityID;
-            tmpArray[i][j].tile = new CustomImage(textureList[tID], 0, 0, w1, w1);
+            tmpArray[i][j].tile = new CustomImage(textureList[tID][0], 0, 0, w1, w1);
             tmpArray[i][j].entity = new CustomImage(entityList[eID], 0, 0, w1, w1);
             if (!mainWindow.subMenus[0].children[0].children[0].tiles[newX][newY].visible) mainWindow.subMenus[0].children[0].children[1].updatePixels(newX, newY);
           } else {
-            tmpArray[i][j].tile = new CustomImage("MapStuff/usedTextures/textures/void.png", 0, 0, w1, w1);
-            tmpArray[i][j].entity = new CustomImage("MapStuff/usedTextures/entities/none.png", 0, 0, w1, w1);
+            tmpArray[i][j].tile = new CustomImage(mapDir + "textures/other_tiles/void.png", 0, 0, w1, w1);
+            tmpArray[i][j].entity = new CustomImage(mapDir + "entities/none.png", 0, 0, w1, w1);
           }
         }
         //console.log(i, j, tmpArray[i][j]);
