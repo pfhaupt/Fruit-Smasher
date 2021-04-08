@@ -9,7 +9,7 @@ var isLocalhost = Boolean(window.location.hostname === 'localhost' ||
 );
 
 let mapDir = "MapStuff/usedTextures/";
-if (!isLocalhost) mapDir = "Fruit-Smasher/" + mapDir;
+//if (!isLocalhost) mapDir = "Fruit-Smasher/" + mapDir;
 let dim = 10;
 let mapSize = 1000;
 let tileSize = mapSize / dim;
@@ -133,7 +133,7 @@ function loadActualMap(sav) {
 function loadMap(zone) {
   mainWindow.subMenus[0].children[0].children[0].hide();
   let saveName = "MapStuff/maps/test" + zone + ".png";
-  if (!isLocalhost) saveName = "Fruit-Smasher/" + saveName;
+  //if (!isLocalhost) saveName = "Fruit-Smasher/" + saveName;
   loadImage(saveName, loadActualMap, generateDefaultMap);
 }
 
