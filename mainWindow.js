@@ -24,9 +24,14 @@ class MainWindow {
     this.currentSubMenu.show();
   }
 
-  display() {
-    this.mainMenu.display();
-    this.currentSubMenu.display();
+  displayEveryFrame() {
+    this.mainMenu.displayEveryFrame();
+    this.currentSubMenu.displayEveryFrame();
+  }
+
+  displayOnce() {
+    this.mainMenu.displayOnce();
+    this.currentSubMenu.displayOnce();
   }
 
   resize() {

@@ -15,8 +15,7 @@ class MenuTemplate {
     this.aspectRatio = 0;
   }
 
-  display() {
-    if (this.hidden) return;
+  displayOnce() {
     push();
     //noStroke();
     fill(this.col);
@@ -24,7 +23,14 @@ class MenuTemplate {
     pop();
     for (var c of this.children)
       if (typeof c !== "undefined" && c !== null)
-        c.display();
+        c.displayOnce();
+  }
+
+  displayEveryFrame() {
+    if (this.hidden) return;
+    for (var c of this.children)
+      if (typeof c !== "undefined" && c !== null)
+        c.displayEveryFrame();
   }
 
   show() {

@@ -1,6 +1,7 @@
 let realDefaultFontSize = 50;
 let defaultFontSize = Math.min(realDefaultFontSize, Math.max(screen.width, screen.height) / 3);
 let debug = true;
+let equipSlotCount = 17;
 
 class BaseUIBlock {
   constructor(x, y, w, h) {
@@ -41,7 +42,7 @@ class BaseUIBlock {
     }
   }
 
-  display() {
+  displayOnce() {
     if (debug) {
       push();
       noFill();
@@ -54,6 +55,9 @@ class BaseUIBlock {
     if (this.content === null) return;
     this.content.position(this.xAbsToScreen, this.yAbsToScreen);
     this.content.size(this.wAbsToScreen, this.hAbsToScreen);
+  }
+
+  displayEveryFrame() {
   }
 
   hide() {
@@ -103,7 +107,8 @@ class Text extends BaseUIBlock {
     //this.content.center();
   }
 
-  display() {
+  displayOnce() {
+    super.displayOnce();
     let digits = 2;
     let resultString = "";
     for (let i = 0; i < this.message.length; i++) {
@@ -117,7 +122,6 @@ class Text extends BaseUIBlock {
       }
     }
     this.content.html(resultString);
-    super.display();
   }
 }
 
@@ -135,6 +139,7 @@ class MainMenuButton extends Button {
     super(name, x, y, w, h, function() {
       mainWindow.showMenu(id);
       mainWindow.resize();
+      mainWindow.displayOnce();
     });
   }
 }
@@ -166,11 +171,11 @@ class ItemSlot extends BaseUIBlock {
     });
     this.content.mouseOver(() => {
       currentlySelectedItemID = this.itemID;
-      this.mouseOver = true;
+      mainWindow.currentSubMenu.displayOnce();
     });
     this.content.mouseOut(() => {
       currentlySelectedItemID = -1;
-      this.mouseOver = false;
+      mainWindow.currentSubMenu.displayOnce();
     });
   }
 
@@ -192,31 +197,25 @@ class ItemSlot extends BaseUIBlock {
       this.item = null;
       this.itemID = -1;
       this.content = null;
-      if (this.slotID < itemCount) this.itemTypeID = -1;
+      if (this.slotID >= equipSlotCount) this.itemTypeID = -1;
       this.mouseOver = false;
+      this.displayOnce();
       return;
     }
     this.item = itemList[i];
     this.itemID = itemList[i].id;
     this.content = itemList[i].img;
     this.itemTypeID = itemList[i].itemType;
-    this.mouseOver = false;
     this.setMouseEvents();
+    this.displayOnce();
   }
 
-  display() {
+  displayOnce() {
     push();
     strokeWeight(0.3);
     stroke(0);
-    if (this.mouseOver) {
-      fill(200);
-    } else {
-      if (currentlySelectedItemID !== -1 && itemList[currentlySelectedItemID].itemType === this.itemTypeID) {
-        fill(0, 255, 0);
-      } else {
-        fill(255);
-      }
-    }
+    if (currentlySelectedItemID !== -1 && this.itemID === currentlySelectedItemID) fill(0, 255, 0);
+    else fill(255);
     rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
     pop();
 
@@ -233,6 +232,9 @@ class ItemSlot extends BaseUIBlock {
     }
   }
 
+  displayEveryFrame() {
+  }
+
   createTooltip() {
     if (this.content === null || this.item === null) return;
     this.content.attribute("title", this.item.getTooltip());
@@ -246,32 +248,32 @@ function swapItems(id1, id2) {
   let item1, item2;
 
   console.log("Swapping Items", id1, id2);
-  if (id1 < 0 || id2 < 0 || id1 > itemCount + 17 || id2 > itemCount + 17) {
+  if (id1 < 0 || id2 < 0 || id1 > itemCount + equipSlotCount || id2 > itemCount + equipSlotCount) {
     console.log("Something went wrong!");
     return;
   }
   //Get both ItemSlots
-  if (id1 < itemCount && id2 < itemCount) {
+  if (id1 >= equipSlotCount && id2 >= equipSlotCount) {
     //Both Items in Inventory
-    slot1 = inv.children[0].children[id1];
-    slot2 = inv.children[0].children[id2];
+    slot1 = inv.children[1].children[id1 - equipSlotCount];
+    slot2 = inv.children[1].children[id2 - equipSlotCount];
     item1 = slot1.itemID;
     item2 = slot2.itemID;
     slot1.setItemByID(item2);
     slot2.setItemByID(item1);
     return;
-  } else if (id1 < itemCount && id2 >= itemCount) {
+  } else if (id1 >= equipSlotCount && id2 < equipSlotCount) {
     //Item One in Inventory, Item Two in Equipment
-    slot1 = inv.children[0].children[id1];
-    slot2 = inv.children[1].children[id2 - itemCount];
-  } else if (id1 >= itemCount && id2 < itemCount) {
-    //Item One in Equipment, Item Two in Inventory
-    slot1 = inv.children[1].children[id1 - itemCount];
+    slot1 = inv.children[1].children[id1 - equipSlotCount];
     slot2 = inv.children[0].children[id2];
-  } else if (id1 >= itemCount && id2 >= itemCount) {
+  } else if (id1 < equipSlotCount && id2 >= equipSlotCount) {
+    //Item One in Equipment, Item Two in Inventory
+    slot1 = inv.children[0].children[id1];
+    slot2 = inv.children[1].children[id2 - equipSlotCount];
+  } else if (id1 < equipSlotCount && id2 < equipSlotCount) {
     //Both Items in Equipment
-    slot1 = inv.children[1].children[id1 - itemCount];
-    slot2 = inv.children[1].children[id2 - itemCount];
+    slot1 = inv.children[0].children[id1];
+    slot2 = inv.children[0].children[id2];
   }
 
   //Is swapping Items possible? (E.g. can you equip a Sword in the Shield slot?)

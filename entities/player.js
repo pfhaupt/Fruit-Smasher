@@ -56,7 +56,7 @@ class Player {
       },
       sight: {
         name: "Sight",
-        fromLevel: 5,
+        fromLevel: 15,
         skillLevel: 0,
         boostPerSkillLevel: 0.1,
         fromSkill: 0,

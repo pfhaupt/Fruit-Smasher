@@ -26,7 +26,7 @@ class Equipment extends MenuTemplate {
       this.currentBonus[c].additive = 0;
       this.currentBonus[c].multiplicative = 1;
     }
-    for (let i = 0; i < 17; i++) {
+    for (let i = 0; i < equipSlotCount; i++) {
       let item = this.children[i].item;
       if (item === null || typeof item === "undefined") continue;
       else {
@@ -68,7 +68,7 @@ class Equipment extends MenuTemplate {
     }
 
     for (let i = 0; i < this.children.length; i++) {
-      this.children[i].slotID = itemCount + i;
+      this.children[i].slotID = i;
     }
   }
 }

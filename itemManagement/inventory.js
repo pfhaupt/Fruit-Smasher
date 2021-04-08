@@ -12,7 +12,7 @@ class Inventory extends MenuTemplate {
     for (let i = 0; i < itemCount; i++) {
       let x = i % this.itemsPerLine;
       let y = floor(i / this.itemsPerLine);
-      this.children[i] = new ItemSlot(i, x * w1, y * h1, w1, h1, null);
+      this.children[i] = new ItemSlot(17 + i, x * w1, y * h1, w1, h1, null);
     }
     for (let i = 0; i < itemCount; i++) {
       if (typeof itemList[i] !== "undefined" && itemList[i] !== null) {

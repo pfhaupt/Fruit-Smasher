@@ -18,6 +18,8 @@ function preload() {
 }
 
 function setup() {
+  noiseSeed(70273982107398);
+  noiseDetail(4, 0.4);
   textSize(defaultFontSize);
   createCanvas(windowWidth, windowHeight);
   generateItems();
@@ -27,17 +29,19 @@ function setup() {
   mainWindow.resize();
   requestAnimationFrame(drawStuff);
 
-  loadMap("t");
+  loadMap(4);
 
   //loadImages();
   //map = loadMap(currentZone);
   //generateMinimap();
+
+  mainWindow.displayOnce();
+  noLoop();
 }
 
 function drawStuff() {
   if (drawing) requestAnimationFrame(drawStuff);
-  background(255);
-  mainWindow.display();
+  mainWindow.displayEveryFrame();
 }
 
 function windowResized() {
@@ -45,29 +49,31 @@ function windowResized() {
   let ratio = Math.min(windowHeight / windowWidth, windowWidth / windowHeight);
   defaultFontSize = realDefaultFontSize * ratio;
   mainWindow.resize();
+  mainWindow.displayOnce();
 }
 
 
 function mouseReleased() {
   if (mainWindow.currentSubMenu.name === "Inventory") {
     let inv = mainWindow.currentSubMenu;
-    let part = 0;
+    let part = 1;
     let end = itemCount;
-    if (mouseX < inv.children[0].xAbsToScreen) {
-      part = 1;
-      end = 17;
+    if (mouseX < inv.children[1].xAbsToScreen) {
+      part = 0;
+      end = equipSlotCount;
     }
     for (let i = 0; i < end; i++) {
       let itemSlot = inv.children[part].children[i];
       if (mouseX > itemSlot.xAbsToScreen && mouseX < itemSlot.xAbsToScreen + itemSlot.wAbsToScreen &&
         mouseY > itemSlot.yAbsToScreen && mouseY < itemSlot.yAbsToScreen + itemSlot.hAbsToScreen) {
-        let slotID = part * itemCount + i;
+        let slotID = part * equipSlotCount + i;
         swapItems(currentlySelectedSlotID, slotID);
         currentlySelectedSlotID = -1;
         currentlySelectedItemID = -1;
         return;
       }
     }
+    inv.displayOnce();
   }
   currentlySelectedSlotID = -1;
   currentlySelectedItemID = -1;
@@ -99,6 +105,7 @@ function keyPressed() {
     //Set Player on Map
     let newX = prevX + dir.x;
     let newY = prevY + dir.y;
+
     map.tiles[prevX][prevY].setEntity(0);
     map.tiles[newX][newY].setEntity(7);
 
@@ -109,14 +116,15 @@ function keyPressed() {
     let middleX = floor(player.attributes.sight.total / 2);
     let middleY = floor(player.attributes.sight.total / 2);
     let offs = 1 / player.attributes.sight.total;
-    map.cachedTiles[middleX][middleY].entity.hide();
-    map.cachedTiles[middleX + dir.x][middleY + dir.y].entity.hide();
-    map.cachedTiles[middleX][middleY].entity = new CustomImage(entityList[0], 0, 0, offs, offs);
+    map.cachedTiles[middleX][middleY].entity.content.elt.remove();
+    if (map.cachedTiles[middleX + dir.x][middleY + dir.y].entity) map.cachedTiles[middleX + dir.x][middleY + dir.y].entity.content.elt.remove();
+    map.cachedTiles[middleX][middleY].entity = null;
     map.cachedTiles[middleX + dir.x][middleY + dir.y].entity = new CustomImage(entityList[7], 0, 0, offs, offs);
     //Update Cache
     map.updateImages(dir.x, dir.y);
     //Update real Player pos
     player.position.x = prevX + dir.x;
     player.position.y = prevY + dir.y;
+    mainWindow.currentSubMenu.displayOnce();
   }
 }
