@@ -7,8 +7,10 @@ class Enemy {
       y: y,
     };
     this.typeID = id;
+    let r = 2 + Math.random() * 4;
+    r = ~~r;
     this.init = {
-      moveCount: 3,
+      moveCount: ~~r,
     };
     this.moveCount = this.init.moveCount;
   }
