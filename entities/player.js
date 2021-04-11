@@ -75,6 +75,16 @@ class Player {
     return this.hp <= 0;
   }
 
+  inViewRange(enemy) {
+    let viewRange = this.attributes.sight.total;
+    let xPos = this.position.x - floor(viewRange / 2);
+    let yPos = this.position.y - floor(viewRange / 2);
+    return (enemy.position.x >= xPos &&
+      enemy.position.x < xPos + viewRange &&
+      enemy.position.y >= yPos &&
+      enemy.position.y < yPos + viewRange);
+  }
+
   update(other, dt) {
     this.attack(other, dt);
     this.regenerate(dt);

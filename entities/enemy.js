@@ -1,14 +1,67 @@
+let enemies = [];
+
 class Enemy {
-  constructor(l = 1, h = 10, d = 1, r = 0.1, s = 1) {
-    this.level = l;
-    this.maxHP = h;
-    this.hp = h;
-    this.dmg = d;
-    this.regen = r;
-    this.atkSpeed = s;
-    this.experience = (this.level + 1) * 5;
+  constructor(x, y, id) {
+    this.position = {
+      x: x,
+      y: y,
+    };
+    this.typeID = id;
+    this.init = {
+      moveCount: 3,
+    };
+    this.moveCount = this.init.moveCount;
   }
 
+  resetMoveCount() {
+    this.moveCount = this.init.moveCount;
+  }
+
+  initMove() {
+    this.resetMoveCount();
+    return new Promise((resolve, reject) => {
+      let interval = setInterval(() => {
+        this.moveCount--;
+        this.move();
+        if (this.moveCount <= 0) {
+          // resolve promise
+          clearInterval(interval);
+          resolve();
+        }
+      }, 100);
+    });
+  }
+
+  move() {
+    let r = ~~random(4); //Fast flooring a random float
+    let prevX = this.position.x;
+    let prevY = this.position.y;
+
+    switch (r) {
+      case 0:
+        this.position.x--;
+        break;
+      case 1:
+        this.position.x++;
+        break;
+      case 2:
+        this.position.y--;
+        break;
+      case 3:
+        this.position.y++;
+        break;
+    }
+    let map = mainWindow.subMenus[0].children[0].children[0];
+    let minimap = mainWindow.subMenus[0].children[0].children[1];
+    map.updateTileMap(prevX, prevY, 0);
+    map.updateTileMap(this.position.x, this.position.y, this.typeID);
+    minimap.updatePixels(prevX, prevY);
+    minimap.updatePixels(this.position.x, this.position.y);
+
+    if (player.inViewRange(this)) {
+      map.forceUpdate();
+    }
+  }
 
   checkDeath() {
     return this.hp <= 0;

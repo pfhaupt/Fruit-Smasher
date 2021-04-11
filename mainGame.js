@@ -17,6 +17,26 @@ function disableGameLoop() {
   looping = false;
 }
 
+function initEnemyMove() {
+  enemyMove();
+}
+
+enemiesMoved = 0;
+
+function enemyMove() {
+  player.moveCount = 3;
+  enemiesMoved = 0;
+  for (let e of enemies) {
+    e.initMove().then(() => {
+      enemiesMoved++;
+      if (enemiesMoved === enemies.length) {
+        // Here we're done
+        mainWindow.subMenus[0].children[0].children[0].forceUpdate();
+      }
+    })
+  }
+ }
+
 function gameLoop() {
   var now = Date.now();
   var dt = now - lastUpdate;
@@ -58,7 +78,9 @@ function nextZone() {
   currentZone = Math.min(++currentZone, maxZone);
   spawnEnemy();
 }
-let minLevel = currentZone * 10, maxLevel = minLevel + 9;
+let minLevel = currentZone * 10,
+  maxLevel = minLevel + 9;
+
 function spawnEnemy() {
   minLevel = currentZone * 10;
   maxLevel = minLevel + 9;
