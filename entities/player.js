@@ -22,6 +22,14 @@ class Player {
         fromSkill: 0,
         total: 0,
       },
+      maxEP: {
+        name: "Energy",
+        fromLevel: h,
+        skillLevel: 0,
+        boostPerSkillLevel: 5,
+        fromSkill: 0,
+        total: 0,
+      },
       maxHP: {
         name: "Hitpoint",
         fromLevel: h,
@@ -68,6 +76,7 @@ class Player {
     for (var i = 0; i < 4 * maxZone; i++) this.chestCount[i] = 0;
 
     this.hp = h;
+    this.ep = this.attributes.maxEP.total;
     this.calculateTotalAttributes();
   }
 
@@ -83,6 +92,59 @@ class Player {
       enemy.position.x < xPos + viewRange &&
       enemy.position.y >= yPos &&
       enemy.position.y < yPos + viewRange);
+  }
+
+  checkMovement(keyCode) {
+    let map = mainWindow.currentSubMenu.children[0].children[0];
+    let minimap = mainWindow.currentSubMenu.children[0].children[1];
+    let prevX = player.position.x;
+    let prevY = player.position.y;
+    let dir = {
+      x: 0,
+      y: 0
+    };
+    switch (keyCode) {
+      case 37: //LEFT ARROW
+        dir.x--;
+        break;
+      case 38: //UP ARROW
+        dir.y--;
+        break;
+      case 39: //RIGHT ARROW
+        dir.x++;
+        break;
+      case 40: //DOWN ARROW
+        dir.y++;
+        break;
+    }
+    //Calculate target position
+    let newX = prevX + dir.x;
+    let newY = prevY + dir.y;
+
+    //Can we move there?
+    let targetIDs = map.getIDs(newX, newY);
+    if (targetIDs.tID === 2) {
+      //Can't move on water
+      return;
+    } else if (targetIDs.eID !== 0) {
+      //Interact with Entity on Target position
+      return;
+    }
+    //Set Player on Map
+    map.tiles[prevX][prevY].setEntity(0);
+    map.tiles[newX][newY].setEntity(7);
+    //Set Player on Minimap
+    minimap.updatePixels(prevX, prevY);
+    minimap.updatePixels(newX, newY);
+    //Set Player in Cache
+    map.updateCacheMap(prevX, prevY, 0);
+    map.updateCacheMap(newX, newY, 7);
+    //Update Cache
+    map.updateImages(dir.x, dir.y);
+    //Update real Player pos
+    player.position.x = newX;
+    player.position.y = newY;
+    mainWindow.currentSubMenu.displayOnce();
   }
 
   update(other, dt) {

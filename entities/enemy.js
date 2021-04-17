@@ -11,12 +11,18 @@ class Enemy {
     r = ~~r;
     this.init = {
       moveCount: ~~r,
+      moveChances: 3
     };
     this.moveCount = this.init.moveCount;
+    this.maxHP = 100;
+    this.hp = 100;
+    this.maxEP = 100;
+    this.ep = 100;
   }
 
   resetMoveCount() {
     this.moveCount = this.init.moveCount;
+    this.moveChances = this.init.moveChances;
   }
 
   initMove() {
@@ -24,6 +30,7 @@ class Enemy {
     return new Promise((resolve, reject) => {
       let interval = setInterval(() => {
         this.moveCount--;
+        this.moveChances = this.init.moveChances;
         this.move();
         if (this.moveCount <= 0) {
           // resolve promise
@@ -35,33 +42,49 @@ class Enemy {
   }
 
   move() {
+    let map = mainWindow.subMenus[0].children[0].children[0];
+    let minimap = mainWindow.subMenus[0].children[0].children[1];
+
     let r = ~~random(4); //Fast flooring a random float
     let prevX = this.position.x;
     let prevY = this.position.y;
-
+    let dirX = 0,
+      dirY = 0;
     switch (r) {
       case 0:
-        this.position.x--;
+        dirX = -1;
         break;
       case 1:
-        this.position.x++;
+        dirX = 1;
         break;
       case 2:
-        this.position.y--;
+        dirY = -1;
         break;
       case 3:
-        this.position.y++;
+        dirY = 1;
         break;
     }
-    let map = mainWindow.subMenus[0].children[0].children[0];
-    let minimap = mainWindow.subMenus[0].children[0].children[1];
+
+    let targetIDs = map.getIDs(prevX + dirX, prevY + dirY);
+    if (targetIDs.eID !== 0 || targetIDs.tID === 2) {
+      this.moveChances--;
+      if (this.moveChances >= 0) {
+        this.move();
+      }
+      return;
+    }
+
+    this.position.x += dirX;
+    this.position.y += dirY;
     map.updateTileMap(prevX, prevY, 0);
     map.updateTileMap(this.position.x, this.position.y, this.typeID);
+    map.updateCacheMap(prevX, prevY, 0);
+    map.updateCacheMap(this.position.x, this.position.y, this.typeID);
     minimap.updatePixels(prevX, prevY);
     minimap.updatePixels(this.position.x, this.position.y);
 
     if (player.inViewRange(this)) {
-      map.forceUpdate();
+
     }
   }
 

@@ -1,7 +1,8 @@
-let realDefaultFontSize = 50;
-let defaultFontSize = Math.min(realDefaultFontSize, Math.max(screen.width, screen.height) / 3);
+let realDefaultFontSize = 32;
+let defaultFontSize = realDefaultFontSize;
 let debug = true;
 let equipSlotCount = 17;
+let digits = 2;
 
 class BaseUIBlock {
   constructor(x, y, w, h) {
@@ -57,8 +58,7 @@ class BaseUIBlock {
     this.content.size(this.wAbsToScreen, this.hAbsToScreen);
   }
 
-  displayEveryFrame() {
-  }
+  displayEveryFrame() {}
 
   hide() {
     if (this.content === null) return;
@@ -78,11 +78,24 @@ class Button extends BaseUIBlock {
     this.content.mouseReleased(fun);
     this.txtSize = s;
     this.content.style('font-size', this.txtSize + 'px');
+    this.content.style('font-weight', 'bold');
+    this.content.style('font-family', 'monospace');
+    this.content.style('display', 'inline-flex');
+    this.content.style('justify-content', 'center');
+    this.content.style('align-items', 'center');
+    this.content.style('padding', '0.5em var(--padding-x)');
+    this.content.style('border-width', '2px');
+    this.content.style('border-style', 'solid');
+    this.content.style('background', 'rgba(255, 150, 0, 0.8)');
+    this.content.style('opacity', '0.8');
+    this.content.style('border-color', ' rgba(0, 0, 255, 0.8)');
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
-    this.txtSize = Math.min(defaultFontSize, Math.max(this.wAbsToScreen, this.hAbsToScreen) / 3);
+    this.txtSize = floor(this.wAbsToScreen / getStringSizeInPixels(this.content.html(), "-mono")) - 1;
+    this.txtSize = Math.min(this.txtSize, this.hAbsToScreen * 0.8);
+    this.txtSize = Math.min(this.txtSize, defaultFontSize);
     this.content.style('font-size', this.txtSize + 'px');
   }
 }
@@ -94,22 +107,27 @@ class Text extends BaseUIBlock {
     this.txtSize = defaultFontSize;
     this.align = a;
     this.format = format;
+    this.textLengthInPixels = 0;
     this.content = createP(this.secondaryMessage + roundToSpecificDecimalLength(eval(this.message), 2));
+    this.content.style('font-weight', 'bold');
+    this.content.style('font-family', 'cursive');
+    this.content.style('line-height', '0px');
+    this.content.style('text-align', this.align);
+    this.content.style('text-shadow', '0px 0px 10px rgba(255, 255, 255, 1)');
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
-    this.txtSize = Math.min(this.hAbsToScreen, defaultFontSize - 1);
+    this.txtSize = floor(this.wAbsToScreen / this.textLengthInPixels);
+    this.txtSize = Math.min(this.txtSize, this.hAbsToScreen * 0.8);
+    this.txtSize = Math.min(this.txtSize, defaultFontSize);
     this.content.style('font-size', this.txtSize + 'px');
-    this.content.style('line-height', '0px');
     this.content.style('margin', (this.hAbsToScreen / 2) + 'px 0px');
-    this.content.style('text-align', this.align);
     //this.content.center();
   }
 
   displayOnce() {
     super.displayOnce();
-    let digits = 2;
     let resultString = "";
     for (let i = 0; i < this.message.length; i++) {
       let msg = this.message[i];
@@ -121,6 +139,7 @@ class Text extends BaseUIBlock {
         resultString += msg;
       }
     }
+    this.textLengthInPixels = getStringSizeInPixels(resultString, "-cursive");
     this.content.html(resultString);
   }
 }
@@ -232,12 +251,50 @@ class ItemSlot extends BaseUIBlock {
     }
   }
 
-  displayEveryFrame() {
-  }
+  displayEveryFrame() {}
 
   createTooltip() {
     if (this.content === null || this.item === null) return;
     this.content.attribute("title", this.item.getTooltip());
+  }
+}
+
+class ProgressBar extends BaseUIBlock {
+  constructor(cval, mval, col, x, y, w, h) {
+    super(x, y, w, h);
+    this.currVal = cval;
+    this.maxVal = mval;
+    this.color = col;
+  }
+
+  displayOnce() {
+    let v1, v2;
+    try {
+      v1 = roundToSpecificDecimalLength(eval(this.currVal), digits);
+      v1 = toFixedDecimalLength(v1, digits);
+      v2 = roundToSpecificDecimalLength(eval(this.maxVal), digits);
+      v2 = toFixedDecimalLength(v2, digits);
+    } catch (e) {
+      return;
+    }
+    let ratio = v1 / v2;
+    push();
+    fill(255);
+    rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+    noStroke();
+    fill(this.color);
+    rect(this.xAbsToScreen + 1, this.yAbsToScreen + 1, this.wAbsToScreen * ratio - 2, this.hAbsToScreen - 2);
+    fill(0);
+    textSize(this.hAbsToScreen);
+    textAlign(LEFT, TOP);
+    text(v1, this.xAbsToScreen, this.yAbsToScreen);
+    textAlign(RIGHT, TOP);
+    text(v2, this.xAbsToScreen + this.wAbsToScreen, this.yAbsToScreen);
+    pop();
+  }
+
+  displayEveryFrame() {
+
   }
 }
 
@@ -313,4 +370,10 @@ function toFixedDecimalLength(val, digits) {
   else
     s = splitted[0] + "." + splitted[1].padEnd(digits, replacementChar);
   return s;
+}
+
+function getStringSizeInPixels(text, type) {
+  let ruler = document.getElementById("ruler" + type);
+  ruler.innerHTML = text;
+  return ruler.offsetWidth / 100;
 }

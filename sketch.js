@@ -25,11 +25,11 @@ function setup() {
   generateItems();
   mainWindow = new MainWindow();
   let ratio = Math.min(windowHeight / windowWidth, windowWidth / windowHeight);
-  defaultFontSize = realDefaultFontSize * ratio;
+  //defaultFontSize = realDefaultFontSize * ratio;
   mainWindow.resize();
   requestAnimationFrame(drawStuff);
 
-  loadMap(4);
+  loadMap(0);
 
   //loadImages();
   //map = loadMap(currentZone);
@@ -47,7 +47,7 @@ function drawStuff() {
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   let ratio = Math.min(windowHeight / windowWidth, windowWidth / windowHeight);
-  defaultFontSize = realDefaultFontSize * ratio;
+  //defaultFontSize = realDefaultFontSize * ratio;
   mainWindow.resize();
   mainWindow.displayOnce();
 }
@@ -81,50 +81,6 @@ function mouseReleased() {
 
 function keyPressed() {
   if (mainWindow.currentSubMenu.name === "Field") {
-    let map = mainWindow.currentSubMenu.children[0].children[0];
-    let prevX = player.position.x;
-    let prevY = player.position.y;
-    let dir = {
-      x: 0,
-      y: 0
-    };
-    switch (keyCode) {
-      case 37: //LEFT ARROW
-        dir.x--;
-        break;
-      case 38: //UP ARROW
-        dir.y--;
-        break;
-      case 39: //RIGHT ARROW
-        dir.x++;
-        break;
-      case 40: //DOWN ARROW
-        dir.y++;
-        break;
-    }
-    //Set Player on Map
-    let newX = prevX + dir.x;
-    let newY = prevY + dir.y;
-
-    map.tiles[prevX][prevY].setEntity(0);
-    map.tiles[newX][newY].setEntity(7);
-
-    //Set Player on Minimap
-    mainWindow.currentSubMenu.children[0].children[1].updatePixels(prevX, prevY);
-    mainWindow.currentSubMenu.children[0].children[1].updatePixels(newX, newY);
-    //Set Player in Cache
-    let middleX = floor(player.attributes.sight.total / 2);
-    let middleY = floor(player.attributes.sight.total / 2);
-    let offs = 1 / player.attributes.sight.total;
-    map.cachedTiles[middleX][middleY].entity.content.elt.remove();
-    if (map.cachedTiles[middleX + dir.x][middleY + dir.y].entity) map.cachedTiles[middleX + dir.x][middleY + dir.y].entity.content.elt.remove();
-    map.cachedTiles[middleX][middleY].entity = null;
-    map.cachedTiles[middleX + dir.x][middleY + dir.y].entity = new CustomImage(entityList[7], 0, 0, offs, offs);
-    //Update Cache
-    map.updateImages(dir.x, dir.y);
-    //Update real Player pos
-    player.position.x = prevX + dir.x;
-    player.position.y = prevY + dir.y;
-    mainWindow.currentSubMenu.displayOnce();
+    player.checkMovement(keyCode);
   }
 }

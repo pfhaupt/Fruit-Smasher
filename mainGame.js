@@ -31,7 +31,8 @@ function enemyMove() {
       enemiesMoved++;
       if (enemiesMoved === enemies.length) {
         // Here we're done
-        mainWindow.subMenus[0].children[0].children[0].forceUpdate();
+        //mainWindow.subMenus[0].children[0].children[0].forceUpdate();
+
       }
     })
   }

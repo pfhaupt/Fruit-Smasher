@@ -16,11 +16,6 @@ class MenuTemplate {
   }
 
   displayOnce() {
-    push();
-    //noStroke();
-    fill(this.col);
-    rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-    pop();
     for (var c of this.children)
       if (typeof c !== "undefined" && c !== null)
         c.displayOnce();

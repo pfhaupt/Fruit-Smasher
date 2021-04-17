@@ -32,7 +32,7 @@ function generateDefaultMap() {
   let yrel = m.yRelToParent;
   let hrel = m.hRelToParent;
   let wrel = m.wRelToParent;
-  mainWindow.subMenus[0].children[0] = new Map(10, 0, 0, 0, 0, 0);
+  mainWindow.subMenus[0].children[0] = new Map(10, 0, 0, 0, 1, 1);
   mainWindow.subMenus[0].children[0].xRelToParent = xrel;
   mainWindow.subMenus[0].children[0].yRelToParent = yrel;
   mainWindow.subMenus[0].children[0].hRelToParent = hrel;
@@ -59,7 +59,6 @@ function loadActualMap(sav) {
       entityID: a % 10
     };
   };
-
   sav.loadPixels();
   newMap.tiles = new Array(d);
   for (let x = 0; x < d; x++) {
@@ -139,6 +138,7 @@ function loadActualMap(sav) {
   mainWindow.subMenus[0].children[0].children[0].updateImages(0, 0);
   mainWindow.resize();
   mainWindow.displayOnce();
+  currentlyFightingEnemy = enemies[0];
 }
 
 function loadMap(zone) {
@@ -178,6 +178,7 @@ function getAverageColor(img, i, j, t) {
   colorList[t][i][j][1] = sg;
   colorList[t][i][j][2] = sb;
   console.log("Getting color average for image " + i + "," + j + " took " + (performance.now() - s) + "ms");
+
 }
 
 function loadImages() {
@@ -207,10 +208,31 @@ function loadImages() {
   entityList[5] = mapDir + "entities/trap.png";
   entityList[6] = mapDir + "entities/portal.png";
   entityList[7] = mapDir + "entities/player.png";
+  /*
   for (let i = 0; i < entityList.length; i++) {
     loadImage(entityList[i], (img) => {
       getAverageColor(img, i, 0, 1);
     });
+  }
+  */
+  let col = [
+    color(0, 0, 0, 0), //minimap color none
+    color(204, 68, 0), //minimap color scorpion
+    color(255, 119, 51), //minimap color spider
+    color(255, 0, 0), //minimap color boss
+    color(200, 180, 50), //minimap color key
+    color(100, 100, 100), //minimap color trap
+    color(153, 0, 230), //minimap color portal
+    color(0, 255, 0) //minimap color player
+  ]
+  console.log(col);
+  colorList[1] = [];
+  for (let i = 0; i < entityList.length; i++) {
+    colorList[1][i] = [];
+    colorList[1][i][0] = [];
+    for (let j = 0; j < col[i].levels.length; j++) {
+      colorList[1][i][0][j] = col[i].levels[j];
+    }
   }
 }
 
@@ -284,6 +306,7 @@ class Minimap extends BaseUIBlock {
       }
     }
     this.content.updatePixels();
+    this.displayOnce();
   }
 
   clear() {
@@ -398,52 +421,26 @@ class Map extends BaseUIBlock {
     this.tiles[x][y].setEntity(id);
   }
 
-  forceUpdate() {
-    console.log("Forcing Cached Tiles Update");
+  updateCacheMap(x, y, id) {
     let viewRange = player.attributes.sight.total;
     let xPos = player.position.x - floor(viewRange / 2);
     let yPos = player.position.y - floor(viewRange / 2);
     let w1 = 1 / viewRange;
-    for (let i = 0; i < this.cachedTiles.length; i++) {
-      for (let j = 0; j < this.cachedTiles.length; j++) {
-        let t = this.cachedTiles[i][j];
-        t.tile.content.elt.remove();
+    let x1 = x - xPos,
+      y1 = y - yPos;
+    if (x1 >= 0 && y1 >= 0 && x1 < viewRange && y1 < viewRange) { //position cached
+      let t = this.cachedTiles[x1][y1];
+      if (id === 0) {
         if (t.entity) t.entity.content.elt.remove();
+      } else {
+        t.entity = new CustomImage(entityList[id], x1 * w1, y1 * w1, w1, w1);
+        t.entity.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+        t.entity.show();
+        t.entity.displayOnce();
       }
+    } else { //position outside of cache
+
     }
-    this.cachedTiles = new Array(viewRange);
-    for (let i = 0; i < viewRange; i++) {
-      this.cachedTiles[i] = [];
-      for (let j = 0; j < viewRange; j++) {
-        this.cachedTiles[i][j] = {
-          tile: null,
-          entity: null
-        };
-        let newX = xPos + i;
-        let newY = yPos + j;
-        if (newX >= 0 && newX < this.width && newY >= 0 && newY < this.height) {
-          let tID = this.tiles[newX][newY].tileID;
-          let eID = this.tiles[newX][newY].entityID;
-          let sID = this.tiles[newX][newY].subTexID;
-          this.cachedTiles[i][j].tile = new CustomImage(textureList[tID][sID], 0, 0, w1, w1);
-          if (eID !== 0) this.cachedTiles[i][j].entity = new CustomImage(entityList[eID], 0, 0, w1, w1);
-        } else {
-          let sID = this.getNoise2D(newX, newY);
-          this.cachedTiles[i][j].tile = new CustomImage(mapDir + "textures/void_tiles/void" + sID + ".png", 0, 0, w1, w1);
-        }
-        this.cachedTiles[i][j].tile.xRelToParent = i * w1;
-        this.cachedTiles[i][j].tile.yRelToParent = j * w1;
-        this.cachedTiles[i][j].tile.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-        if (this.cachedTiles[i][j].entity) {
-          this.cachedTiles[i][j].entity.xRelToParent = i * w1;
-          this.cachedTiles[i][j].entity.yRelToParent = j * w1;
-          this.cachedTiles[i][j].entity.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-        }
-      }
-    }
-    this.show();
-    this.displayOnce();
-    mainWindow.subMenus[0].children[0].children[1].displayOnce();
   }
 
   updateImages(x, y) {
@@ -536,6 +533,54 @@ class Map extends BaseUIBlock {
     this.displayOnce();
   }
 
+  forceUpdate() {
+    console.log("Forcing Cached Tiles Update");
+    let viewRange = player.attributes.sight.total;
+    let xPos = player.position.x - floor(viewRange / 2);
+    let yPos = player.position.y - floor(viewRange / 2);
+    let w1 = 1 / viewRange;
+    for (let i = 0; i < this.cachedTiles.length; i++) {
+      for (let j = 0; j < this.cachedTiles.length; j++) {
+        let t = this.cachedTiles[i][j];
+        t.tile.content.elt.remove();
+        if (t.entity) t.entity.content.elt.remove();
+      }
+    }
+    this.cachedTiles = new Array(viewRange);
+    for (let i = 0; i < viewRange; i++) {
+      this.cachedTiles[i] = [];
+      for (let j = 0; j < viewRange; j++) {
+        this.cachedTiles[i][j] = {
+          tile: null,
+          entity: null
+        };
+        let newX = xPos + i;
+        let newY = yPos + j;
+        if (newX >= 0 && newX < this.width && newY >= 0 && newY < this.height) {
+          let tID = this.tiles[newX][newY].tileID;
+          let eID = this.tiles[newX][newY].entityID;
+          let sID = this.tiles[newX][newY].subTexID;
+          this.cachedTiles[i][j].tile = new CustomImage(textureList[tID][sID], 0, 0, w1, w1);
+          if (eID !== 0) this.cachedTiles[i][j].entity = new CustomImage(entityList[eID], 0, 0, w1, w1);
+        } else {
+          let sID = this.getNoise2D(newX, newY);
+          this.cachedTiles[i][j].tile = new CustomImage(mapDir + "textures/void_tiles/void" + sID + ".png", 0, 0, w1, w1);
+        }
+        this.cachedTiles[i][j].tile.xRelToParent = i * w1;
+        this.cachedTiles[i][j].tile.yRelToParent = j * w1;
+        this.cachedTiles[i][j].tile.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+        if (this.cachedTiles[i][j].entity) {
+          this.cachedTiles[i][j].entity.xRelToParent = i * w1;
+          this.cachedTiles[i][j].entity.yRelToParent = j * w1;
+          this.cachedTiles[i][j].entity.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+        }
+      }
+    }
+    this.show();
+    this.displayOnce();
+    mainWindow.subMenus[0].children[0].children[1].displayOnce();
+  }
+
   set(x, y, id) {
     if (!(x >= 0 && x < this.width && y >= 0 && y < this.height)) {
       console.log("INVALID TILE", x, y);
@@ -547,6 +592,21 @@ class Map extends BaseUIBlock {
 
   setEntity(x, y, id) {
     this.tiles[x][y].setEntity(id);
+  }
+
+  getIDs(x, y) {
+    if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
+      return {
+        tID: -1,
+        eID: -1,
+      }
+    } else {
+      let t = this.tiles[x][y];
+      return {
+        tID: t.tileID,
+        eID: t.entityID
+      }
+    }
   }
 
   getNoise2D(i, j) {

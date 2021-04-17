@@ -22,6 +22,7 @@ class MainWindow {
     this.mainMenu = new MainMenu(0, 0, 1, mainMenuHeight, this.subMenus);
     this.currentSubMenu = this.subMenus[0];
     this.currentSubMenu.show();
+    this.image = loadImage("images/backgrounds/fieldMenuBackground.png", () => {this.displayOnce()});
   }
 
   displayEveryFrame() {
@@ -30,6 +31,7 @@ class MainWindow {
   }
 
   displayOnce() {
+    image(this.image, this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
     this.mainMenu.displayOnce();
     this.currentSubMenu.displayOnce();
   }
@@ -48,5 +50,6 @@ class MainWindow {
     this.currentSubMenu.hide();
     this.currentSubMenu = this.subMenus[id];
     this.currentSubMenu.show();
+    windowResized();
   }
 }
