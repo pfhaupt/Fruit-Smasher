@@ -116,6 +116,8 @@ class Player {
       case 40: //DOWN ARROW
         dir.y++;
         break;
+      default:
+        return;
     }
     //Calculate target position
     let newX = prevX + dir.x;

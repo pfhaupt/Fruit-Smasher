@@ -10,7 +10,7 @@ class Enemy {
     let r = 2 + Math.random() * 4;
     r = ~~r;
     this.init = {
-      moveCount: ~~r,
+      moveCount: r,
       moveChances: 3
     };
     this.moveCount = this.init.moveCount;
@@ -67,6 +67,7 @@ class Enemy {
 
     let targetIDs = map.getIDs(prevX + dirX, prevY + dirY);
     if (targetIDs.eID !== 0 || targetIDs.tID === 2) {
+      //Entity already at target pos, or water at target pos
       this.moveChances--;
       if (this.moveChances >= 0) {
         this.move();
@@ -84,7 +85,6 @@ class Enemy {
     minimap.updatePixels(this.position.x, this.position.y);
 
     if (player.inViewRange(this)) {
-
     }
   }
 

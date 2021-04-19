@@ -41,6 +41,8 @@ function generateDefaultMap() {
 }
 
 function loadActualMap(sav) {
+  enemies = [];
+
   let newMap = new Map(0, 0);
   let mapFile = sav;
   dim = mapFile.width;

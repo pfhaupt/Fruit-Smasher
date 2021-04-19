@@ -50,7 +50,7 @@ function generateItems() {
       else if (index >= 6 && index < 8) id = 6;
       else if (index >= 8) id = 7;
       let name = itemTypeName[id];
-      let imgSrc = "/images/items/Chestplate0.png";
+      let imgSrc = "images/items/Chestplate0.png";
       console.log(imgSrc);
       itemList[i + z * itemsPerZone] = new Item(i + z * itemsPerZone, getRandomName(i), imgSrc, itemType[itemTypeName[id % itemTypeName.length]], 1000, bonus, boost, effect);
     }
