@@ -1,6 +1,6 @@
 class MainMenu extends MenuTemplate {
   constructor(x, y, w, h, sub) {
-    super("Main", x, y, w, h, color(255, 163, 0));
+    super("Main", x, y, w, h);
     this.hidden = false;
     let len = sub.length;
     let offs = 1 / len;

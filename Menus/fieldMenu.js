@@ -1,6 +1,6 @@
 class FieldMenu extends MenuTemplate {
-  constructor(name, x, y, w, h, col) {
-    super(name, x, y, w, h, col);
+  constructor(name, x, y, w, h) {
+    super(name, x, y, w, h);
 
     /*
     //Unten Navigator
@@ -16,8 +16,8 @@ class FieldMenu extends MenuTemplate {
 
     */
     let mapWidth = 0.6;
-    this.children.push(new MapOverview("Maps", 0, 0, mapWidth, 1, col));
-    this.children.push(new ActionOverview("Actions", mapWidth, 0, 1 - mapWidth, 1, col));
+    this.children.push(new MapOverview("Maps", 0, 0, mapWidth, 1));
+    this.children.push(new ActionOverview("Actions", mapWidth, 0, 1 - mapWidth, 1));
   }
 
   displayEveryFrame() {
@@ -30,8 +30,8 @@ class FieldMenu extends MenuTemplate {
 }
 
 class StatOverview extends MenuTemplate {
-  constructor(n, x, y, w, h, col) {
-    super(n, x, y, w, h, col);
+  constructor(n, x, y, w, h) {
+    super(n, x, y, w, h);
     //Anzeige Spieler
     this.children.push(new Text(["Current Zone: ", "currentZone"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Zone Size: ", "dim", " by ", "dim"], 0, 0, 1, 0, 'center', false));
@@ -54,12 +54,12 @@ class StatOverview extends MenuTemplate {
 }
 
 class MapOverview extends MenuTemplate {
-  constructor(n, x, y, w, h, col) {
-    super(n, x, y, w, h, col);
+  constructor(n, x, y, w, h) {
+    super(n, x, y, w, h);
 
     this.children.push(new Map(0, 0, 0, 0, 2 / 3, 1));
     this.children.push(new Minimap(2 / 3, 0, 1 / 3, 0.5));
-    this.children.push(new StatOverview("Stats", 2 / 3, 0.5, 1 / 3, 0.5, col));
+    this.children.push(new StatOverview("Stats", 2 / 3, 0.5, 1 / 3, 0.5));
     this.aspectRatio = 1.5;
   }
 }

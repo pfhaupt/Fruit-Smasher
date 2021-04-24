@@ -15,7 +15,16 @@ function disableDraw() {
 
 function preload() {
   loadImages();
+  //loadMusic();
 }
+/*
+TODO: Klasse für Musik hinzufügen
+TODO: Mute-Button in Optionen :P, oder Checkbox, je nach Aufwand
+let m;
+function loadMusic() {
+  m = loadSound("music/Tech2.wav");
+}
+*/
 
 function setup() {
   noiseSeed(70273982107398);

@@ -1,5 +1,5 @@
 class MenuTemplate {
-  constructor(name, x, y, w, h, col) {
+  constructor(name, x, y, w, h) {
     this.name = name;
     this.xRelToParent = x;
     this.yRelToParent = y;
@@ -9,7 +9,6 @@ class MenuTemplate {
     this.yAbsToScreen = 0;
     this.wAbsToScreen = 0;
     this.hAbsToScreen = 0;
-    this.col = col;
     this.children = []; //Alle Elemente eines Fensters hier rein, wenn möglich
     this.hidden = true;
     this.aspectRatio = 0;

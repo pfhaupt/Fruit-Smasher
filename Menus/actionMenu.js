@@ -36,14 +36,14 @@ class ActionOverview extends MenuTemplate {
 }
 
 class Action extends MenuTemplate {
-  constructor(n, x, y, w, h, col) {
-    super(n, x, y, w, h, col);
+  constructor(n, x, y, w, h) {
+    super(n, x, y, w, h);
   }
 }
 let currentlyFightingEnemy;
 class CombatAction extends Action {
-  constructor(n, x, y, w, h, col) {
-    super(n, x, y, w, h, col);
+  constructor(n, x, y, w, h) {
+    super(n, x, y, w, h);
     //Title
     this.children.push(new Text(["Currently Fighting ", "currentlyFightingEnemy.typeID"], 0, 0, 1, 0.1, 'center', false));
     //Player Stuff
@@ -80,7 +80,7 @@ class CombatAction extends Action {
 }
 
 class ChestAction extends Action {
-  constructor(n, x, y, w, h, col) {
-    super(n, x, y, w, h, col);
+  constructor(n, x, y, w, h) {
+    super(n, x, y, w, h);
   }
 }

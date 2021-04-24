@@ -1,6 +1,6 @@
 class Inventory extends MenuTemplate {
-  constructor(name, x, y, w, h, col) {
-    super(name, x, y, w, h, col);
+  constructor(name, x, y, w, h) {
+    super(name, x, y, w, h);
 
     this.itemsPerLine = 10;
     this.itemsPerPage = this.itemsPerLine ** 2;

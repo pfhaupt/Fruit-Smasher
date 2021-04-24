@@ -1,6 +1,6 @@
 class SkillMenu extends MenuTemplate {
-  constructor(name, x, y, w, h, col) {
-    super(name, x, y, w, h, col);
+  constructor(name, x, y, w, h) {
+    super(name, x, y, w, h);
 
     this.children.push(new Text(["Current Skill Points: ", "player.skillPoints"], 0, 0, 1, 0.1, 'center', false));
 
@@ -10,14 +10,14 @@ class SkillMenu extends MenuTemplate {
     for (let i = 0; i < blockCount; i++) {
       let att = Object.keys(player.attributes)[i];
       let name = player.attributes[att].name;
-      this.children.push(new SkillBlock(name, att, 0, this.children[0].hRelToParent + i * h1, 1, h1, col));
+      this.children.push(new SkillBlock(name, att, 0, this.children[0].hRelToParent + i * h1, 1, h1));
     }
   }
 }
 
 class SkillBlock extends MenuTemplate {
-  constructor(name, att, x, y, w, h, col) {
-    super(name, x, y, w, h, col);
+  constructor(name, att, x, y, w, h) {
+    super(name, x, y, w, h);
     this.attribute = att;
 
     this.children.push(new Button("-MAX", 0.01, 0.1, 0.055, 0.8, () => {
