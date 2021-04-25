@@ -178,7 +178,6 @@ class ActionBlock extends MenuTemplate {
 class VictoryAction extends Action {
   constructor(n, x, y, w, h) {
     super(n, x, y, w, h);
-    thi
   }
 }
 
