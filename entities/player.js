@@ -1,104 +1,18 @@
-class Player {
+class Player extends Deity {
   constructor(h = 100, d = 2, r = 0.25, s = 2) {
-    this.position = {
-      x: 5,
-      y: 5,
-    };
-
-    this.level = 0;
-    this.experience = 0;
-    this.expForLevel1 = 100;
-    this.expForLvlUp = this.expForLevel1;
-    this.expIncrease = 1.05;
-    this.skillPoints = 0;
-    this.skillPointsPerLevel = 5;
-
-    this.attributes = {
-      damage: {
-        name: "Damage",
-        fromLevel: d,
-        skillLevel: 0,
-        boostPerSkillLevel: 0.1,
-        fromSkill: 0,
-        total: 0,
-      },
-      maxEP: {
-        name: "Energy",
-        fromLevel: h,
-        skillLevel: 0,
-        boostPerSkillLevel: 5,
-        fromSkill: 0,
-        total: 0,
-      },
-      maxHP: {
-        name: "Hitpoint",
-        fromLevel: h,
-        skillLevel: 0,
-        boostPerSkillLevel: 5,
-        fromSkill: 0,
-        total: 0,
-      },
-      regen: {
-        name: "Regen",
-        fromLevel: r,
-        skillLevel: 0,
-        boostPerSkillLevel: 0.02,
-        fromSkill: 0,
-        total: 0,
-      },
-      atkSpeed: {
-        name: "Speed",
-        fromLevel: s,
-        skillLevel: 0,
-        boostPerSkillLevel: 0.01,
-        fromSkill: 0,
-        total: 0,
-      },
-      expBoost: {
-        name: "Experience",
-        fromLevel: 1,
-        skillLevel: 0,
-        boostPerSkillLevel: 0.002,
-        fromSkill: 0,
-        total: 0,
-      },
-      sight: {
-        name: "Sight",
-        fromLevel: 15,
-        skillLevel: 0,
-        boostPerSkillLevel: 0.1,
-        fromSkill: 0,
-        total: 0,
-      },
-    };
+    super(h, d, r, s);
 
     this.chestCount = [];
     for (var i = 0; i < 4 * maxZone; i++) this.chestCount[i] = 0;
-
-    this.hp = h;
-    this.ep = this.attributes.maxEP.total;
-    this.calculateTotalAttributes();
-  }
-
-  checkDeath() {
-    return this.hp <= 0;
-  }
-
-  inViewRange(enemy) {
-    let viewRange = this.attributes.sight.total;
-    let xPos = this.position.x - floor(viewRange / 2);
-    let yPos = this.position.y - floor(viewRange / 2);
-    return (enemy.position.x >= xPos &&
-      enemy.position.x < xPos + viewRange &&
-      enemy.position.y >= yPos &&
-      enemy.position.y < yPos + viewRange);
   }
 
   checkMovement(keyCode) {
+    if (this.attributes.moveCount.current === 0) return;
     let map = mainWindow.currentSubMenu.children[0].children[0];
     let minimap = mainWindow.currentSubMenu.children[0].children[1];
-    let prevX = player.position.x;
-    let prevY = player.position.y;
+    let action = mainWindow.currentSubMenu.children[1];
+    let prevX = this.position.x;
+    let prevY = this.position.y;
     let dir = {
       x: 0,
       y: 0
@@ -130,8 +44,26 @@ class Player {
       return;
     } else if (targetIDs.eID !== 0) {
       //Interact with Entity on Target position
+      if (targetIDs.eID >= 1 && targetIDs.eID <= 3) {
+        //Target contains an enemy
+        //Find out which enemy
+        let id = (newX * 1000 + newY);
+        let targetEnemy = enemies.get(id);
+        console.log(targetEnemy);
+        if (targetEnemy) {
+          action.subActions[ActionScreen.Combat].setEnemy(targetEnemy);
+          action.setAction(ActionScreen.Combat);
+        }
+      } else if (targetIDs.eID === 4) {
+        //Target is a key
+      } else {
+        console.log(targetIDs.eID);
+      }
       return;
     }
+    this.attributes.moveCount.current--;
+    action.setAction(ActionScreen.Idle);
+
     //Set Player on Map
     map.tiles[prevX][prevY].setEntity(0);
     map.tiles[newX][newY].setEntity(7);
@@ -144,109 +76,15 @@ class Player {
     //Update Cache
     map.updateImages(dir.x, dir.y);
     //Update real Player pos
-    player.position.x = newX;
-    player.position.y = newY;
+    this.position.x = newX;
+    this.position.y = newY;
     mainWindow.currentSubMenu.displayOnce();
   }
 
-  update(other, dt) {
-    this.attack(other, dt);
-    this.regenerate(dt);
-  }
-
-  attack(other, dt) {
-    other.hp -= this.attributes.damage.total * this.attributes.atkSpeed.total * dt;
-  }
-
-  regenerate(dt) {
-    this.hp = constrain(this.hp + this.attributes.regen.total * dt, 0, this.attributes.maxHP.total);
-  }
-
-  calculateSkillBoost(att) {
-    this.attributes[att].fromSkill = this.attributes[att].skillLevel * this.attributes[att].boostPerSkillLevel;
-  }
-
-  calculateTotalAttributes() {
-    for (var a in this.attributes) {
-      this.attributes[a].total = this.attributes[a].fromLevel + this.attributes[a].fromSkill;
-      //console.log(a, this.attributes[a].total);
-    }
-  }
-
-  addExperience(enemy) {
-    this.experience += enemy.experience * this.attributes.expBoost.total;
-    if (this.experience >= this.expForLvlUp) this.levelUp();
-  }
-
-  levelUp() {
-    /*
-    let b = this.expForLevel1;
-    let i = this.expIncrease;
-    let e = this.experience;
-    let c = this.level;
-    //New Level r after calculating e experience at level c (linear growth)
-    let r = floor((sqrt(4 * b * b + 4 * b * (2 * c - 1) * i + i * (pow(1 - 2 * c, 2) * i + 8 * e)) - 2 * b + i) / (2 * i));
-
-    //Getting XP cost for a given Level l
-    //totalXP=BaseXP*l+IncreasePerLevel/2((l-1)^2+(l-1))
-    let xpCostCurrent = b * c + i / 2 * ((c - 1) * (c - 1) + (c - 1));
-    let xpCostResult = b * r + i / 2 * ((r - 1) * (r - 1) + (r - 1));
-    //Experience cost to get from current level to new level
-    let totalXP = xpCostResult - xpCostCurrent;
-    this.experience -= totalXP;
-    this.level = r;
-    this.expForLvlUp = this.expForLevel1 + this.expIncrease * this.level;
-    */
-    let c = this.level;
-    let r = this.level + 1;
-    if (this.experience === this.expForLvlUp) {
-      this.experience -= this.expForLvlUp;
-      this.level = r;
-    } else {
-      let e = this.experience;
-      let i = this.expIncrease;
-      let b = this.expForLevel1;
-      //New Level r after calculating e experience at level c (exponential growth)
-
-      let xpForCurrentLevel = b * (1 - pow(i, c)) / (1 - i);
-      r = floor(log(1 + (e + xpForCurrentLevel) * (i - 1) / b) / log(i) + 0.001);
-      let xpForResultLevel = b * (1 - pow(i, r)) / (1 - i);
-      let totalXP = xpForResultLevel - xpForCurrentLevel;
-      this.experience -= totalXP;
-      this.level = r;
-    }
-    this.expForLvlUp = this.expForLevel1 * pow(this.expIncrease, this.level);
-    this.skillPoints += this.skillPointsPerLevel * (r - c);
-    this.attributes.damage.fromLevel = 2 + 1 * this.level;
-    this.attributes.maxHP.fromLevel = 100 + 10 * this.level;
-    this.attributes.regen.fromLevel = 0.25 * (this.level + 1);
-    this.attributes.atkSpeed.fromLevel = Math.ceil(this.level / 10);
-    this.attributes.maxHP.fromLevel = 100 + 10 * this.level;
-
-    this.calculateTotalAttributes();
-  }
-
-  respawn() {
-    this.hp = this.attributes.maxHP.total;
-    this.experience = Math.floor(this.experience * 0.9);
+  die() {
+    let action = mainWindow.subMenus[0].children[1];
     console.log("You died");
-  }
-
-  addAttribute(att, count) {
-    let possibleLevels = Math.min(count, this.skillPoints);
-
-    this.attributes[att].skillLevel += possibleLevels;
-    this.skillPoints -= possibleLevels;
-    this.calculateSkillBoost(att);
-    this.calculateTotalAttributes();
-  }
-
-  removeAttribute(att, count) {
-    let possibleLevels = Math.min(count, this.attributes[att].skillLevel);
-    this.attributes[att].skillLevel -= possibleLevels;
-    this.skillPoints += possibleLevels;
-    this.calculateSkillBoost(att);
-    this.calculateTotalAttributes();
+    action.setAction(ActionScreen.Defeat);
   }
 
   checkChestDrop(enemy) {

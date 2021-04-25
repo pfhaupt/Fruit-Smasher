@@ -1,27 +1,59 @@
-let enemies = [];
+let enemies = new Map();
 
-class Enemy {
+let enemyNames = [
+  "The Goblin King",
+  "Agamemnon",
+  "The Truly Drunken Centaur",
+  "Lonely Hector",
+  "Otherworldly Idiot",
+  "Spinning Butterfly",
+  "Psychofrog",
+  "Grilled Turkey",
+  "Modern Venus Fly Trap",
+  "Graduated Bug"
+];
+
+let entityCount = {
+  enemy: {
+    normal: {
+      current: 0,
+      total: 0
+    },
+    boss: {
+      current: 0,
+      total: 0
+    },
+    spawner: {
+      current: 0,
+      total: 0
+    }
+  },
+  object: {
+    key: {
+      current: 0,
+      total: 0
+    }
+  }
+}
+
+class Enemy extends Deity {
   constructor(x, y, id) {
+    super(100, 10, 3, 2);
     this.position = {
       x: x,
       y: y,
     };
     this.typeID = id;
+    this.name = enemyNames[~~(Math.random() * enemyNames.length)];
     let r = 2 + Math.random() * 4;
     r = ~~r;
     this.init = {
-      moveCount: r,
       moveChances: 3
-    };
-    this.moveCount = this.init.moveCount;
-    this.maxHP = 100;
-    this.hp = 100;
-    this.maxEP = 100;
-    this.ep = 100;
+    }
   }
 
   resetMoveCount() {
-    this.moveCount = this.init.moveCount;
+    this.attributes.moveCount.current = this.attributes.moveCount.total;
     this.moveChances = this.init.moveChances;
   }
 
@@ -29,10 +61,10 @@ class Enemy {
     this.resetMoveCount();
     return new Promise((resolve, reject) => {
       let interval = setInterval(() => {
-        this.moveCount--;
+        this.attributes.moveCount.current--;
         this.moveChances = this.init.moveChances;
         this.move();
-        if (this.moveCount <= 0) {
+        if (this.attributes.moveCount.current <= 0) {
           // resolve promise
           clearInterval(interval);
           resolve();
@@ -84,24 +116,36 @@ class Enemy {
     minimap.updatePixels(prevX, prevY);
     minimap.updatePixels(this.position.x, this.position.y);
 
-    if (player.inViewRange(this)) {
-    }
+    if (player.inViewRange(this)) {}
   }
 
-  checkDeath() {
-    return this.hp <= 0;
+  performRandomAction(other) {
+    let r = Math.random() * 100;
+    if (r < 70) this.attack(other);
+    else if (r < 88) this.heal();
+    else if (r < 95) this.wait();
+    else this.flee(other);
   }
 
-  update(other, dt) {
-    this.attack(other, dt);
-    this.regenerate(dt);
-  }
-
-  attack(other, dt) {
-    other.hp -= this.dmg * this.atkSpeed * dt;
-  }
-
-  regenerate(dt) {
-    this.hp = constrain(this.hp + this.regen * dt, 0, this.maxHP);
+  die() {
+    //Do stuff on the tile map, enemy list, player stats....
+    console.log("THIS ENEMY IS NOW OFFICIALLY DEAD");
+    let map = mainWindow.subMenus[0].children[0].children[0];
+    let minimap = mainWindow.subMenus[0].children[0].children[1];
+    let action = mainWindow.subMenus[0].children[1];
+    let x = this.position.x,
+      y = this.position.y;
+    //Remove Enemy From World Map
+    map.updateTileMap(x, y, 0);
+    //Remove Enemy From Visible Tiles
+    map.updateCacheMap(x, y, 0);
+    //Remove Enemy From Minimap
+    minimap.updatePixels(x, y);
+    //Remove Enemy From Enemy List
+    enemies.delete((x * 1000 + y));
+    //We completed the action, show default
+    action.setAction(ActionScreen.Victory);
+    //Refresh everything
+    mainWindow.displayOnce();
   }
 }

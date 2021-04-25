@@ -1,6 +1,6 @@
 let realDefaultFontSize = 32;
 let defaultFontSize = realDefaultFontSize;
-let debug = true;
+let debug = false;
 let equipSlotCount = 17;
 let digits = 2;
 
@@ -113,14 +113,43 @@ class Text extends BaseUIBlock {
     this.content.style('font-family', 'cursive');
     this.content.style('line-height', '0px');
     this.content.style('text-align', this.align);
+    this.content.style('font-size', defaultFontSize);
     this.content.style('text-shadow', '0px 0px 10px rgba(255, 255, 255, 1)');
+    this.setTextLength();
+  }
+
+  setText(arr) {
+    this.message = [...arr];
+    this.setTextLength();
+    this.setTextSize();
+    this.displayOnce();
+  }
+
+  setTextLength() {
+    let resultString = "";
+    for (let i = 0; i < this.message.length; i++) {
+      let msg = this.message[i];
+      try {
+        let valText = roundToSpecificDecimalLength(eval(msg), digits);
+        if (this.format) valText = toFixedDecimalLength(valText, digits);
+        resultString += valText;
+      } catch (e) {
+        resultString += msg;
+      }
+    }
+    this.textLengthInPixels = getStringSizeInPixels(resultString, "-cursive");
+  }
+
+  setTextSize() {
+    this.txtSize = floor(this.wAbsToScreen / this.textLengthInPixels);
+    this.txtSize = Math.min(this.txtSize, this.hAbsToScreen * 0.8);
+    this.txtSize = Math.min(this.txtSize, defaultFontSize);
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
-    this.txtSize = floor(this.wAbsToScreen / this.textLengthInPixels);
-    this.txtSize = Math.min(this.txtSize, this.hAbsToScreen * 0.8);
-    this.txtSize = Math.min(this.txtSize, defaultFontSize);
+    this.setTextLength();
+    this.setTextSize();
     this.content.style('font-size', this.txtSize + 'px');
     this.content.style('margin', (this.hAbsToScreen / 2) + 'px 0px');
     //this.content.center();
@@ -139,7 +168,6 @@ class Text extends BaseUIBlock {
         resultString += msg;
       }
     }
-    this.textLengthInPixels = getStringSizeInPixels(resultString, "-cursive");
     this.content.html(resultString);
   }
 }
@@ -354,6 +382,7 @@ function swapItems(id1, id2) {
 }
 
 function roundToSpecificDecimalLength(val, digits) {
+  if (typeof val !== "number") return val;
   if (isNaN(val)) return;
   if (val === 0) return 0;
   var powOf10 = pow(10, digits);

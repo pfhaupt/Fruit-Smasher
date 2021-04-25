@@ -32,7 +32,7 @@ function generateDefaultMap() {
   let yrel = m.yRelToParent;
   let hrel = m.hRelToParent;
   let wrel = m.wRelToParent;
-  mainWindow.subMenus[0].children[0] = new Map(10, 0, 0, 0, 1, 1);
+  mainWindow.subMenus[0].children[0] = new WorldMap(10, 0, 0, 0, 1, 1);
   mainWindow.subMenus[0].children[0].xRelToParent = xrel;
   mainWindow.subMenus[0].children[0].yRelToParent = yrel;
   mainWindow.subMenus[0].children[0].hRelToParent = hrel;
@@ -41,9 +41,31 @@ function generateDefaultMap() {
 }
 
 function loadActualMap(sav) {
-  enemies = [];
+  enemies = new Map();
+  entityCount = {
+    enemy: {
+      normal: {
+        current: 0,
+        total: 0
+      },
+      boss: {
+        current: 0,
+        total: 0
+      },
+      spawner: {
+        current: 0,
+        total: 0
+      }
+    },
+    object: {
+      key: {
+        current: 0,
+        total: 0
+      }
+    }
+  }
 
-  let newMap = new Map(0, 0);
+  let newMap = new WorldMap(0, 0);
   let mapFile = sav;
   dim = mapFile.width;
   tileSize = mapSize / dim;
@@ -73,14 +95,25 @@ function loadActualMap(sav) {
       if (ids.entityID !== 0) newMap.tiles[x][y].setEntity(ids.entityID);
       newMap.tiles[x][y].setTex(newMap.getNoise2D(x, y));
       switch (ids.entityID) {
-        case 1:
-          enemies.push(new Enemy(x, y, ids.entityID));
+        case 1: //Scorpion
+          enemies.set((x * 1000 + y), new Enemy(x, y, ids.entityID, enemies.length));
+          entityCount.enemy.normal.total++;
           break;
-        case 2:
-          enemies.push(new Enemy(x, y, ids.entityID));
+        case 2: //Spider
+          enemies.set((x * 1000 + y), new Enemy(x, y, ids.entityID, enemies.length));
+          entityCount.enemy.normal.total++;
           break;
-        case 3:
-          enemies.push(new Enemy(x, y, ids.entityID));
+        case 3: //Boss
+          enemies.set((x * 1000 + y), new Enemy(x, y, ids.entityID, enemies.length));
+          entityCount.enemy.boss.total++;
+          break;
+        case 4: //Key
+          entityCount.object.key.total++;
+          break;
+        case 5: //Trap
+          break;
+        case 6: //Spawner/Portal
+          entityCount.enemy.spawner.total++;
           break;
         case 7:
           player.position.x = x;
@@ -140,7 +173,12 @@ function loadActualMap(sav) {
   mainWindow.subMenus[0].children[0].children[0].updateImages(0, 0);
   mainWindow.resize();
   mainWindow.displayOnce();
-  currentlyFightingEnemy = enemies[0];
+  entityCount.enemy.boss.current = entityCount.enemy.boss.total;
+  entityCount.enemy.normal.current = entityCount.enemy.normal.total;
+  entityCount.enemy.spawner.current = entityCount.enemy.spawner.total;
+  entityCount.object.key.current = entityCount.object.key.total;
+  player.resetMoveCount();
+  mainWindow.subMenus[0].children[1].setAction(0);
 }
 
 function loadMap(zone) {
@@ -151,7 +189,6 @@ function loadMap(zone) {
 }
 
 function getAverageColor(img, i, j, t) {
-  let s = performance.now();
   img.loadPixels();
 
   let sr = 0,
@@ -179,8 +216,6 @@ function getAverageColor(img, i, j, t) {
   colorList[t][i][j][0] = sr;
   colorList[t][i][j][1] = sg;
   colorList[t][i][j][2] = sb;
-  console.log("Getting color average for image " + i + "," + j + " took " + (performance.now() - s) + "ms");
-
 }
 
 function loadImages() {
@@ -323,7 +358,7 @@ class Minimap extends BaseUIBlock {
   }
 }
 
-class Map extends BaseUIBlock {
+class WorldMap extends BaseUIBlock {
   constructor(dim, zone, x, y, w, h) {
     super(x, y, w, h);
     this.aspectRatio = 1;
@@ -432,9 +467,8 @@ class Map extends BaseUIBlock {
       y1 = y - yPos;
     if (x1 >= 0 && y1 >= 0 && x1 < viewRange && y1 < viewRange) { //position cached
       let t = this.cachedTiles[x1][y1];
-      if (id === 0) {
-        if (t.entity) t.entity.content.elt.remove();
-      } else {
+      if (t.entity) t.entity.content.elt.remove();
+      if (id !== 0) {
         t.entity = new CustomImage(entityList[id], x1 * w1, y1 * w1, w1, w1);
         t.entity.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
         t.entity.show();

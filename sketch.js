@@ -20,6 +20,7 @@ function preload() {
 /*
 TODO: Klasse für Musik hinzufügen
 TODO: Mute-Button in Optionen :P, oder Checkbox, je nach Aufwand
+
 let m;
 function loadMusic() {
   m = loadSound("music/Tech2.wav");

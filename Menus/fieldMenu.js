@@ -19,14 +19,6 @@ class FieldMenu extends MenuTemplate {
     this.children.push(new MapOverview("Maps", 0, 0, mapWidth, 1));
     this.children.push(new ActionOverview("Actions", mapWidth, 0, 1 - mapWidth, 1));
   }
-
-  displayEveryFrame() {
-    super.displayEveryFrame();
-  }
-
-  displayOnce() {
-    super.displayOnce();
-  }
 }
 
 class StatOverview extends MenuTemplate {
@@ -37,11 +29,13 @@ class StatOverview extends MenuTemplate {
     this.children.push(new Text(["Zone Size: ", "dim", " by ", "dim"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Enemy Level: ", "minLevel", "-", "maxLevel"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Player Level: ", "player.level"], 0, 0, 1, 0, 'center', false));
-    this.children.push(new Text(["Player HP: ", "player.hp"], 0, 0, 1, 0));
-    this.children.push(new Text(["Keys Left: ", "player.hp"], 0, 0, 1, 0, 'center', false));
-    this.children.push(new Text(["Boss Enemies Left: ", "player.hp"], 0, 0, 1, 0, 'center', false));
-    this.children.push(new Text(["Normal Enemies Left: ", "player.hp"], 0, 0, 1, 0, 'center', false));
-    this.children.push(new Text(["Chests Left: ", "player.hp"], 0, 0, 1, 0, 'center', false));
+    this.children.push(new Text(["Player HP: ", "player.attributes.hitpoints.current"], 0, 0, 1, 0));
+    this.children.push(new Text(["Player Moves Left: ", "player.attributes.moveCount.current", "/", "player.attributes.moveCount.total"], 0, 0, 1, 0, 'center', false));
+    this.children.push(new Text(["Keys Left: ", "entityCount.object.key.current", "/", "entityCount.object.key.total"], 0, 0, 1, 0, 'center', false));
+    this.children.push(new Text(["Boss Enemies Left: ", "entityCount.enemy.boss.current"], 0, 0, 1, 0, 'center', false));
+    this.children.push(new Text(["Normal Enemies Left: ", "entityCount.enemy.normal.current"], 0, 0, 1, 0, 'center', false));
+    this.children.push(new Text(["Spawners In This World: ", "entityCount.enemy.spawner.current"], 0, 0, 1, 0, 'center', false));
+    this.children.push(new Text(["Chests Left: ", "a lot"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Placeholder: ", "42069"], 0, 0, 1, 0, 'center', false));
     //this.children.push(new Text(["Player Dmg: ", "player.attributes.damage.total"], 0.05, 0.53, 0.3, 0.03));
 
@@ -57,7 +51,7 @@ class MapOverview extends MenuTemplate {
   constructor(n, x, y, w, h) {
     super(n, x, y, w, h);
 
-    this.children.push(new Map(0, 0, 0, 0, 2 / 3, 1));
+    this.children.push(new WorldMap(0, 0, 0, 0, 2 / 3, 1));
     this.children.push(new Minimap(2 / 3, 0, 1 / 3, 0.5));
     this.children.push(new StatOverview("Stats", 2 / 3, 0.5, 1 / 3, 0.5));
     this.aspectRatio = 1.5;
