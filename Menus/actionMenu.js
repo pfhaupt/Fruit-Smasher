@@ -105,38 +105,54 @@ class CombatAction extends Action {
 class ActionBlockGroup extends MenuTemplate {
   constructor(n, x, y, w, h) {
     super(n, x, y, w, h);
-    this.children.push(new ActionBlock("NormalAction", 0, 0, 1, 0,
-      "Attack (1 EP)", () => {
-        player.attack(currentlyFightingEnemy);
-        mainWindow.currentSubMenu.children[1].displayOnce();
-        enemy.performRandomAction(player);
-        mainWindow.currentSubMenu.children[1].displayOnce();
-      },
-      ["Attack the enemy for ", "player.attributes.damage.total * player.damageRange.min", " to ", "player.attributes.damage.total * player.damageRange.max", " damage points"],
-      []
-    ));
-    this.children.push(new ActionBlock("QuickAction", 0, 0, 1, 0,
-      "Quick Tap (20 EP)", () => {
-        let r = ~~(Math.random() * 3) + 1;
-        console.log(r);
-        for (let i = 0; i < r; i++) player.attack(currentlyFightingEnemy);
-        mainWindow.currentSubMenu.children[1].displayOnce();
-        enemy.performRandomAction(player);
-        mainWindow.currentSubMenu.children[1].displayOnce();
-      },
-      ["Attack the enemy up to 3 times at once!"],
-      []
-    ));
-    this.children.push(new ActionBlock("HealAction", 0, 0, 1, 0,
-      "Heal (2 EP)", () => {
-        player.heal();
-        mainWindow.currentSubMenu.children[1].displayOnce();
-        enemy.performRandomAction(player);
-        mainWindow.currentSubMenu.children[1].displayOnce();
-      },
-      ["Heal yourself for ", "player.attributes.damage.total * player.healRange.min", " to ", "player.attributes.damage.total * player.healRange.max", " hitpoints"],
-      [],
-    ));
+    this.children.push(new UICollection("NormalAction", 0, 0, 1, 0,
+      [
+        [Button, "Attack (1 EP)", () => {
+          player.attack(currentlyFightingEnemy);
+          mainWindow.currentSubMenu.children[1].displayOnce();
+          enemy.performRandomAction(player);
+          mainWindow.currentSubMenu.children[1].displayOnce();
+        }],
+        [Text, ["Attack the enemy for ", "player.attributes.damage.total * player.damageRange.min", " to ", "player.attributes.damage.total * player.damageRange.max", " damage points"]],
+        [Text, ["This is another text!"]]
+      ],
+      [
+        [1, 3],
+        [1, 2]
+      ], 0.025));
+    this.children.push(new UICollection("QuickAction", 0, 0, 1, 0,
+      [
+        [Button, "Quick Tap (20 EP)", () => {
+          let r = ~~(Math.random() * 3) + 1;
+          console.log(r);
+          for (let i = 0; i < r; i++) player.attack(currentlyFightingEnemy);
+          mainWindow.currentSubMenu.children[1].displayOnce();
+          enemy.performRandomAction(player);
+          mainWindow.currentSubMenu.children[1].displayOnce();
+        }],
+        [Text, ["Attack the enemy up to 3 times at once!"]],
+        [Text, ["This is another text!"]]
+      ],
+      [
+        [1, 3],
+        [1, 2]
+      ], 0.025));
+    this.children.push(new UICollection("HealAction", 0, 0, 1, 0,
+      [
+        [Button, "Heal (2 EP)", () => {
+          player.heal();
+          mainWindow.currentSubMenu.children[1].displayOnce();
+          enemy.performRandomAction(player);
+          mainWindow.currentSubMenu.children[1].displayOnce();
+        }],
+        [Text, ["Heal yourself for ", "player.attributes.damage.total * player.healRange.min", " to ", "player.attributes.damage.total * player.healRange.max", " hitpoints"]],
+        [Text, ["This is another text!"]]
+      ],
+      [
+        [1, 3],
+        [1, 2]
+      ], 0.025));
+      /*
     this.children.push(new ActionBlock("WaitAction", 0, 0, 1, 0,
       "Wait (5 EP)", () => {
         player.wait();
@@ -157,21 +173,12 @@ class ActionBlockGroup extends MenuTemplate {
       ["Attempt to flee the battle. Chance to flee: ", "getFleeChance(player, currentlyFightingEnemy) * 100", "%"],
       []
     ));
+    */
     let h1 = 1 / this.children.length;
     for (let i = 0; i < this.children.length; i++) {
       this.children[i].yRelToParent = h1 * i;
       this.children[i].hRelToParent = h1;
     }
-  }
-}
-
-class ActionBlock extends MenuTemplate {
-  constructor(n, x, y, w, h, btnName, btnFunction, txtOne, txtTwo) {
-    super(n, x, y, w, h);
-    this.children.push(new Button(btnName, 0.01, 0.15, 0.29, 0.7, btnFunction));
-    this.children.push(new Text(txtOne, 0.31, 0.05, 0.68, 0.45));
-    this.children.push(new Text(txtTwo, 0.31, 0.5, 0.68, 0.45));
-
   }
 }
 

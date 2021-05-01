@@ -2,7 +2,7 @@ let realDefaultFontSize = 32;
 let defaultFontSize = realDefaultFontSize;
 let debug = false;
 let equipSlotCount = 17;
-let digits = 2;
+let digits = 2; 
 
 class BaseUIBlock {
   constructor(x, y, w, h) {
