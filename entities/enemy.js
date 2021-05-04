@@ -1,4 +1,4 @@
-let enemies = new Map();
+let enemies = [];
 
 let enemyNames = [
   "The Goblin King",
@@ -49,7 +49,8 @@ class Enemy extends Deity {
     r = ~~r;
     this.init = {
       moveChances: 3
-    }
+    };
+    this.placeInMap = enemies.length;
   }
 
   resetMoveCount() {
@@ -69,7 +70,7 @@ class Enemy extends Deity {
           clearInterval(interval);
           resolve();
         }
-      }, 100);
+      }, 250);
     });
   }
 
@@ -142,7 +143,8 @@ class Enemy extends Deity {
     //Remove Enemy From Minimap
     minimap.updatePixels(x, y);
     //Remove Enemy From Enemy List
-    enemies.delete((x * 1000 + y));
+    enemies.splice(this.placeInMap, 1);
+    for (let i = this.placeInMap; i < enemies.length; i++) enemies[i].placeInMap--;
     //We completed the action, show default
     action.setAction(ActionScreen.Victory);
     //Refresh everything

@@ -13,8 +13,8 @@ class FieldMenu extends MenuTemplate {
     this.children.push(new Text(["Enemy Lvl: ", "enemy.level"], 0.65, 0.47, 0.3, 0.03, 'center', false));
     this.children.push(new Text(["Enemy HP: ", "enemy.hp"], 0.65, 0.5, 0.3, 0.03));
     this.children.push(new Text(["Enemy Dmg: ", "enemy.dmg"], 0.65, 0.53, 0.3, 0.03));
-
     */
+    
     let mapWidth = 0.6;
     this.children.push(new MapOverview("Maps", 0, 0, mapWidth, 1));
     this.children.push(new ActionOverview("Actions", mapWidth, 0, 1 - mapWidth, 1));

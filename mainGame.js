@@ -29,10 +29,10 @@ enemiesMoved = 0;
 
 function enemyMove() {
   enemiesMoved = 0;
-  for (let e of enemies) {
+  for (let e of enemies.values()) {
     e.initMove().then(() => {
       enemiesMoved++;
-      if (enemiesMoved === enemies.length) {
+      if (enemiesMoved === enemies.size) {
         // Here we're done
         //mainWindow.subMenus[0].children[0].children[0].forceUpdate();
         player.resetMoveCount();
@@ -84,7 +84,6 @@ function getFleeChance(from, to) {
   let x = constrain(eta, minHeur, maxHeur);
   let res = mul * cos(str * (x - minHeur)) + off;
   return res;
-
 }
 
 function update(dt) {

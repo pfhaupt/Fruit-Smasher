@@ -1,3 +1,7 @@
+function getUniqueID(x, y) {
+  return x * 1000 + y;
+}
+
 class Deity {
   constructor(h, d, r, s) {
     this.position = {

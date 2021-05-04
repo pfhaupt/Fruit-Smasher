@@ -84,7 +84,6 @@ class CombatAction extends Action {
     this.children.push(new ProgressBar("currentlyFightingEnemy.attributes.enerpoints.current", "currentlyFightingEnemy.attributes.enerpoints.total", color(102, 102, 255), 0.55, 0.4, 0.4, 0.03));
     this.children.push(new Text(["currentlyFightingEnemy.attributes.damage.total"], 0.55, 0.45, 0.4, 0.03));
 
-
     //Actions
     this.children.push(new ActionBlockGroup("FightGroup", 0, 0.5, 1, 0.5));
   }
@@ -114,7 +113,7 @@ class ActionBlockGroup extends MenuTemplate {
           mainWindow.currentSubMenu.children[1].displayOnce();
         }],
         [Text, ["Attack the enemy for ", "player.attributes.damage.total * player.damageRange.min", " to ", "player.attributes.damage.total * player.damageRange.max", " damage points"]],
-        [Text, ["This is another text!"]]
+        [Text, ["This is another text!"]],
       ],
       [
         [1, 3],
@@ -152,28 +151,37 @@ class ActionBlockGroup extends MenuTemplate {
         [1, 3],
         [1, 2]
       ], 0.025));
-      /*
-    this.children.push(new ActionBlock("WaitAction", 0, 0, 1, 0,
-      "Wait (5 EP)", () => {
-        player.wait();
-        mainWindow.currentSubMenu.children[1].displayOnce();
-        enemy.performRandomAction(player);
-        mainWindow.currentSubMenu.children[1].displayOnce();
-      },
-      ["Wait a round and deal ", "50%", " more damage in the next turn!"],
-      []
-    ));
-    this.children.push(new ActionBlock("FleeAction", 0, 0, 1, 0,
-      "Run away (1 EP)", () => {
-        player.flee(currentlyFightingEnemy);
-        mainWindow.currentSubMenu.children[1].displayOnce();
-        enemy.performRandomAction(player);
-        mainWindow.currentSubMenu.children[1].displayOnce();
-      },
-      ["Attempt to flee the battle. Chance to flee: ", "getFleeChance(player, currentlyFightingEnemy) * 100", "%"],
-      []
-    ));
-    */
+    this.children.push(new UICollection("WaitAction", 0, 0, 1, 0,
+      [
+        [Button, "Wait (5 EP)", () => {
+          player.wait();
+          mainWindow.currentSubMenu.children[1].displayOnce();
+          enemy.performRandomAction(player);
+          mainWindow.currentSubMenu.children[1].displayOnce();
+        }],
+        [Text, ["Wait a round and deal ", "50%", " more damage in the next turn!"]],
+        [Text, ["This is another text!"]]
+      ],
+      [
+        [1, 3],
+        [1, 2]
+      ], 0.025));
+    this.children.push(new UICollection("FleeAction", 0, 0, 1, 0,
+      [
+        [Button, "Run away (1 EP)", () => {
+          player.flee(currentlyFightingEnemy);
+          mainWindow.currentSubMenu.children[1].displayOnce();
+          enemy.performRandomAction(player);
+          mainWindow.currentSubMenu.children[1].displayOnce();
+        }],
+        [Text, ["Attempt to flee the battle. Chance to flee: ", "getFleeChance(player, currentlyFightingEnemy) * 100", "%"]],
+        [Text, ["This is based on your HP and the Damage of the Enemy."]]
+      ],
+      [
+        [1, 3],
+        [1, 2]
+      ], 0.025));
+
     let h1 = 1 / this.children.length;
     for (let i = 0; i < this.children.length; i++) {
       this.children[i].yRelToParent = h1 * i;
@@ -185,6 +193,9 @@ class ActionBlockGroup extends MenuTemplate {
 class VictoryAction extends Action {
   constructor(n, x, y, w, h) {
     super(n, x, y, w, h);
+    this.children.push(new CustomImage("images/victory.png", 0, 0, 1, 0.5, 1));
+    this.children.push(new Text(["Hello, you defeated an enemy."], 0, 0.5, 1, 0.1));
+    this.children.push(new Text(["You got ", "currentlyFightingEnemy.level", " gold!"], 0, 0.6, 1, 0.1));
   }
 }
 

@@ -41,7 +41,7 @@ function generateDefaultMap() {
 }
 
 function loadActualMap(sav) {
-  enemies = new Map();
+  enemies = [];
   entityCount = {
     enemy: {
       normal: {
@@ -96,15 +96,15 @@ function loadActualMap(sav) {
       newMap.tiles[x][y].setTex(newMap.getNoise2D(x, y));
       switch (ids.entityID) {
         case 1: //Scorpion
-          enemies.set((x * 1000 + y), new Enemy(x, y, ids.entityID, enemies.length));
+          enemies.push(new Enemy(x, y, ids.entityID, enemies.length));
           entityCount.enemy.normal.total++;
           break;
         case 2: //Spider
-          enemies.set((x * 1000 + y), new Enemy(x, y, ids.entityID, enemies.length));
+          enemies.push(new Enemy(x, y, ids.entityID, enemies.length));
           entityCount.enemy.normal.total++;
           break;
         case 3: //Boss
-          enemies.set((x * 1000 + y), new Enemy(x, y, ids.entityID, enemies.length));
+          enemies.push(new Enemy(x, y, ids.entityID, enemies.length));
           entityCount.enemy.boss.total++;
           break;
         case 4: //Key

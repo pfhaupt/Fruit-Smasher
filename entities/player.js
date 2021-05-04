@@ -5,7 +5,7 @@ class Player extends Deity {
     this.chestCount = [];
     for (var i = 0; i < 4 * maxZone; i++) this.chestCount[i] = 0;
   }
-
+  
   checkMovement(keyCode) {
     if (this.attributes.moveCount.current === 0) return;
     let map = mainWindow.currentSubMenu.children[0].children[0];
@@ -47,8 +47,14 @@ class Player extends Deity {
       if (targetIDs.eID >= 1 && targetIDs.eID <= 3) {
         //Target contains an enemy
         //Find out which enemy
-        let id = (newX * 1000 + newY);
-        let targetEnemy = enemies.get(id);
+
+        let targetEnemy = null;
+        for (let e of enemies)
+          if (e.position.x === newX && e.position.y === newY) {
+            targetEnemy = e;
+            break;
+          }
+
         console.log(targetEnemy);
         if (targetEnemy) {
           action.subActions[ActionScreen.Combat].setEnemy(targetEnemy);

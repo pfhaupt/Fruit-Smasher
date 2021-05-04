@@ -1,0 +1,48 @@
+TODO-LIST:
+Bugs:
+  - Choose a suited time to reset currentlyFightingEnemy to null
+  -> After death? After fleeing? When setting Action to non-Combat?
+
+Necessary Features:
+  - Energy Points should have a use
+  -> Skills exist, make use of it
+
+  - Leveling
+  -> Killing Enemies grants XP for better Stats
+
+  - Balancing
+  -> Please introduce real enemies and balance their stats so that they become useful
+  -> Player dies in like 4 rounds, too hard
+
+  - Spawners
+  -> Entities that spawn Enemies, for more fun that doesn't end in 3 rounds
+  -> Shouldn't be too hard to fight, but also not too easy
+  -> Kinda necessary to advance, but not mandatory
+
+  - Add Saving/Loading
+  -> What to save... What to load? Enemies? Map? map_played.png?
+  -> Save/Load Buttons in Options, perhaps even Export/Import?
+
+  - Quests and Tutorials
+  -> Give the player something to do
+
+  - Chest Drops
+  -> Enemies should drop Chests, which drop Items
+
+  - Finally make Items useful
+  -> Drops from Chests, boost to all kind of stats
+  -> Set Bonus?
+
+Free time? Do this:
+  - Work on more Maps
+  -> Having 1 or 2 extra maps to try different zones wouldn't be bad
+
+  - Draw Item images D:
+  -> It has to be done at some point
+
+Nice to have / QoL:
+  - Add the Music
+  -> Once done, add a Mute Button to Options
+
+  - Advanced Stat Breakdown
+  -> Display what Stats are made of
