@@ -1,12 +1,17 @@
-// isLocalhost will be True if you site is hosted on localhost. Otherwise it will be False.
-var isLocalhost = Boolean(window.location.hostname === 'localhost' ||
-  // [::1] is the IPv6 localhost address.
-  window.location.hostname === '[::1]' ||
-  // 127.0.0.1/8 is considered localhost for IPv4.
-  window.location.hostname.match(
-    /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
-  )
-);
+let EntityIDs = {
+  None: 0,
+  Spider: 1,
+  Scorpion: 2,
+  Wraith: 3,
+  Octopus: 4,
+  Ghost: 5,
+  Dragon: 6,
+  SkeletonBoss: 7,
+  Key: 8,
+  Trap: 9,
+  Portal: 10,
+  Player: 11,
+};
 
 let mapDir = "MapStuff/usedTextures/";
 //if (!isLocalhost) mapDir = "Fruit-Smasher/" + mapDir;
@@ -14,7 +19,8 @@ let dim = 10;
 let mapSize = 1000;
 let tileSize = mapSize / dim;
 let minimap;
-let colorList = [];
+let textureColorList = [];
+let entityColorList = [];
 let entityNames = [];
 let entityList = [];
 let textureNames = [];
@@ -75,12 +81,10 @@ function loadActualMap(sav) {
 
   let d = dim;
 
-  console.log(mapFile);
-
   let getID = (a) => {
     return {
-      tileID: round((a - (a % 10)) / 10),
-      entityID: a % 10
+      tileID: round((a - (a % 50)) / 50),
+      entityID: a % 50
     };
   };
   sav.loadPixels();
@@ -88,34 +92,51 @@ function loadActualMap(sav) {
   for (let x = 0; x < d; x++) {
     newMap.tiles[x] = [];
     for (let y = 0; y < d; y++) {
-      newMap.tiles[x][y] = new TileSet(x, y);
+      newMap.tiles[x][y] = new TileSet();
       let id = mapFile.pixels[(y * dim + x) * 4];
       let ids = getID(id);
       if (ids.tileID !== 0) newMap.tiles[x][y].set(ids.tileID);
       if (ids.entityID !== 0) newMap.tiles[x][y].setEntity(ids.entityID);
+      if (ids.entityID >= 1 && ids.entityID <= 7) newMap.tiles[x][y].setEnemyID(enemies.length);
       newMap.tiles[x][y].setTex(newMap.getNoise2D(x, y));
       switch (ids.entityID) {
-        case 1: //Scorpion
-          enemies.push(new Enemy(x, y, ids.entityID, enemies.length));
+        case EntityIDs.Scorpion:
+          enemies.push(new Scorpion(x, y));
           entityCount.enemy.normal.total++;
           break;
-        case 2: //Spider
-          enemies.push(new Enemy(x, y, ids.entityID, enemies.length));
+        case EntityIDs.Spider:
+          enemies.push(new Spider(x, y));
           entityCount.enemy.normal.total++;
           break;
-        case 3: //Boss
-          enemies.push(new Enemy(x, y, ids.entityID, enemies.length));
+        case EntityIDs.Ghost:
+          enemies.push(new Ghost(x, y));
+          entityCount.enemy.normal.total++;
+          break;
+        case EntityIDs.Wraith:
+          enemies.push(new Wraith(x, y));
+          entityCount.enemy.normal.total++;
+          break;
+        case EntityIDs.Octopus:
+          enemies.push(new Octopus(x, y));
+          entityCount.enemy.normal.total++;
+          break;
+        case EntityIDs.Dragon:
+          enemies.push(new Dragon(x, y));
           entityCount.enemy.boss.total++;
           break;
-        case 4: //Key
+        case EntityIDs.SkeletonBoss:
+          enemies.push(new SkeletonBoss(x, y));
+          entityCount.enemy.boss.total++;
+          break;
+        case EntityIDs.Key: //Key
           entityCount.object.key.total++;
           break;
-        case 5: //Trap
+        case EntityIDs.Trap: //Trap
           break;
-        case 6: //Spawner/Portal
+        case EntityIDs.Portal: //Spawner/Portal
           entityCount.enemy.spawner.total++;
           break;
-        case 7:
+        case EntityIDs.Player:
           player.position.x = x;
           player.position.y = y;
           break;
@@ -178,7 +199,7 @@ function loadActualMap(sav) {
   entityCount.enemy.spawner.current = entityCount.enemy.spawner.total;
   entityCount.object.key.current = entityCount.object.key.total;
   player.resetMoveCount();
-  mainWindow.subMenus[0].children[1].setAction(0);
+  mainWindow.subMenus[0].children[1].setAction(ActionScreen.Idle);
 }
 
 function loadMap(zone) {
@@ -188,7 +209,7 @@ function loadMap(zone) {
   loadImage(saveName, loadActualMap, generateDefaultMap);
 }
 
-function getAverageColor(img, i, j, t) {
+function getAverageColor(img, i, j) {
   img.loadPixels();
 
   let sr = 0,
@@ -209,13 +230,10 @@ function getAverageColor(img, i, j, t) {
     sg /= pixCount;
     sb /= pixCount;
   }
+  textureColorList[i][j][0] = sr;
+  textureColorList[i][j][1] = sg;
+  textureColorList[i][j][2] = sb;
   //console.log(sr, sg, sb);
-  if (typeof colorList[t] === 'undefined') colorList[t] = [];
-  if (typeof colorList[t][i] === 'undefined') colorList[t][i] = [];
-  colorList[t][i][j] = [];
-  colorList[t][i][j][0] = sr;
-  colorList[t][i][j][1] = sg;
-  colorList[t][i][j][2] = sb;
 }
 
 function loadImages() {
@@ -228,49 +246,42 @@ function loadImages() {
       textureList[i][j] = mapDir + "textures/" + n[i] + "_tiles/" + n[i] + "" + j + ".png";
     }
   }
+  textureColorList = [];
 
   for (let i = 0; i < textureList.length; i++) {
+    textureColorList[i] = [];
     for (let j = 0; j < textureList[i].length; j++) {
+      textureColorList[i][j] = [];
       loadImage(textureList[i][j], (img) => {
-        getAverageColor(img, i, j, 0);
+        getAverageColor(img, i, j);
       });
     }
   }
+  entityList[EntityIDs.None] = mapDir + "entities/none.png";
+  entityList[EntityIDs.Scorpion] = mapDir + "entities/enemy0.png";
+  entityList[EntityIDs.Spider] = mapDir + "entities/enemy1.png";
+  entityList[EntityIDs.SkeletonBoss] = mapDir + "entities/boss.png";
+  entityList[EntityIDs.Key] = mapDir + "entities/key.png";
+  entityList[EntityIDs.Trap] = mapDir + "entities/trap.png";
+  entityList[EntityIDs.Portal] = mapDir + "entities/portal.png";
+  entityList[EntityIDs.Player] = mapDir + "entities/player.png";
+  entityList[EntityIDs.Wraith] = mapDir + "entities/enemy2.png";
+  entityList[EntityIDs.Octopus] = mapDir + "entities/enemy3.png";
+  entityList[EntityIDs.Ghost] = mapDir + "entities/enemy4.png";
+  entityList[EntityIDs.Dragon] = mapDir + "entities/enemy6.png";
 
-  entityList[0] = mapDir + "entities/none.png";
-  entityList[1] = mapDir + "entities/enemy0.png";
-  entityList[2] = mapDir + "entities/enemy1.png";
-  entityList[3] = mapDir + "entities/boss.png";
-  entityList[4] = mapDir + "entities/key.png";
-  entityList[5] = mapDir + "entities/trap.png";
-  entityList[6] = mapDir + "entities/portal.png";
-  entityList[7] = mapDir + "entities/player.png";
-  /*
   for (let i = 0; i < entityList.length; i++) {
-    loadImage(entityList[i], (img) => {
-      getAverageColor(img, i, 0, 1);
-    });
+    entityColorList[i] = [];
+    entityColorList[i][0] = 255;
+    entityColorList[i][1] = 0;
+    entityColorList[i][2] = 0;
   }
-  */
-  let col = [
-    color(0, 0, 0, 0), //minimap color none
-    color(204, 68, 0), //minimap color scorpion
-    color(255, 119, 51), //minimap color spider
-    color(255, 0, 0), //minimap color boss
-    color(200, 180, 50), //minimap color key
-    color(100, 100, 100), //minimap color trap
-    color(153, 0, 230), //minimap color portal
-    color(0, 255, 0) //minimap color player
-  ]
-  console.log(col);
-  colorList[1] = [];
-  for (let i = 0; i < entityList.length; i++) {
-    colorList[1][i] = [];
-    colorList[1][i][0] = [];
-    for (let j = 0; j < col[i].levels.length; j++) {
-      colorList[1][i][0][j] = col[i].levels[j];
-    }
-  }
+  entityColorList[EntityIDs.Key][0] = 255;
+  entityColorList[EntityIDs.Key][1] = 215;
+  entityColorList[EntityIDs.Key][2] = 0;
+  entityColorList[EntityIDs.Player][0] = 0;
+  entityColorList[EntityIDs.Player][1] = 255;
+  entityColorList[EntityIDs.Player][2] = 0;
 }
 
 class Minimap extends BaseUIBlock {
@@ -330,14 +341,14 @@ class Minimap extends BaseUIBlock {
         let yp = y * w + j;
         let id = yp * this.content.width + xp;
         if (eID !== 0) {
-          this.content.pixels[4 * id] = colorList[1][eID][0][0];
-          this.content.pixels[4 * id + 1] = colorList[1][eID][0][1];
-          this.content.pixels[4 * id + 2] = colorList[1][eID][0][2];
+          this.content.pixels[4 * id] = entityColorList[eID][0];
+          this.content.pixels[4 * id + 1] = entityColorList[eID][1];
+          this.content.pixels[4 * id + 2] = entityColorList[eID][2];
           this.content.pixels[4 * id + 3] = 255;
         } else {
-          this.content.pixels[4 * id] = colorList[0][tID][sID][0];
-          this.content.pixels[4 * id + 1] = colorList[0][tID][sID][1];
-          this.content.pixels[4 * id + 2] = colorList[0][tID][sID][2];
+          this.content.pixels[4 * id] = textureColorList[tID][sID][0];
+          this.content.pixels[4 * id + 1] = textureColorList[tID][sID][1];
+          this.content.pixels[4 * id + 2] = textureColorList[tID][sID][2];
           this.content.pixels[4 * id + 3] = 255;
         }
       }
@@ -456,6 +467,10 @@ class WorldMap extends BaseUIBlock {
 
   updateTileMap(x, y, id) {
     this.tiles[x][y].setEntity(id);
+  }
+
+  updateEnemyPos(x, y, id) {
+    this.tiles[x][y].setEnemyID(id);
   }
 
   updateCacheMap(x, y, id) {
@@ -654,15 +669,19 @@ class WorldMap extends BaseUIBlock {
     noiseVal = floor(noiseVal * this.noiseMaxID);
     return noiseVal;
   }
+
+  getEnemyAtPosition(x, y) {
+    if (this.tiles[x][y].enemyID === -1) return null;
+    else return enemies[this.tiles[x][y].enemyID];
+  }
 }
 
 class TileSet {
-  constructor(i, j) {
-    this.x = i;
-    this.y = j;
+  constructor() {
     this.tileID = 0;
     this.subTexID = 0;
     this.entityID = 0;
+    this.enemyID = -1;
     this.visible = false;
     //this.img.size(dim, dim);
   }
@@ -677,5 +696,9 @@ class TileSet {
 
   setTex(i) {
     this.subTexID = i;
+  }
+
+  setEnemyID(i) {
+    this.enemyID = i;
   }
 }

@@ -5,12 +5,13 @@ class Player extends Deity {
     this.chestCount = [];
     for (var i = 0; i < 4 * maxZone; i++) this.chestCount[i] = 0;
   }
-  
+
   checkMovement(keyCode) {
     if (this.attributes.moveCount.current === 0) return;
-    let map = mainWindow.currentSubMenu.children[0].children[0];
-    let minimap = mainWindow.currentSubMenu.children[0].children[1];
-    let action = mainWindow.currentSubMenu.children[1];
+    let map = mainWindow.subMenus[SubMenu.Field].children[0].children[0];
+    let minimap = mainWindow.subMenus[SubMenu.Field].children[0].children[1];
+    let action = mainWindow.subMenus[SubMenu.Field].children[1];
+    if (action.getCurrentAction() === "Combat") return;
     let prevX = this.position.x;
     let prevY = this.position.y;
     let dir = {
@@ -44,16 +45,12 @@ class Player extends Deity {
       return;
     } else if (targetIDs.eID !== 0) {
       //Interact with Entity on Target position
-      if (targetIDs.eID >= 1 && targetIDs.eID <= 3) {
+
+      if (targetIDs.eID >= 1 && targetIDs.eID <= 7) {
         //Target contains an enemy
         //Find out which enemy
 
-        let targetEnemy = null;
-        for (let e of enemies)
-          if (e.position.x === newX && e.position.y === newY) {
-            targetEnemy = e;
-            break;
-          }
+        let targetEnemy = map.getEnemyAtPosition(newX, newY);
 
         console.log(targetEnemy);
         if (targetEnemy) {
@@ -71,14 +68,14 @@ class Player extends Deity {
     action.setAction(ActionScreen.Idle);
 
     //Set Player on Map
-    map.tiles[prevX][prevY].setEntity(0);
-    map.tiles[newX][newY].setEntity(7);
+    map.tiles[prevX][prevY].setEntity(EntityIDs.None);
+    map.tiles[newX][newY].setEntity(EntityIDs.Player);
     //Set Player on Minimap
     minimap.updatePixels(prevX, prevY);
     minimap.updatePixels(newX, newY);
     //Set Player in Cache
-    map.updateCacheMap(prevX, prevY, 0);
-    map.updateCacheMap(newX, newY, 7);
+    map.updateCacheMap(prevX, prevY, EntityIDs.None);
+    map.updateCacheMap(newX, newY, EntityIDs.Player);
     //Update Cache
     map.updateImages(dir.x, dir.y);
     //Update real Player pos
@@ -88,7 +85,7 @@ class Player extends Deity {
   }
 
   die() {
-    let action = mainWindow.subMenus[0].children[1];
+    let action = mainWindow.subMenus[SubMenu.Field].children[1];
     console.log("You died");
     action.setAction(ActionScreen.Defeat);
   }
@@ -109,6 +106,14 @@ class Player extends Deity {
 
   openChests(chestLevel) {
     console.log(chestLevel);
+  }
+
+  flee(other) {
+    console.log("FLEE");
+    this.attributes.enerpoints.current = constrain(this.attributes.enerpoints.current - ActionCost.FleeAction, 0, this.attributes.enerpoints.total);
+    this.lastAction = "Attempted to flee.";
+    let fleeChance = getFleeChance(player, other);
+    if (fleeChance < random()) mainWindow.subMenus[SubMenu.Field].children[1].setAction(ActionScreen.PlayedFled);
   }
 }
 

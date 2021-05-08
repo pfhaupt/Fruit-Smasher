@@ -36,14 +36,17 @@ let entityCount = {
   }
 }
 
+function getExpReward(level) {
+  return (level + 1) ** 2;
+}
+
 class Enemy extends Deity {
-  constructor(x, y, id) {
+  constructor(x, y) {
     super(100, 10, 3, 2);
     this.position = {
       x: x,
       y: y,
     };
-    this.typeID = id;
     this.name = enemyNames[~~(Math.random() * enemyNames.length)];
     let r = 2 + Math.random() * 4;
     r = ~~r;
@@ -51,6 +54,7 @@ class Enemy extends Deity {
       moveChances: 3
     };
     this.placeInMap = enemies.length;
+    this.expReward = getExpReward(this.level);
   }
 
   resetMoveCount() {
@@ -99,7 +103,7 @@ class Enemy extends Deity {
     }
 
     let targetIDs = map.getIDs(prevX + dirX, prevY + dirY);
-    if (targetIDs.eID !== 0 || targetIDs.tID === 2) {
+    if (targetIDs.eID !== EntityIDs.None || targetIDs.tID === 2) {
       //Entity already at target pos, or water at target pos
       this.moveChances--;
       if (this.moveChances >= 0) {
@@ -110,10 +114,12 @@ class Enemy extends Deity {
 
     this.position.x += dirX;
     this.position.y += dirY;
-    map.updateTileMap(prevX, prevY, 0);
-    map.updateTileMap(this.position.x, this.position.y, this.typeID);
-    map.updateCacheMap(prevX, prevY, 0);
-    map.updateCacheMap(this.position.x, this.position.y, this.typeID);
+    map.updateTileMap(prevX, prevY, EntityIDs.None);
+    map.updateTileMap(this.position.x, this.position.y, EntityIDs[this.constructor.name]);
+    map.updateEnemyPos(prevX, prevY, -1);
+    map.updateEnemyPos(this.position.x, this.position.y, this.placeInMap);
+    map.updateCacheMap(prevX, prevY, EntityIDs.None);
+    map.updateCacheMap(this.position.x, this.position.y, EntityIDs[this.constructor.name]);
     minimap.updatePixels(prevX, prevY);
     minimap.updatePixels(this.position.x, this.position.y);
 
@@ -128,26 +134,103 @@ class Enemy extends Deity {
     else this.flee(other);
   }
 
+  flee(other) {
+    console.log("FLEE");
+    this.attributes.enerpoints.current = constrain(this.attributes.enerpoints.current - ActionCost.FleeAction, 0, this.attributes.enerpoints.total);
+    this.lastAction = "Attempted to flee.";
+    let fleeChance = getFleeChance(player, other);
+    if (fleeChance < random()) mainWindow.subMenus[SubMenu.Field].children[1].setAction(ActionScreen.EnemyFled);
+  }
+
   die() {
     //Do stuff on the tile map, enemy list, player stats....
     console.log("THIS ENEMY IS NOW OFFICIALLY DEAD");
-    let map = mainWindow.subMenus[0].children[0].children[0];
-    let minimap = mainWindow.subMenus[0].children[0].children[1];
-    let action = mainWindow.subMenus[0].children[1];
+    let map = mainWindow.subMenus[SubMenu.Field].children[0].children[0];
+    let minimap = mainWindow.subMenus[SubMenu.Field].children[0].children[1];
+    let action = mainWindow.subMenus[SubMenu.Field].children[1];
     let x = this.position.x,
       y = this.position.y;
     //Remove Enemy From World Map
-    map.updateTileMap(x, y, 0);
+    map.updateTileMap(x, y, EntityIDs.None);
     //Remove Enemy From Visible Tiles
-    map.updateCacheMap(x, y, 0);
+    map.updateCacheMap(x, y, EntityIDs.None);
+    //Remove Pointer on Tilemap to Enemy in Array
+    map.updateEnemyPos(x, y, -1);
     //Remove Enemy From Minimap
     minimap.updatePixels(x, y);
     //Remove Enemy From Enemy List
     enemies.splice(this.placeInMap, 1);
-    for (let i = this.placeInMap; i < enemies.length; i++) enemies[i].placeInMap--;
-    //We completed the action, show default
+    for (let i = this.placeInMap; i < enemies.length; i++) {
+      let e = enemies[i];
+      e.placeInMap--;
+      map.updateEnemyPos(e.position.x, e.position.y, e.placeInMap);
+    }
+    //Player gets some stuff for successfully killing an enemy
+    player.addExperience(this);
+    //We completed the action, show Victory Screen
     action.setAction(ActionScreen.Victory);
     //Refresh everything
     mainWindow.displayOnce();
+  }
+}
+
+class Boss extends Enemy {
+  constructor(x, y) {
+    super(x, y);
+  }
+}
+
+class Spider extends Enemy {
+  constructor(x, y) {
+    super(x, y);
+  }
+}
+
+class Scorpion extends Enemy {
+  constructor(x, y) {
+    super(x, y);
+  }
+
+  attack(other) {
+
+  }
+}
+
+class Ghost extends Enemy {
+  constructor(x, y) {
+    super(x, y);
+  }
+}
+
+class Wraith extends Enemy {
+  constructor(x, y) {
+    super(x, y);
+  }
+}
+
+class Octopus extends Enemy {
+  constructor(x, y) {
+    super(x, y);
+  }
+}
+
+class Dragon extends Boss {
+  constructor(x, y) {
+    super(x, y);
+  }
+}
+
+class SkeletonBoss extends Boss {
+  constructor(x, y) {
+    super(x, y);
+  }
+}
+
+class Trap {
+  constructor(x, y) {
+    this.position = {
+      x: x,
+      y: y,
+    };
   }
 }

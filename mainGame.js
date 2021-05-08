@@ -9,7 +9,6 @@ let mainLoop = setTimeout(gameLoop, refreshTime);
 let currentZone = 0;
 
 let player = new Player();
-let enemy = new Enemy();
 
 function enableGameLoop() {
   looping = true;
@@ -29,10 +28,10 @@ enemiesMoved = 0;
 
 function enemyMove() {
   enemiesMoved = 0;
-  for (let e of enemies.values()) {
+  for (let e of enemies) {
     e.initMove().then(() => {
       enemiesMoved++;
-      if (enemiesMoved === enemies.size) {
+      if (enemiesMoved === enemies.length) {
         // Here we're done
         //mainWindow.subMenus[0].children[0].children[0].forceUpdate();
         player.resetMoveCount();
@@ -110,5 +109,4 @@ function spawnEnemy() {
   let dmg = 1 + 1 * enemyLevel;
   let regen = 0.1 * enemyLevel;
   let atkSpeed = 1 + Math.floor(enemyLevel / 10);
-  enemy = new Enemy(enemyLevel, hp, dmg, regen, atkSpeed);
 }

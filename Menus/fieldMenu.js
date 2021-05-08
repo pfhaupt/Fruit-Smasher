@@ -14,7 +14,7 @@ class FieldMenu extends MenuTemplate {
     this.children.push(new Text(["Enemy HP: ", "enemy.hp"], 0.65, 0.5, 0.3, 0.03));
     this.children.push(new Text(["Enemy Dmg: ", "enemy.dmg"], 0.65, 0.53, 0.3, 0.03));
     */
-    
+
     let mapWidth = 0.6;
     this.children.push(new MapOverview("Maps", 0, 0, mapWidth, 1));
     this.children.push(new ActionOverview("Actions", mapWidth, 0, 1 - mapWidth, 1));
@@ -28,7 +28,7 @@ class StatOverview extends MenuTemplate {
     this.children.push(new Text(["Current Zone: ", "currentZone"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Zone Size: ", "dim", " by ", "dim"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Enemy Level: ", "minLevel", "-", "maxLevel"], 0, 0, 1, 0, 'center', false));
-    this.children.push(new Text(["Player Level: ", "player.level"], 0, 0, 1, 0, 'center', false));
+    this.children.push(new Text(["Player Level: ", "player.level", " (", "player.experience", "/", "player.expForLvlUp", "XP)"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Player HP: ", "player.attributes.hitpoints.current"], 0, 0, 1, 0));
     this.children.push(new Text(["Player Moves Left: ", "player.attributes.moveCount.current", "/", "player.attributes.moveCount.total"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Keys Left: ", "entityCount.object.key.current", "/", "entityCount.object.key.total"], 0, 0, 1, 0, 'center', false));

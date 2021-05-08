@@ -2,7 +2,7 @@ let realDefaultFontSize = 32;
 let defaultFontSize = realDefaultFontSize;
 let debug = false;
 let equipSlotCount = 17;
-let digits = 2; 
+let digits = 2;
 
 class BaseUIBlock {
   constructor(x, y, w, h) {
@@ -101,12 +101,13 @@ class Button extends BaseUIBlock {
 }
 
 class Text extends BaseUIBlock {
-  constructor(messageArray, x, y, w, h, a = 'center', format = true) {
+  constructor(messageArray, x, y, w, h, a = 'center', format = true, maxFontSize = defaultFontSize) {
     super(x, y, w, h);
     this.message = messageArray;
     this.txtSize = defaultFontSize;
     this.align = a;
     this.format = format;
+    this.maxTxtSize = maxFontSize;
     this.textLengthInPixels = 0;
     this.content = createP(this.secondaryMessage + roundToSpecificDecimalLength(eval(this.message), 2));
     this.content.style('font-weight', 'bold');
@@ -143,7 +144,7 @@ class Text extends BaseUIBlock {
   setTextSize() {
     this.txtSize = floor(this.wAbsToScreen / this.textLengthInPixels);
     this.txtSize = Math.min(this.txtSize, this.hAbsToScreen * 0.8);
-    this.txtSize = Math.min(this.txtSize, defaultFontSize);
+    this.txtSize = Math.min(this.txtSize, this.maxTxtSize);
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
@@ -293,9 +294,11 @@ class ProgressBar extends BaseUIBlock {
     this.currVal = cval;
     this.maxVal = mval;
     this.color = col;
+    this.maxTxtSize = defaultFontSize;
   }
 
   displayOnce() {
+    this.txtSize = Math.min(this.maxTxtSize, this.hAbsToScreen * 0.8);
     let v1, v2;
     try {
       v1 = roundToSpecificDecimalLength(eval(this.currVal), digits);
@@ -313,16 +316,22 @@ class ProgressBar extends BaseUIBlock {
     fill(this.color);
     rect(this.xAbsToScreen + 1, this.yAbsToScreen + 1, this.wAbsToScreen * ratio - 2, this.hAbsToScreen - 2);
     fill(0);
-    textSize(this.hAbsToScreen);
-    textAlign(LEFT, TOP);
-    text(v1, this.xAbsToScreen, this.yAbsToScreen);
-    textAlign(RIGHT, TOP);
-    text(v2, this.xAbsToScreen + this.wAbsToScreen, this.yAbsToScreen);
+    textSize(this.txtSize);
+    textAlign(LEFT, CENTER);
+    text(v1, this.xAbsToScreen, this.yAbsToScreen + this.hAbsToScreen / 2);
+    textAlign(RIGHT, CENTER);
+    text(v2, this.xAbsToScreen + this.wAbsToScreen, this.yAbsToScreen + this.hAbsToScreen / 2);
     pop();
   }
 
   displayEveryFrame() {
 
+  }
+}
+
+class EmptyElement extends BaseUIBlock {
+  constructor(x, y, w, h) {
+    super(x, y, w, h);
   }
 }
 
@@ -392,6 +401,7 @@ function roundToSpecificDecimalLength(val, digits) {
 let replacementChar = "0";
 
 function toFixedDecimalLength(val, digits) {
+  if (typeof val !== "number") return val;
   var splitted = (val + "").split(".");
   var s;
   if (splitted.length === 1)

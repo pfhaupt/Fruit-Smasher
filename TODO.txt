@@ -1,15 +1,5 @@
 TODO-LIST:
-Bugs:
-  - Choose a suited time to reset currentlyFightingEnemy to null
-  -> After death? After fleeing? When setting Action to non-Combat?
-
 Necessary Features:
-  - Energy Points should have a use
-  -> Skills exist, make use of it
-
-  - Leveling
-  -> Killing Enemies grants XP for better Stats
-
   - Balancing
   -> Please introduce real enemies and balance their stats so that they become useful
   -> Player dies in like 4 rounds, too hard

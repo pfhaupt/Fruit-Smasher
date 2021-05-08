@@ -3,7 +3,17 @@ let ActionScreen = {
   Combat: 1,
   Victory: 2,
   Defeat: 3,
-  Chest: 4
+  Chest: 4,
+  PlayedFled: 5,
+  EnemyFled: 6
+};
+
+let ActionCost = {
+  NormalAction: 1,
+  QuickAction: 5,
+  HealAction: 3,
+  WaitAction: 3,
+  FleeAction: 1
 };
 
 class ActionOverview extends MenuTemplate {
@@ -15,7 +25,19 @@ class ActionOverview extends MenuTemplate {
     this.subActions.push(new VictoryAction("Victory", 0, 0, 1, 1));
     this.subActions.push(new DefeatAction("Defeat", 0, 0, 1, 1));
     this.subActions.push(new ChestAction("Looting", 0, 0, 1, 1));
+    this.subActions.push(new PlayerFleeAction("PlayerFled", 0, 0, 1, 1));
+    this.subActions.push(new EnemyFleeAction("EnemyFled", 0, 0, 1, 1));
     this.currentAction = this.subActions[ActionScreen.Idle];
+  }
+
+  hide() {
+    this.hidden = true;
+    this.currentAction.hide();
+  }
+
+  show() {
+    this.hidden = false;
+    this.currentAction.show();
   }
 
   displayEveryFrame() {
@@ -32,6 +54,7 @@ class ActionOverview extends MenuTemplate {
   }
 
   setAction(id) {
+    if (id !== ActionScreen.Combat) currentlyFightingEnemy = null;
     this.currentAction.hide();
     this.currentAction = this.subActions[id];
     this.currentAction.show();
@@ -39,12 +62,8 @@ class ActionOverview extends MenuTemplate {
     mainWindow.displayOnce();
   }
 
-  show() {
-    this.currentAction.show();
-  }
-
-  hide() {
-    this.currentAction.hide();
+  getCurrentAction() {
+    return this.currentAction.name;
   }
 }
 
@@ -67,11 +86,56 @@ class CombatAction extends Action {
     super(n, x, y, w, h);
     //Title
     this.children.push(new Text(["Currently Fighting ", "\"", "currentlyFightingEnemy.name", "\""], 0, 0, 1, 0.1, 'center', false));
+
+    //All that display stuff
+    let emptySpace = 0.15;
+    this.children.push(new UICollection("CombatDisplay", 0, 0.1, 1, 0.4, [
+        [CustomImage, entityList[EntityIDs.Player], 1],
+        [EmptyElement],
+        [ProgressBar, "player.attributes.hitpoints.current", "player.attributes.hitpoints.total", color(34, 204, 0)],
+        [EmptyElement],
+        [ProgressBar, "player.attributes.enerpoints.current", "player.attributes.enerpoints.total", color(102, 102, 255)],
+        [EmptyElement],
+        [Text, ["player.attributes.damage.total"]],
+        [EmptyElement],
+        [Text, ["player.lastAction"]],
+        [EmptyElement],
+        [Text, ["vs."]],
+        [EmptyElement],
+        [Text, ["HP"]],
+        [EmptyElement],
+        [Text, ["EP"]],
+        [EmptyElement],
+        [Text, ["AVG DMG"]],
+        [EmptyElement],
+        [Text, ["Last Action"]],
+        [EmptyElement],
+        [CustomImage, entityList[3]],
+        [EmptyElement],
+        [ProgressBar, "currentlyFightingEnemy.attributes.hitpoints.current", "currentlyFightingEnemy.attributes.hitpoints.total", color(34, 204, 0)],
+        [EmptyElement],
+        [ProgressBar, "currentlyFightingEnemy.attributes.enerpoints.current", "currentlyFightingEnemy.attributes.enerpoints.total", color(102, 102, 255)],
+        [EmptyElement],
+        [Text, ["currentlyFightingEnemy.attributes.damage.total"]],
+        [EmptyElement],
+        [Text, ["currentlyFightingEnemy.lastAction"]],
+      ],
+      [
+        [3, 1.5, 3],
+        [
+          [5, emptySpace, 1, emptySpace, 1, emptySpace, 1, emptySpace, 1, emptySpace],
+          [5, emptySpace, 1, emptySpace, 1, emptySpace, 1, emptySpace, 1, emptySpace],
+          [5, emptySpace, 1, emptySpace, 1, emptySpace, 1, emptySpace, 1, emptySpace]
+        ]
+      ],
+      [0.0, 0.0]));
+    /*
     //Player Stuff
     this.children.push(new CustomImage(entityList[7], 0.125, 0.1, 0.25, 0.25, 1));
     this.children.push(new ProgressBar("player.attributes.hitpoints.current", "player.attributes.hitpoints.total", color(34, 204, 0), 0.05, 0.37, 0.4, 0.03));
     this.children.push(new ProgressBar("player.attributes.enerpoints.current", "player.attributes.enerpoints.total", color(102, 102, 255), 0.05, 0.4, 0.4, 0.03));
     this.children.push(new Text(["player.attributes.damage.total"], 0.05, 0.45, 0.4, 0.03));
+
     //General Stuff
     this.children.push(new Text(["vs."], 0.4, 0.175, 0.2, 0.1, 'center', false));
     this.children.push(new Text(["HP"], 0.45, 0.37, 0.1, 0.03));
@@ -83,7 +147,7 @@ class CombatAction extends Action {
     this.children.push(new ProgressBar("currentlyFightingEnemy.attributes.hitpoints.current", "currentlyFightingEnemy.attributes.hitpoints.total", color(34, 204, 0), 0.55, 0.37, 0.4, 0.03));
     this.children.push(new ProgressBar("currentlyFightingEnemy.attributes.enerpoints.current", "currentlyFightingEnemy.attributes.enerpoints.total", color(102, 102, 255), 0.55, 0.4, 0.4, 0.03));
     this.children.push(new Text(["currentlyFightingEnemy.attributes.damage.total"], 0.55, 0.45, 0.4, 0.03));
-
+*/
     //Actions
     this.children.push(new ActionBlockGroup("FightGroup", 0, 0.5, 1, 0.5));
   }
@@ -91,96 +155,130 @@ class CombatAction extends Action {
   setEnemy(enemy) {
     currentlyFightingEnemy = enemy;
     //Set the new Enemy Image
-    let enemyImageID = 9;
-    let enemyImg = this.children[enemyImageID];
-    this.children[enemyImageID].content.elt.remove();
-    this.children[enemyImageID] = new CustomImage(entityList[currentlyFightingEnemy.typeID],
+    let enemyImageID = 20;
+    let enemyImg = this.children[1].children[enemyImageID];
+    this.children[1].children[enemyImageID].content.elt.remove();
+    this.children[1].children[enemyImageID] = new CustomImage(entityList[EntityIDs[currentlyFightingEnemy.constructor.name]],
       enemyImg.xRelToParent, enemyImg.yRelToParent, enemyImg.wRelToParent, enemyImg.hRelToParent);
-    this.children[enemyImageID].resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
-    this.children[enemyImageID].show();
+    this.children[1].children[enemyImageID].resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+    this.children[1].children[enemyImageID].show();
   }
 }
 
 class ActionBlockGroup extends MenuTemplate {
   constructor(n, x, y, w, h) {
     super(n, x, y, w, h);
+    let space = 0.1;
     this.children.push(new UICollection("NormalAction", 0, 0, 1, 0,
       [
-        [Button, "Attack (1 EP)", () => {
+        [Button, "Attack (" + ActionCost.NormalAction + " EP)", () => {
+          if (player.attributes.enerpoints.current < ActionCost.NormalAction) {
+            return;
+          }
           player.attack(currentlyFightingEnemy);
-          mainWindow.currentSubMenu.children[1].displayOnce();
-          enemy.performRandomAction(player);
-          mainWindow.currentSubMenu.children[1].displayOnce();
+          mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
+          if (currentlyFightingEnemy)
+            currentlyFightingEnemy.performRandomAction(player);
+          mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
         }],
         [Text, ["Attack the enemy for ", "player.attributes.damage.total * player.damageRange.min", " to ", "player.attributes.damage.total * player.damageRange.max", " damage points"]],
         [Text, ["This is another text!"]],
       ],
       [
         [1, 3],
-        [1, 2]
-      ], 0.025));
+        [
+          [1],
+          [1, 1]
+        ]
+      ], [0.0, space]));
     this.children.push(new UICollection("QuickAction", 0, 0, 1, 0,
       [
-        [Button, "Quick Tap (20 EP)", () => {
-          let r = ~~(Math.random() * 3) + 1;
-          console.log(r);
-          for (let i = 0; i < r; i++) player.attack(currentlyFightingEnemy);
-          mainWindow.currentSubMenu.children[1].displayOnce();
-          enemy.performRandomAction(player);
-          mainWindow.currentSubMenu.children[1].displayOnce();
+        [Button, "Quick Attack (" + ActionCost.QuickAction + " EP)", () => {
+          if (player.attributes.enerpoints.current < ActionCost.QuickAction) {
+            return;
+          }
+          player.quickAttack(currentlyFightingEnemy);
+          mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
+          if (currentlyFightingEnemy)
+            currentlyFightingEnemy.performRandomAction(player);
+          mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
         }],
         [Text, ["Attack the enemy up to 3 times at once!"]],
         [Text, ["This is another text!"]]
       ],
       [
         [1, 3],
-        [1, 2]
-      ], 0.025));
+        [
+          [1],
+          [1, 1]
+        ]
+      ], [0.0, space]));
     this.children.push(new UICollection("HealAction", 0, 0, 1, 0,
       [
-        [Button, "Heal (2 EP)", () => {
+        [Button, "Heal (" + ActionCost.HealAction + " EP)", () => {
+          if (player.attributes.enerpoints.current < ActionCost.HealAction) {
+            return;
+          }
           player.heal();
-          mainWindow.currentSubMenu.children[1].displayOnce();
-          enemy.performRandomAction(player);
-          mainWindow.currentSubMenu.children[1].displayOnce();
+          mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
+          if (currentlyFightingEnemy)
+            currentlyFightingEnemy.performRandomAction(player);
+          mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
         }],
         [Text, ["Heal yourself for ", "player.attributes.damage.total * player.healRange.min", " to ", "player.attributes.damage.total * player.healRange.max", " hitpoints"]],
         [Text, ["This is another text!"]]
       ],
       [
         [1, 3],
-        [1, 2]
-      ], 0.025));
+        [
+          [1],
+          [1, 1]
+        ]
+      ], [0.0, space]));
     this.children.push(new UICollection("WaitAction", 0, 0, 1, 0,
       [
-        [Button, "Wait (5 EP)", () => {
+        [Button, "Wait (" + ActionCost.WaitAction + " EP)", () => {
+          if (player.attributes.enerpoints.current < ActionCost.WaitAction) {
+            return;
+          }
           player.wait();
-          mainWindow.currentSubMenu.children[1].displayOnce();
-          enemy.performRandomAction(player);
-          mainWindow.currentSubMenu.children[1].displayOnce();
+          mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
+          if (currentlyFightingEnemy)
+            currentlyFightingEnemy.performRandomAction(player);
+          mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
         }],
         [Text, ["Wait a round and deal ", "50%", " more damage in the next turn!"]],
         [Text, ["This is another text!"]]
       ],
       [
         [1, 3],
-        [1, 2]
-      ], 0.025));
+        [
+          [1],
+          [1, 1]
+        ]
+      ], [0.0, space]));
     this.children.push(new UICollection("FleeAction", 0, 0, 1, 0,
       [
-        [Button, "Run away (1 EP)", () => {
+        [Button, "Run away (" + ActionCost.FleeAction + " EP)", () => {
+          if (player.attributes.enerpoints.current < ActionCost.FleeAction) {
+            return;
+          }
           player.flee(currentlyFightingEnemy);
-          mainWindow.currentSubMenu.children[1].displayOnce();
-          enemy.performRandomAction(player);
-          mainWindow.currentSubMenu.children[1].displayOnce();
+          mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
+          if (currentlyFightingEnemy)
+            currentlyFightingEnemy.performRandomAction(player);
+          mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
         }],
         [Text, ["Attempt to flee the battle. Chance to flee: ", "getFleeChance(player, currentlyFightingEnemy) * 100", "%"]],
-        [Text, ["This is based on your HP and the Damage of the Enemy."]]
+        [Text, ["This is based on your HP and the Damage of the Enemy."]],
       ],
       [
         [1, 3],
-        [1, 2]
-      ], 0.025));
+        [
+          [1],
+          [1, 1]
+        ]
+      ], [0.0, space]));
 
     let h1 = 1 / this.children.length;
     for (let i = 0; i < this.children.length; i++) {
@@ -209,5 +307,47 @@ class DefeatAction extends Action {
 class ChestAction extends Action {
   constructor(n, x, y, w, h) {
     super(n, x, y, w, h);
+  }
+}
+
+class PlayerFleeAction extends Action {
+  constructor(n, x, y, w, h) {
+    super(n, x, y, w, h);
+    this.children.push(new CustomImage("images/PlayerEscaped.png", 0, 0, 1, 0.5));
+    this.children.push(new UICollection("", 0, 0.5, 1, 0.15, [
+      [Text, ["You escaped the battle!"]],
+      [Text, ["You are a disgrace."]],
+      [Text, ["If you have problems defeating enemies,"]],
+      [Text, ["check your equipment loadout or your skills."]],
+    ], [
+      [1],
+      [
+        [1, 1, 1, 1]
+      ]
+    ], [0.0, 0.0]));
+    this.children.push(new Button("Dismiss", 0.3, 0.7, 0.4, 0.1, () => {
+      mainWindow.subMenus[SubMenu.Field].children[1].setAction(ActionScreen.Idle);
+    }));
+  }
+}
+
+class EnemyFleeAction extends Action {
+  constructor(n, x, y, w, h) {
+    super(n, x, y, w, h);
+    this.children.push(new CustomImage("images/EnemyEscaped.png", 0, 0, 1, 0.5));
+    this.children.push(new UICollection("", 0, 0.5, 1, 0.15, [
+      [Text, ["Your Enemy escaped the battle!"]],
+      [Text, ["You must be very intimidating."]],
+      [Text, ["Increasing your damage reduces"]],
+      [Text, ["their chance to flee!"]],
+    ], [
+      [1],
+      [
+        [1, 1, 1, 1]
+      ]
+    ], [0.0, 0.0]));
+    this.children.push(new Button("Dismiss", 0.3, 0.7, 0.4, 0.1, () => {
+      mainWindow.subMenus[SubMenu.Field].children[1].setAction(ActionScreen.Idle);
+    }));
   }
 }

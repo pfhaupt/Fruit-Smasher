@@ -1,3 +1,12 @@
+let SubMenu = {
+  Field: 0,
+  Skills: 1,
+  Chests: 2,
+  Inventory: 3,
+  Stats: 4,
+  Options: 5
+};
+
 class MainWindow {
   constructor() {
     this.xRelToParent = 0;
@@ -21,9 +30,11 @@ class MainWindow {
     ];
     for (var s of this.subMenus) s.hide();
     this.mainMenu = new MainMenu(0, 0, 1, mainMenuHeight, this.subMenus);
-    this.currentSubMenu = this.subMenus[0];
+    this.currentSubMenu = this.subMenus[SubMenu.Field];
     this.currentSubMenu.show();
-    this.image = loadImage("images/backgrounds/fieldMenuBackground.png", () => {this.displayOnce()});
+    this.image = loadImage("images/backgrounds/fieldMenuBackground.png", () => {
+      this.displayOnce();
+    });
   }
 
   displayEveryFrame() {

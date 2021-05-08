@@ -1,6 +1,5 @@
-
 class UICollection extends MenuTemplate {
-  constructor(name, x, y, w, h, child, dims, space = 0.0) {
+  constructor(name, x, y, w, h, child, dims, space = [0.0, 0.0]) {
     super(name, x, y, w, h);
 
     if (dims[0].length != dims[1].length) {
@@ -13,50 +12,91 @@ class UICollection extends MenuTemplate {
       spaceForChildren = 0;
     for (let i = 0; i < dims[0].length; i++) {
       sumWidth += dims[0][i];
-      spaceForChildren += dims[1][i];
-    }
-
-    let tmpWidth = new Array(dims[0].length);
-    let tmpX = new Array(tmpWidth.length);
-    tmpX[0] = 0;
-    let tmpY = new Array(tmpX.length);
-    let tmpHeight = new Array(tmpY.length);
-
-    for (let i = 0; i < dims[0].length; i++) {
-      tmpWidth[i] = dims[0][i] / sumWidth;
-      if (i > 0) tmpX[i] = tmpX[i - 1] + tmpWidth[i - 1];
-      tmpY[i] = 0;
-      tmpHeight[i] = 1 / dims[1][i];
-    }
-
-    let xywh = [];
-    let duplicates = ceil(child.length / spaceForChildren);
-    for (let i = 0; i < dims[0].length; i++) {
-      let tmpYOffset = 0;
-      for (let j = 0; j < dims[1][i]; j++) {
-        xywh.push({
-          x: tmpX[i],
-          y: tmpYOffset,
-          w: tmpWidth[i],
-          h: tmpHeight[i] / duplicates,
-        });
-        tmpYOffset += tmpHeight[i] / duplicates;
+      for (let j = 0; j < dims[1][i].length; j++) {
+        spaceForChildren++;
       }
     }
 
-    let xOff = 0,
-      yOff = 0,
-      width = 1,
-      height = 1;
+    let tmpWidth = [];
+    let tmpHeight = [];
+    for (let i = 0; i < dims[0].length; i++) {
+      let sumHeight = 0;
+      for (let j = 0; j < dims[1][i].length; j++) {
+        sumHeight += dims[1][i][j];
+      }
+      for (let j = 0; j < dims[1][i].length; j++) {
+        tmpWidth.push(dims[0][i] / sumWidth);
+        tmpHeight.push(dims[1][i][j] / sumHeight);
+      }
+    }
+
+    let xOff = 0;
+    let yOff = 0;
+    let width = 0;
+    let height = 0;
+    let xywh = [];
+    let id = 0;
+    for (let i = 0; i < dims[0].length; i++) {
+      yOff = 0;
+      for (let j = 0; j < dims[1][i].length; j++) {
+        xywh.push({
+          x: xOff,
+          y: yOff,
+          w: tmpWidth[id],
+          h: tmpHeight[id],
+        });
+        yOff += tmpHeight[id];
+        id++;
+      }
+      xOff += tmpWidth[id - 1];
+    }
+
+    /*
+        for (let i = 0; i < dims[0].length; i++) {
+          tmpWidth[i] = dims[0][i] / sumWidth;
+          if (i > 0) tmpX[i] = tmpX[i - 1] + tmpWidth[i - 1];
+          tmpY[i] = 0;
+          tmpHeight[i] = 1 / dims[1][i];
+        }
+
+        let xywh = [];
+        for (let i = 0; i < dims[0].length; i++) {
+          let tmpYOffset = 0;
+          for (let j = 0; j < dims[1][i]; j++) {
+            xywh.push({
+              x: tmpX[i],
+              y: tmpYOffset,
+              w: tmpWidth[i],
+              h: tmpHeight[i],
+            });
+            tmpYOffset += tmpHeight[i];
+          }
+        }
+    */
+
+    for (let dim of xywh) {
+      dim.x = (1 - 2 * dim.x) * space[0] + dim.x;
+      dim.y = (1 - 2 * dim.y) * space[1] + dim.y;
+      dim.w = dim.w * (1.0 - 2 * space[0]);
+      dim.h = dim.h * (1.0 - 2 * space[1]);
+    }
+
     for (let i = 0; i < child.length; i++) {
+      if (i >= spaceForChildren) {
+        console.log("Attempted to add more children than space is available.");
+        break;
+      }
       let c = child[i];
       let id = i % xywh.length;
       xOff = xywh[id].x;
-      yOff = xywh[id].y + floor(i / spaceForChildren) / duplicates;
+      yOff = xywh[id].y;
       width = xywh[id].w;
       height = xywh[id].h;
       try {
         switch (c[0]) {
+          case UICollection:
+            this.children.push(new UICollection("", xOff, yOff, width, height, c[1], c[2], c[3]));
+            break;
           case Button:
             this.children.push(new Button(c[1], xOff, yOff, width, height, c[2]));
             break;
@@ -66,9 +106,15 @@ class UICollection extends MenuTemplate {
           case CustomImage:
             this.children.push(new CustomImage(c[1], xOff, yOff, width, height, c[2]));
             break;
+          case ProgressBar:
+            this.children.push(new ProgressBar(c[1], c[2], c[3], xOff, yOff, width, height));
+            break;
+          case EmptyElement:
+            this.children.push(new EmptyElement(xOff, yOff, width, height));
+            break;
           default:
             console.log("Attempted to push an undefined UI element.");
-            this.children.push(new Text(["Undefined Element."], xOff, yOff, width, height));
+            this.children.push(new EmptyElement(xOff, yOff, width, height));
             break;
         }
         //this.children.push(new c[0](c[1], 0, 0, 0, 0, c[2]));

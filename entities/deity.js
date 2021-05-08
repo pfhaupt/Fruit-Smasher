@@ -103,6 +103,8 @@ class Deity {
     this.attributes.moveCount.current = this.attributes.moveCount.total;
     this.attributes.hitpoints.current = this.attributes.hitpoints.total;
     this.attributes.enerpoints.current = this.attributes.enerpoints.total;
+    this.lastAction = "None";
+    this.isDead = false;
   }
 
   resetMoveCount() {
@@ -154,7 +156,7 @@ class Deity {
   }
 
   addExperience(other) {
-    this.experience += other.experience * this.attributes.expBoost.total;
+    this.experience += other.expReward * this.attributes.expBoost.total;
     if (this.experience >= this.expForLvlUp) this.levelUp();
   }
 
@@ -208,35 +210,51 @@ class Deity {
 
   attack(other) {
     console.log("ATTACK");
+    this.attributes.enerpoints.current = constrain(this.attributes.enerpoints.current - ActionCost.NormalAction, 0, this.attributes.enerpoints.total);
+    this.lastAction = "Normal Attack";
     let minDmg = this.attributes.damage.total * this.damageRange.min,
       maxDmg = this.attributes.damage.total * this.damageRange.max;
     let dmg = minDmg + Math.random() * (maxDmg - minDmg);
-    console.log(dmg);
-    other.updateHP(-dmg);
+    if (other.hp !== 0)
+      other.updateHP(-dmg);
+  }
+
+  quickAttack(other) {
+    console.log("QUICK ATTACK");
+    this.attributes.enerpoints.current = constrain(this.attributes.enerpoints.current - ActionCost.QuickAction, 0, this.attributes.enerpoints.total);
+    this.lastAction = "Quick Attack";
+    let r = ~~(Math.random() * 3) + 1;
+    for (let i = 0; i < r; i++) {
+      if (other.isDead) return;
+      let minDmg = this.attributes.damage.total * this.damageRange.min,
+        maxDmg = this.attributes.damage.total * this.damageRange.max;
+      let dmg = minDmg + Math.random() * (maxDmg - minDmg);
+      if (other.hp !== 0)
+        other.updateHP(-dmg);
+    }
   }
 
   heal() {
     console.log("HEAL");
+    this.attributes.enerpoints.current = constrain(this.attributes.enerpoints.current - ActionCost.HealAction, 0, this.attributes.enerpoints.total);
+    this.lastAction = "Heal";
     let minHeal = this.attributes.damage.total * this.healRange.min,
       maxHeal = this.attributes.damage.total * this.healRange.max;
     let heal = minHeal + Math.random() * (maxHeal - minHeal);
-    console.log(heal);
     this.updateHP(heal);
   }
 
   wait() {
     console.log("WAIT");
-  }
-
-  flee(other) {
-    console.log("FLEE");
-    let fleeChance = getFleeChance(player, other);
-    if (fleeChance < random()) console.log("HELP");
+    this.attributes.enerpoints.current = constrain(this.attributes.enerpoints.current - ActionCost.WaitAction, 0, this.attributes.enerpoints.total);
+    this.lastAction = "Waiting";
   }
 
   updateHP(val) {
     this.attributes.hitpoints.current = constrain(this.attributes.hitpoints.current + val, 0, this.attributes.hitpoints.total);
-    if (this.attributes.hitpoints.current === 0) this.die();
+    if (this.attributes.hitpoints.current === 0) {
+      this.isDead = true;
+      this.die();
+    }
   }
-
 }
