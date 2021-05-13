@@ -533,69 +533,70 @@ class Dragon extends Boss {
       },
     }
   }
+}
 
-  class SkeletonBoss extends Boss {
-    constructor(x, y) {
-      super(x, y);
-    }
+class SkeletonBoss extends Boss {
+  constructor(x, y) {
+    super(x, y);
+  }
+}
+
+class Trap {
+  constructor(x, y) {
+    this.position = {
+      x: x,
+      y: y,
+    };
+    this.placeInMap = enemies.length;
   }
 
-  class Trap {
-    constructor(x, y) {
-      this.position = {
-        x: x,
-        y: y,
-      };
-      this.placeInMap = enemies.length;
-    }
-
-    initMove() {
-      return new Promise((resolve, reject) => {
-        let interval = setInterval(() => {
-          this.move();
-          clearInterval(interval);
-          resolve();
-        }, 250);
-      });
-    }
-
-    move() {
-      this.updatePositions();
-    }
-
-    updatePositions() {
-      let map = mainWindow.subMenus[0].children[0].children[0];
-
-      map.updateTileMap(this.position.x, this.position.y, EntityIDs[this.constructor.name]);
-      map.updateEnemyPos(this.position.x, this.position.y, this.placeInMap);
-      map.updateCacheMap(this.position.x, this.position.y, EntityIDs.None);
-    }
-
-    die() {
-      //Do stuff on the tile map, enemy list, player stats....
-      console.log("THIS TRAP IS NOW OFFICIALLY DEAD");
-      let map = mainWindow.subMenus[SubMenu.Field].children[0].children[0];
-      let minimap = mainWindow.subMenus[SubMenu.Field].children[0].children[1];
-      let action = mainWindow.subMenus[SubMenu.Field].children[1];
-      let x = this.position.x,
-        y = this.position.y;
-      //Remove Enemy From World Map
-      map.updateTileMap(x, y, EntityIDs.None);
-      //Remove Enemy From Visible Tiles
-      map.updateCacheMap(x, y, EntityIDs.None);
-      //Remove Pointer on Tilemap to Enemy in Array
-      map.updateEnemyPos(x, y, -1);
-      //Remove Enemy From Minimap
-      minimap.updatePixels(x, y);
-      //Remove Enemy From Enemy List
-      enemies.splice(this.placeInMap, 1);
-      for (let i = this.placeInMap; i < enemies.length; i++) {
-        let e = enemies[i];
-        e.placeInMap--;
-        map.updateEnemyPos(e.position.x, e.position.y, e.placeInMap);
-      }
-      action.setAction(ActionScreen.Trap);
-      //Refresh everything
-      mainWindow.displayOnce();
-    }
+  initMove() {
+    return new Promise((resolve, reject) => {
+      let interval = setInterval(() => {
+        this.move();
+        clearInterval(interval);
+        resolve();
+      }, 250);
+    });
   }
+
+  move() {
+    this.updatePositions();
+  }
+
+  updatePositions() {
+    let map = mainWindow.subMenus[0].children[0].children[0];
+
+    map.updateTileMap(this.position.x, this.position.y, EntityIDs[this.constructor.name]);
+    map.updateEnemyPos(this.position.x, this.position.y, this.placeInMap);
+    map.updateCacheMap(this.position.x, this.position.y, EntityIDs.None);
+  }
+
+  die() {
+    //Do stuff on the tile map, enemy list, player stats....
+    console.log("THIS TRAP IS NOW OFFICIALLY DEAD");
+    let map = mainWindow.subMenus[SubMenu.Field].children[0].children[0];
+    let minimap = mainWindow.subMenus[SubMenu.Field].children[0].children[1];
+    let action = mainWindow.subMenus[SubMenu.Field].children[1];
+    let x = this.position.x,
+      y = this.position.y;
+    //Remove Enemy From World Map
+    map.updateTileMap(x, y, EntityIDs.None);
+    //Remove Enemy From Visible Tiles
+    map.updateCacheMap(x, y, EntityIDs.None);
+    //Remove Pointer on Tilemap to Enemy in Array
+    map.updateEnemyPos(x, y, -1);
+    //Remove Enemy From Minimap
+    minimap.updatePixels(x, y);
+    //Remove Enemy From Enemy List
+    enemies.splice(this.placeInMap, 1);
+    for (let i = this.placeInMap; i < enemies.length; i++) {
+      let e = enemies[i];
+      e.placeInMap--;
+      map.updateEnemyPos(e.position.x, e.position.y, e.placeInMap);
+    }
+    action.setAction(ActionScreen.Trap);
+    //Refresh everything
+    mainWindow.displayOnce();
+  }
+}
