@@ -1,13 +1,13 @@
 class Player extends Deity {
-  constructor(h = 100, d = 2, r = 0.25, s = 2) {
-    super(h, d, r, s);
+  constructor() {
+    super();
 
     this.chestCount = [];
     for (var i = 0; i < 4 * maxZone; i++) this.chestCount[i] = 0;
   }
 
   checkMovement(keyCode) {
-    if (this.attributes.moveCount.current === 0) return;
+    if (this.attributes[AttributeIDs.MoveCount].current === 0) return;
     let map = mainWindow.subMenus[SubMenu.Field].children[0].children[0];
     let minimap = mainWindow.subMenus[SubMenu.Field].children[0].children[1];
     let action = mainWindow.subMenus[SubMenu.Field].children[1];
@@ -40,10 +40,10 @@ class Player extends Deity {
 
     //Can we move there?
     let targetIDs = map.getIDs(newX, newY);
-    if (targetIDs.tID === 2) {
+    if (targetIDs.tID === TextureIDs.Water) {
       //Can't move on water
       return;
-    } else if (targetIDs.eID !== 0) {
+    } else if (targetIDs.eID !== EntityIDs.None) {
       //Interact with Entity on Target position
 
       if (targetIDs.eID >= 1 && targetIDs.eID <= 7) {
@@ -57,14 +57,22 @@ class Player extends Deity {
           action.subActions[ActionScreen.Combat].setEnemy(targetEnemy);
           action.setAction(ActionScreen.Combat);
         }
-      } else if (targetIDs.eID === 4) {
+      } else if (targetIDs.eID === EntityIDs.Key) {
         //Target is a key
+      } else if (targetIDs.eID === EntityIDs.Trap) {
+        //You just walked on top of a trap, nice.
+        let targetEnemy = map.getEnemyAtPosition(newX, newY);
+        console.log(targetEnemy);
+        if (targetEnemy) {
+          player.activatedTrap();
+          targetEnemy.die();
+        }
       } else {
         console.log(targetIDs.eID);
       }
       return;
     }
-    this.attributes.moveCount.current--;
+    this.attributes[AttributeIDs.MoveCount].current--;
     action.setAction(ActionScreen.Idle);
 
     //Set Player on Map
@@ -109,11 +117,14 @@ class Player extends Deity {
   }
 
   flee(other) {
+    if (this.applyPoison()) return;
     console.log("FLEE");
-    this.attributes.enerpoints.current = constrain(this.attributes.enerpoints.current - ActionCost.FleeAction, 0, this.attributes.enerpoints.total);
+    this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.FleeAction, 0, this.attributes[AttributeIDs.Energy].total);
     this.lastAction = "Attempted to flee.";
     let fleeChance = getFleeChance(player, other);
-    if (fleeChance < random()) mainWindow.subMenus[SubMenu.Field].children[1].setAction(ActionScreen.PlayedFled);
+    if (this.checkParalyze()) fleeChance *= 0.5;
+    if (this.checkEntanglement()) fleeChance = 0.0;
+    if (random() < fleeChance) mainWindow.subMenus[SubMenu.Field].children[1].setAction(ActionScreen.PlayedFled);
   }
 }
 

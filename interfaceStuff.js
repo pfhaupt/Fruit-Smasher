@@ -416,3 +416,10 @@ function getStringSizeInPixels(text, type) {
   ruler.innerHTML = text;
   return ruler.offsetWidth / 100;
 }
+
+//Returns singular or plural form
+//Of the word based on number
+function pl(word, number, plural) {
+  plural = (plural === '' || plural === undefined) ? word + 's' : plural;
+  return `${number} ${number !== 1 ? plural : word}`;
+}

@@ -13,8 +13,13 @@ let EntityIDs = {
   Player: 11,
 };
 
+let TextureIDs = {
+  Grass: 0,
+  Sand: 1,
+  Water: 2
+};
+
 let mapDir = "MapStuff/usedTextures/";
-//if (!isLocalhost) mapDir = "Fruit-Smasher/" + mapDir;
 let dim = 10;
 let mapSize = 1000;
 let tileSize = mapSize / dim;
@@ -25,8 +30,6 @@ let entityNames = [];
 let entityList = [];
 let textureNames = [];
 let textureList = [];
-
-//let upd = setInterval(generateMinimap, 100);
 
 function generateDefaultMap() {
   console.log("Didn't find a map file, generating default map.");
@@ -132,6 +135,7 @@ function loadActualMap(sav) {
           entityCount.object.key.total++;
           break;
         case EntityIDs.Trap: //Trap
+          enemies.push(new Trap(x, y));
           break;
         case EntityIDs.Portal: //Spawner/Portal
           entityCount.enemy.spawner.total++;
@@ -159,14 +163,14 @@ function loadActualMap(sav) {
   mainWindow.subMenus[0].children[0].children[0].cachedTiles = [];
 
 
-  let viewRange = player.attributes.sight.total;
+  let viewRange = player.attributes[AttributeIDs.Sight].getTotal();
   let xPos = player.position.x - floor(viewRange / 2);
   let yPos = player.position.y - floor(viewRange / 2);
 
-  let w1 = 1 / player.attributes.sight.total;
-  for (let i = 0; i < player.attributes.sight.total; i++) {
+  let w1 = 1 / viewRange;
+  for (let i = 0; i < viewRange; i++) {
     mainWindow.subMenus[0].children[0].children[0].cachedTiles[i] = [];
-    for (let j = 0; j < player.attributes.sight.total; j++) {
+    for (let j = 0; j < viewRange; j++) {
       let posWithOffX = xPos + i;
       let posWithOffY = yPos + j;
       mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j] = {
@@ -191,6 +195,9 @@ function loadActualMap(sav) {
       if (mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].entity) mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].entity.hide();
     }
   }
+
+  for (let enemy of enemies) enemy.updatePositions(enemy.position.x, enemy.position.y);
+
   mainWindow.subMenus[0].children[0].children[0].updateImages(0, 0);
   mainWindow.resize();
   mainWindow.displayOnce();
@@ -383,27 +390,6 @@ class WorldMap extends BaseUIBlock {
       }
     }
     this.cachedTiles = [];
-    /*
-    let w1 = 1 / player.attributes.sight.total;
-    for (let i = 0; i < player.attributes.sight.total; i++) {
-      this.cachedTiles[i] = [];
-      for (let j = 0; j < player.attributes.sight.total; j++) {
-        this.cachedTiles[i][j] = {
-          tile: null,
-          entity: null,
-          hide() {
-            this.tile.hide();
-            if (this.entity) this.entity.hide();
-          },
-          show() {
-            this.tile.show();
-            if (this.entity) this.entity.show();
-          }
-        };
-        this.cachedTiles[i][j].hide();
-      }
-    }
-*/
 
     this.xMul = 0.3239;
     this.xOffs = 0; //.51031;
@@ -465,6 +451,15 @@ class WorldMap extends BaseUIBlock {
     this.displayOnce();
   }
 
+  updateEverything(x, y, px, py, id, placeInMap) {
+    this.updateTileMap(px, py, EntityIDs.None);
+    this.updateTileMap(x, y, id);
+    this.updateEnemyPos(px, py, -1);
+    this.updateEnemyPos(x, y, placeInMap);
+    this.updateCacheMap(px, py, EntityIDs.None);
+    this.updateCacheMap(x, y, id);
+  }
+
   updateTileMap(x, y, id) {
     this.tiles[x][y].setEntity(id);
   }
@@ -474,7 +469,7 @@ class WorldMap extends BaseUIBlock {
   }
 
   updateCacheMap(x, y, id) {
-    let viewRange = player.attributes.sight.total;
+    let viewRange = player.attributes[AttributeIDs.Sight].total;
     let xPos = player.position.x - floor(viewRange / 2);
     let yPos = player.position.y - floor(viewRange / 2);
     let w1 = 1 / viewRange;
@@ -495,7 +490,7 @@ class WorldMap extends BaseUIBlock {
   }
 
   updateImages(x, y) {
-    let viewRange = player.attributes.sight.total;
+    let viewRange = player.attributes[AttributeIDs.Sight].total;
     let xPos = player.position.x - floor(viewRange / 2);
     let yPos = player.position.y - floor(viewRange / 2);
     let w1 = 1 / viewRange;
@@ -586,7 +581,7 @@ class WorldMap extends BaseUIBlock {
 
   forceUpdate() {
     console.log("Forcing Cached Tiles Update");
-    let viewRange = player.attributes.sight.total;
+    let viewRange = player.attributes[AttributeIDs.Sight].total;
     let xPos = player.position.x - floor(viewRange / 2);
     let yPos = player.position.y - floor(viewRange / 2);
     let w1 = 1 / viewRange;
@@ -649,13 +644,15 @@ class WorldMap extends BaseUIBlock {
     if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
       return {
         tID: -1,
+        sID: -1,
         eID: -1,
       }
     } else {
       let t = this.tiles[x][y];
       return {
         tID: t.tileID,
-        eID: t.entityID
+        sID: t.subTexID,
+        eID: t.entityID,
       }
     }
   }
@@ -683,7 +680,6 @@ class TileSet {
     this.entityID = 0;
     this.enemyID = -1;
     this.visible = false;
-    //this.img.size(dim, dim);
   }
 
   setEntity(i) {

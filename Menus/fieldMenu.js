@@ -29,8 +29,8 @@ class StatOverview extends MenuTemplate {
     this.children.push(new Text(["Zone Size: ", "dim", " by ", "dim"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Enemy Level: ", "minLevel", "-", "maxLevel"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Player Level: ", "player.level", " (", "player.experience", "/", "player.expForLvlUp", "XP)"], 0, 0, 1, 0, 'center', false));
-    this.children.push(new Text(["Player HP: ", "player.attributes.hitpoints.current"], 0, 0, 1, 0));
-    this.children.push(new Text(["Player Moves Left: ", "player.attributes.moveCount.current", "/", "player.attributes.moveCount.total"], 0, 0, 1, 0, 'center', false));
+    this.children.push(new Text(["Player HP: ", "player.attributes[AttributeIDs.Hitpoint].getCurrent()"], 0, 0, 1, 0));
+    this.children.push(new Text(["Player Moves Left: ", "player.attributes[AttributeIDs.MoveCount].getCurrent()", "/", "player.attributes[AttributeIDs.MoveCount].getTotal()"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Keys Left: ", "entityCount.object.key.current", "/", "entityCount.object.key.total"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Boss Enemies Left: ", "entityCount.enemy.boss.current"], 0, 0, 1, 0, 'center', false));
     this.children.push(new Text(["Normal Enemies Left: ", "entityCount.enemy.normal.current"], 0, 0, 1, 0, 'center', false));

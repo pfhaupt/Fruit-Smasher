@@ -26,6 +26,7 @@ Necessary Features:
 Free time? Do this:
   - Work on more Maps
   -> Having 1 or 2 extra maps to try different zones wouldn't be bad
+  -> Flower types to make the map less boring
 
   - Draw Item images D:
   -> It has to be done at some point

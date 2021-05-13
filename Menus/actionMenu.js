@@ -5,7 +5,8 @@ let ActionScreen = {
   Defeat: 3,
   Chest: 4,
   PlayedFled: 5,
-  EnemyFled: 6
+  EnemyFled: 6,
+  Trap: 7
 };
 
 let ActionCost = {
@@ -27,6 +28,7 @@ class ActionOverview extends MenuTemplate {
     this.subActions.push(new ChestAction("Looting", 0, 0, 1, 1));
     this.subActions.push(new PlayerFleeAction("PlayerFled", 0, 0, 1, 1));
     this.subActions.push(new EnemyFleeAction("EnemyFled", 0, 0, 1, 1));
+    this.subActions.push(new TrapAction("TrapActivated", 0, 0, 1, 1));
     this.currentAction = this.subActions[ActionScreen.Idle];
   }
 
@@ -92,11 +94,11 @@ class CombatAction extends Action {
     this.children.push(new UICollection("CombatDisplay", 0, 0.1, 1, 0.4, [
         [CustomImage, entityList[EntityIDs.Player], 1],
         [EmptyElement],
-        [ProgressBar, "player.attributes.hitpoints.current", "player.attributes.hitpoints.total", color(34, 204, 0)],
+        [ProgressBar, "player.attributes[AttributeIDs.Hitpoint].current", "player.attributes[AttributeIDs.Hitpoint].total", color(34, 204, 0)],
         [EmptyElement],
-        [ProgressBar, "player.attributes.enerpoints.current", "player.attributes.enerpoints.total", color(102, 102, 255)],
+        [ProgressBar, "player.attributes[AttributeIDs.Energy].current", "player.attributes[AttributeIDs.Energy].total", color(102, 102, 255)],
         [EmptyElement],
-        [Text, ["player.attributes.damage.total"]],
+        [Text, ["player.attributes[AttributeIDs.Damage].total"]],
         [EmptyElement],
         [Text, ["player.lastAction"]],
         [EmptyElement],
@@ -112,11 +114,11 @@ class CombatAction extends Action {
         [EmptyElement],
         [CustomImage, entityList[3]],
         [EmptyElement],
-        [ProgressBar, "currentlyFightingEnemy.attributes.hitpoints.current", "currentlyFightingEnemy.attributes.hitpoints.total", color(34, 204, 0)],
+        [ProgressBar, "currentlyFightingEnemy.attributes[AttributeIDs.Hitpoint].current", "currentlyFightingEnemy.attributes[AttributeIDs.Hitpoint].total", color(34, 204, 0)],
         [EmptyElement],
-        [ProgressBar, "currentlyFightingEnemy.attributes.enerpoints.current", "currentlyFightingEnemy.attributes.enerpoints.total", color(102, 102, 255)],
+        [ProgressBar, "currentlyFightingEnemy.attributes[AttributeIDs.Energy].current", "currentlyFightingEnemy.attributes[AttributeIDs.Energy].total", color(102, 102, 255)],
         [EmptyElement],
-        [Text, ["currentlyFightingEnemy.attributes.damage.total"]],
+        [Text, ["currentlyFightingEnemy.attributes[AttributeIDs.Damage].total"]],
         [EmptyElement],
         [Text, ["currentlyFightingEnemy.lastAction"]],
       ],
@@ -129,25 +131,6 @@ class CombatAction extends Action {
         ]
       ],
       [0.0, 0.0]));
-    /*
-    //Player Stuff
-    this.children.push(new CustomImage(entityList[7], 0.125, 0.1, 0.25, 0.25, 1));
-    this.children.push(new ProgressBar("player.attributes.hitpoints.current", "player.attributes.hitpoints.total", color(34, 204, 0), 0.05, 0.37, 0.4, 0.03));
-    this.children.push(new ProgressBar("player.attributes.enerpoints.current", "player.attributes.enerpoints.total", color(102, 102, 255), 0.05, 0.4, 0.4, 0.03));
-    this.children.push(new Text(["player.attributes.damage.total"], 0.05, 0.45, 0.4, 0.03));
-
-    //General Stuff
-    this.children.push(new Text(["vs."], 0.4, 0.175, 0.2, 0.1, 'center', false));
-    this.children.push(new Text(["HP"], 0.45, 0.37, 0.1, 0.03));
-    this.children.push(new Text(["EP"], 0.45, 0.4, 0.1, 0.03));
-    this.children.push(new Text(["AVG DMG"], 0.45, 0.45, 0.1, 0.03));
-
-    //Enemy Stuff
-    this.children.push(new CustomImage(entityList[3], 0.625, 0.1, 0.25, 0.25, 1));
-    this.children.push(new ProgressBar("currentlyFightingEnemy.attributes.hitpoints.current", "currentlyFightingEnemy.attributes.hitpoints.total", color(34, 204, 0), 0.55, 0.37, 0.4, 0.03));
-    this.children.push(new ProgressBar("currentlyFightingEnemy.attributes.enerpoints.current", "currentlyFightingEnemy.attributes.enerpoints.total", color(102, 102, 255), 0.55, 0.4, 0.4, 0.03));
-    this.children.push(new Text(["currentlyFightingEnemy.attributes.damage.total"], 0.55, 0.45, 0.4, 0.03));
-*/
     //Actions
     this.children.push(new ActionBlockGroup("FightGroup", 0, 0.5, 1, 0.5));
   }
@@ -172,7 +155,7 @@ class ActionBlockGroup extends MenuTemplate {
     this.children.push(new UICollection("NormalAction", 0, 0, 1, 0,
       [
         [Button, "Attack (" + ActionCost.NormalAction + " EP)", () => {
-          if (player.attributes.enerpoints.current < ActionCost.NormalAction) {
+          if (player.attributes[AttributeIDs.Energy].current < ActionCost.NormalAction) {
             return;
           }
           player.attack(currentlyFightingEnemy);
@@ -181,7 +164,7 @@ class ActionBlockGroup extends MenuTemplate {
             currentlyFightingEnemy.performRandomAction(player);
           mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
         }],
-        [Text, ["Attack the enemy for ", "player.attributes.damage.total * player.damageRange.min", " to ", "player.attributes.damage.total * player.damageRange.max", " damage points"]],
+        [Text, ["Attack the enemy for ", "player.attributes[AttributeIDs.Damage].total * player.damageRange.min", " to ", "player.attributes[AttributeIDs.Damage].total * player.damageRange.max", " damage points"]],
         [Text, ["This is another text!"]],
       ],
       [
@@ -194,7 +177,7 @@ class ActionBlockGroup extends MenuTemplate {
     this.children.push(new UICollection("QuickAction", 0, 0, 1, 0,
       [
         [Button, "Quick Attack (" + ActionCost.QuickAction + " EP)", () => {
-          if (player.attributes.enerpoints.current < ActionCost.QuickAction) {
+          if (player.attributes[AttributeIDs.Energy].current < ActionCost.QuickAction) {
             return;
           }
           player.quickAttack(currentlyFightingEnemy);
@@ -216,7 +199,7 @@ class ActionBlockGroup extends MenuTemplate {
     this.children.push(new UICollection("HealAction", 0, 0, 1, 0,
       [
         [Button, "Heal (" + ActionCost.HealAction + " EP)", () => {
-          if (player.attributes.enerpoints.current < ActionCost.HealAction) {
+          if (player.attributes[AttributeIDs.Energy].current < ActionCost.HealAction) {
             return;
           }
           player.heal();
@@ -225,7 +208,7 @@ class ActionBlockGroup extends MenuTemplate {
             currentlyFightingEnemy.performRandomAction(player);
           mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
         }],
-        [Text, ["Heal yourself for ", "player.attributes.damage.total * player.healRange.min", " to ", "player.attributes.damage.total * player.healRange.max", " hitpoints"]],
+        [Text, ["Heal yourself for ", "player.attributes[AttributeIDs.Damage].total * player.healRange.min", " to ", "player.attributes[AttributeIDs.Damage].total * player.healRange.max", " hitpoints"]],
         [Text, ["This is another text!"]]
       ],
       [
@@ -238,7 +221,7 @@ class ActionBlockGroup extends MenuTemplate {
     this.children.push(new UICollection("WaitAction", 0, 0, 1, 0,
       [
         [Button, "Wait (" + ActionCost.WaitAction + " EP)", () => {
-          if (player.attributes.enerpoints.current < ActionCost.WaitAction) {
+          if (player.attributes[AttributeIDs.Energy].current < ActionCost.WaitAction) {
             return;
           }
           player.wait();
@@ -260,7 +243,7 @@ class ActionBlockGroup extends MenuTemplate {
     this.children.push(new UICollection("FleeAction", 0, 0, 1, 0,
       [
         [Button, "Run away (" + ActionCost.FleeAction + " EP)", () => {
-          if (player.attributes.enerpoints.current < ActionCost.FleeAction) {
+          if (player.attributes[AttributeIDs.Energy].current < ActionCost.FleeAction) {
             return;
           }
           player.flee(currentlyFightingEnemy);
@@ -269,7 +252,7 @@ class ActionBlockGroup extends MenuTemplate {
             currentlyFightingEnemy.performRandomAction(player);
           mainWindow.subMenus[SubMenu.Field].children[1].displayOnce();
         }],
-        [Text, ["Attempt to flee the battle. Chance to flee: ", "getFleeChance(player, currentlyFightingEnemy) * 100", "%"]],
+        [Text, ["Attempt to flee the battle. Chance to flee: ", "getFleeChance(player, currentlyFightingEnemy) / (1 + int(player.statusEffects.isParalyzed)) * (1 - int(player.statusEffects.isEntangled)) * 100", "%"]],
         [Text, ["This is based on your HP and the Damage of the Enemy."]],
       ],
       [
@@ -349,5 +332,12 @@ class EnemyFleeAction extends Action {
     this.children.push(new Button("Dismiss", 0.3, 0.7, 0.4, 0.1, () => {
       mainWindow.subMenus[SubMenu.Field].children[1].setAction(ActionScreen.Idle);
     }));
+  }
+}
+
+class TrapAction extends Action {
+  constructor(n, x, y, w, h) {
+    super(n, x, y, w, h);
+    this.children.push(new Text(["IF YOU CAN READ THIS THE TRAP DIED!"], 0, 0, 1, 1));
   }
 }

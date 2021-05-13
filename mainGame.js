@@ -20,7 +20,8 @@ function disableGameLoop() {
 }
 
 function initEnemyMove() {
-  player.attributes.moveCount.current = 0;
+  player.attributes[AttributeIDs.MoveCount].current = 0;
+  player.applyPoison();
   enemyMove();
 }
 
@@ -55,8 +56,8 @@ function gameLoop() {
 }
 
 function getEstimatedRoundsTillDeath(from, to) {
-  if (to.attributes.damage.total === 0) return 1000;
-  return (from.attributes.hitpoints.current / to.attributes.damage.total);
+  if (to.attributes[AttributeIDs.Damage].total === 0) return 1000;
+  return (from.attributes[AttributeIDs.Hitpoint].current / to.attributes[AttributeIDs.Damage].total);
 }
 
 function getFleeChance(from, to) {
