@@ -12,6 +12,7 @@ let AttributeIDs = {
   Paralyze: 10,
   Poison: 11,
   SpiderWeb: 12,
+  Burn: 13,
 };
 
 class Attribute {

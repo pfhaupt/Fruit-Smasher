@@ -157,8 +157,14 @@ class Enemy extends Deity {
     if (player.inViewRange(this)) {}
   }
 
+  initPositions() {
+    this.updatePositions(this.position.x, this.position.y);
+    mainWindow.subMenus[SubMenu.Field].displayOnce();
+  }
+
   //Default: Legal Move if not water and empty space
   //Overload in enemy classes for individual behavior
+  //like only moving on Sand
   legalMove(newX, newY) {
     let targetIDs = mainWindow.subMenus[0].children[0].children[0].getIDs(newX, newY);
     return (targetIDs.eID === EntityIDs.None && targetIDs.tID !== TextureIDs.Water);
@@ -221,17 +227,15 @@ class Enemy extends Deity {
   flee(other) {
     if (this.checkParalyze()) return;
     if (this.applyPoison()) return;
-    console.log("FLEE");
     this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.FleeAction, 0, this.attributes[AttributeIDs.Energy].total);
     this.lastAction = "Attempted to flee.";
     let fleeChance = getFleeChance(player, other);
     if (fleeChance < random()) mainWindow.subMenus[SubMenu.Field].children[1].setAction(ActionScreen.EnemyFled);
-    else console.log("It attempted to flee, but failed.");
+    //else console.log("It attempted to flee, but failed.");
   }
 
   die() {
     //Do stuff on the tile map, enemy list, player stats....
-    console.log("THIS ENEMY IS NOW OFFICIALLY DEAD");
     let map = mainWindow.subMenus[SubMenu.Field].children[0].children[0];
     let minimap = mainWindow.subMenus[SubMenu.Field].children[0].children[1];
     let action = mainWindow.subMenus[SubMenu.Field].children[1];
@@ -510,7 +514,8 @@ class Dragon extends Boss {
     attributes[AttributeIDs.Hitpoint] = new Attribute(this, "Hitpoint", 150, 10, 5);
     attributes[AttributeIDs.Evasion] = new Attribute(this, "Evasion", 5, 0.03, 0.01);
     attributes[AttributeIDs.Sight] = new Attribute(this, "Sight", 9, 0.0, 0.1);
-    attributes[AttributeIDs.Paralyze] = new Attribute(this, "Paralyze", 0.1, 0.0, 0.0);
+    //attributes[AttributeIDs.Paralyze] = new Attribute(this, "Paralyze", 0.1, 0.0, 0.0);
+    attributes[AttributeIDs.Burn] = new Attribute(this, "Burn", 0.5, 0.0, 0.0);
     return attributes;
   }
 
@@ -538,6 +543,79 @@ class Dragon extends Boss {
 class SkeletonBoss extends Boss {
   constructor(x, y) {
     super(x, y);
+    //The SkeletonBoss can now spawn Scorpions :eyes:
+    //Well, he can spawn whatever we want!
+    this.spawnerHandler = new Spawner(this, x, y, EntityIDs.Scorpion);
+  }
+
+  legalMove(newX, newY) {
+    let targetIDs = mainWindow.subMenus[0].children[0].children[0].getIDs(newX, newY);
+    return (targetIDs.eID === EntityIDs.None &&
+      targetIDs.tID === TextureIDs.Water &&
+      (targetIDs.sID === SubTextureIDs.VeryDark || targetIDs.sID === SubTextureIDs.Dark));
+  }
+
+  defineAttributes() {
+    let attributes = super.defineAttributes();
+    attributes[AttributeIDs.Hitpoint] = new Attribute(this, "Hitpoint", 1000, 0.0, 0.0);
+    attributes[AttributeIDs.MoveCount] = new Attribute(this, "Move Count", 3, 0.0, 0.05);
+    attributes[AttributeIDs.Sight] = new Attribute(this, "Sight", 7, 0.0, 0.1);
+    attributes[AttributeIDs.Damage] = new Attribute(this, "Damage", 0, 0.0, 0.0);
+    return attributes;
+  }
+
+  defineActions() {
+    return {
+      Attack: {
+        chance: 1,
+        trigger(from, to) {
+          from.attack(to);
+          from.updateHP(from.attributes[AttributeIDs.Hitpoint].total * 0.01);
+          from.checkSpawn();
+        }
+      }
+    }
+  }
+
+  checkSpawn() {
+    this.spawnerHandler.checkSpawn();
+  }
+
+}
+
+class Spawner extends Enemy {
+  constructor(par, x, y, enemyID) {
+    super(x, y);
+    //We don't want to have the Spawner in the List
+    enemies.splice(enemies.length - 1, 1);
+    this.owner = par;
+    this.timeTillSpawn = 3;
+    this.enemyToSpawn = enemyID;
+  }
+
+  checkSpawn() {
+    this.timeTillSpawn--;
+    if (this.timeTillSpawn === 0) {
+      this.spawnEnemy(EntityIDs.Scorpion);
+      this.timeTillSpawn = 2 + ~~random(2); //2 or 3 rounds, based on random
+    }
+  }
+  spawnEnemy() {
+    let map = mainWindow.subMenus[SubMenu.Field].children[0].children[0];
+    let viewRange = this.owner.attributes[AttributeIDs.Sight].total;
+    let xPos = this.owner.position.x - floor(viewRange / 2);
+    let yPos = this.owner.position.y - floor(viewRange / 2);
+    let attemptsToSpawn = 3;
+    do {
+      attemptsToSpawn--;
+      let xOffset = ~~random(viewRange);
+      let yOffset = ~~random(viewRange);
+      if (map.checkIfLocationFree(xPos + xOffset, yPos + yOffset, null, EntityIDs.None, null)) {
+        map.addEnemyToLocation(xPos + xOffset, yPos + yOffset, this.enemyToSpawn);
+        return true;
+      }
+    } while (attemptsToSpawn > 0);
+    return false;
   }
 }
 

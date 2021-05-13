@@ -399,7 +399,6 @@ function roundToSpecificDecimalLength(val, digits) {
 }
 
 let replacementChar = "0";
-
 function toFixedDecimalLength(val, digits) {
   if (typeof val !== "number") return val;
   var splitted = (val + "").split(".");

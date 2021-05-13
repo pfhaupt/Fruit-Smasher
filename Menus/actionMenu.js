@@ -283,7 +283,22 @@ class VictoryAction extends Action {
 class DefeatAction extends Action {
   constructor(n, x, y, w, h) {
     super(n, x, y, w, h);
-    this.children.push(new Text(["LMAO you suck, get good"], 0, 0, 1, 1));
+    this.children.push(new CustomImage("images/PlayerDead.png", 0, 0, 1, 0.5));
+    this.children.push(new UICollection("", 0, 0.5, 1, 0.15, [
+      [Text, ["You died!"]],
+      [Text, ["How could this happen?"]],
+      [Text, ["If you have problems surviving,"]],
+      [Text, ["check your equipment loadout or your skills."]],
+    ], [
+      [1],
+      [
+        [1, 1, 1, 1]
+      ]
+    ], [0.0, 0.0]));
+    this.children.push(new Button("Dismiss", 0.3, 0.7, 0.4, 0.1, () => {
+      mainWindow.subMenus[SubMenu.Field].children[1].setAction(ActionScreen.Idle);
+      player.revive();
+    }));
   }
 }
 

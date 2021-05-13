@@ -4,7 +4,6 @@ class MainMenu extends MenuTemplate {
     this.hidden = false;
     let len = sub.length;
     let offs = 1 / len;
-    console.log(offs);
     for (var i = 0; i < sub.length; i++) {
       this.children.push(new MainMenuButton(sub[i].name, i * offs, 0.5, offs, 0.5, i));
     }

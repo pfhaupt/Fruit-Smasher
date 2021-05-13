@@ -12,6 +12,12 @@ class Player extends Deity {
     let minimap = mainWindow.subMenus[SubMenu.Field].children[0].children[1];
     let action = mainWindow.subMenus[SubMenu.Field].children[1];
     if (action.getCurrentAction() === "Combat") return;
+
+    if (this.applyBurn()) {
+      this.die();
+      return;
+    }
+
     let prevX = this.position.x;
     let prevY = this.position.y;
     let dir = {
@@ -52,7 +58,7 @@ class Player extends Deity {
 
         let targetEnemy = map.getEnemyAtPosition(newX, newY);
 
-        console.log(targetEnemy);
+        //console.log(targetEnemy);
         if (targetEnemy) {
           action.subActions[ActionScreen.Combat].setEnemy(targetEnemy);
           action.setAction(ActionScreen.Combat);
@@ -94,8 +100,15 @@ class Player extends Deity {
 
   die() {
     let action = mainWindow.subMenus[SubMenu.Field].children[1];
-    console.log("You died");
     action.setAction(ActionScreen.Defeat);
+  }
+
+  revive() {
+    for (let att of this.attributes) {
+      att.calculateTotal();
+      att.resetCurrent();
+    }
+    console.log("hello");
   }
 
   checkChestDrop(enemy) {
@@ -117,8 +130,8 @@ class Player extends Deity {
   }
 
   flee(other) {
+    if (this.applyBurn()) return;
     if (this.applyPoison()) return;
-    console.log("FLEE");
     this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.FleeAction, 0, this.attributes[AttributeIDs.Energy].total);
     this.lastAction = "Attempted to flee.";
     let fleeChance = getFleeChance(player, other);

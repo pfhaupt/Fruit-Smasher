@@ -1,4 +1,5 @@
-TODO-LIST:
+TODO-LIST / "Have no idea? Do this"-List
+
 Necessary Features:
   - Balancing
   -> Please introduce real enemies and balance their stats so that they become useful

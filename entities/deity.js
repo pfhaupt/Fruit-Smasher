@@ -40,10 +40,12 @@ class Deity {
       isDead: false,
       isParalyzed: false,
       isPoisoned: false,
-      isEntangled: false
+      isEntangled: false,
+      isBurning: false
     };
     this.paralyzedMoves = 0;
     this.poisonStacks = 0;
+    this.burnStacks = 0;
 
     this.calculateTotalAttributes();
   }
@@ -75,7 +77,8 @@ class Deity {
     attributes.push(new Attribute(this, "Move Count", 5, 0.0, 0.05));
     attributes.push(new Attribute(this, "Paralyze", 0, 0.0, 0.001));
     attributes.push(new Attribute(this, "Poison", 0, 0.0, 0.001));
-    attributes.push(new Attribute(this, "Bound", 0, 0.0, 0.001));
+    attributes.push(new Attribute(this, "Entangle", 0, 0.0, 0.001));
+    attributes.push(new Attribute(this, "Burn", 0, 0.0, 0.001));
     return attributes;
   }
 
@@ -157,6 +160,22 @@ class Deity {
     }
   }
 
+  applyBurn() {
+    this.updateHP(-1 * this.burnStacks);
+    return this.statusEffects.isDead;
+  }
+
+  checkBurn() {
+    if (this.statusEffects.isBurning) {
+      this.burnStacks--;
+      this.statusEffects.isBurning = this.burnStacks > 0;
+      return this.statusEffects.isBurning;
+    } else {
+      this.burnStacks = 0;
+      return false;
+    }
+  }
+
   poison() {
     this.statusEffects.isPoisoned = true;
     this.poisonStacks++;
@@ -174,6 +193,12 @@ class Deity {
     if (this.statusEffects.isEntangled) return;
     this.lastAction = "Entangled";
     this.statusEffects.isEntangled = true;
+  }
+
+  burn() {
+    this.lastAction = "Burned";
+    this.statusEffects.isBurning = true;
+    this.burnStacks += 3;
   }
 
   addExperience(other) {
@@ -225,10 +250,10 @@ class Deity {
   }
 
   attack(other) {
+    if (this.applyBurn()) return;
     if (this.applyPoison()) return;
     if (this.checkParalyze()) return;
     if (this.checkEntanglement()) return;
-    console.log("ATTACK");
     this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.NormalAction, 0, this.attributes[AttributeIDs.Energy].total);
     this.lastAction = "Normal Attack";
     let minDmg = this.attributes[AttributeIDs.Damage].total * this.damageRange.min,
@@ -257,15 +282,21 @@ class Deity {
           other.entangle();
         }
       }
+      if (this.attributes[AttributeIDs.Burn].total > 0) {
+        let r = Math.random();
+        if (r < this.attributes[AttributeIDs.Burn].total) {
+          other.burn();
+        }
+      }
       other.updateHP(-dmg);
     }
   }
 
   quickAttack(other) {
+    if (this.applyBurn()) return;
     if (this.applyPoison()) return;
     if (this.checkParalyze()) return;
     if (this.checkEntanglement()) return;
-    console.log("QUICK ATTACK");
     this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.QuickAction, 0, this.attributes[AttributeIDs.Energy].total);
     this.lastAction = "Quick Attack";
     let r = ~~(Math.random() * 3) + 1;
@@ -280,9 +311,9 @@ class Deity {
   }
 
   heal(other) {
+    if (this.applyBurn()) return;
     if (this.checkPoison()) return;
     if (this.checkParalyze()) return;
-    console.log("HEAL");
     this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.HealAction, 0, this.attributes[AttributeIDs.Energy].total);
     this.lastAction = "Heal";
     let minHeal = this.attributes[AttributeIDs.Damage].total * this.healRange.min,
@@ -292,9 +323,9 @@ class Deity {
   }
 
   wait() {
+    if (this.applyBurn()) return;
     if (this.checkParalyze()) return;
     if (this.applyPoison()) return;
-    console.log("WAIT");
     this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.WaitAction, 0, this.attributes[AttributeIDs.Energy].total);
     this.lastAction = "Waiting";
   }

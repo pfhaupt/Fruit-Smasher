@@ -19,6 +19,13 @@ let TextureIDs = {
   Water: 2
 };
 
+let SubTextureIDs = {
+  VeryLight: 0,
+  Light: 1,
+  Dark: 2,
+  VeryDark: 3
+};
+
 let mapDir = "MapStuff/usedTextures/";
 let dim = 10;
 let mapSize = 1000;
@@ -102,53 +109,10 @@ function loadActualMap(sav) {
       if (ids.entityID !== 0) newMap.tiles[x][y].setEntity(ids.entityID);
       if (ids.entityID >= 1 && ids.entityID <= 7) newMap.tiles[x][y].setEnemyID(enemies.length);
       newMap.tiles[x][y].setTex(newMap.getNoise2D(x, y));
-      switch (ids.entityID) {
-        case EntityIDs.Scorpion:
-          enemies.push(new Scorpion(x, y));
-          entityCount.enemy.normal.total++;
-          break;
-        case EntityIDs.Spider:
-          enemies.push(new Spider(x, y));
-          entityCount.enemy.normal.total++;
-          break;
-        case EntityIDs.Ghost:
-          enemies.push(new Ghost(x, y));
-          entityCount.enemy.normal.total++;
-          break;
-        case EntityIDs.Wraith:
-          enemies.push(new Wraith(x, y));
-          entityCount.enemy.normal.total++;
-          break;
-        case EntityIDs.Octopus:
-          enemies.push(new Octopus(x, y));
-          entityCount.enemy.normal.total++;
-          break;
-        case EntityIDs.Dragon:
-          enemies.push(new Dragon(x, y));
-          entityCount.enemy.boss.total++;
-          break;
-        case EntityIDs.SkeletonBoss:
-          enemies.push(new SkeletonBoss(x, y));
-          entityCount.enemy.boss.total++;
-          break;
-        case EntityIDs.Key: //Key
-          entityCount.object.key.total++;
-          break;
-        case EntityIDs.Trap: //Trap
-          enemies.push(new Trap(x, y));
-          break;
-        case EntityIDs.Portal: //Spawner/Portal
-          entityCount.enemy.spawner.total++;
-          break;
-        case EntityIDs.Player:
-          player.position.x = x;
-          player.position.y = y;
-          break;
-        default:
-          continue;
-      }
+      mainWindow.subMenus[0].children[0].children[0].handleEnemy(x, y, ids.entityID);
     }
   }
+
   let m = mainWindow.subMenus[0].children[0].children[0];
   let xrel = m.xRelToParent;
   let yrel = m.yRelToParent;
@@ -265,17 +229,17 @@ function loadImages() {
     }
   }
   entityList[EntityIDs.None] = mapDir + "entities/none.png";
-  entityList[EntityIDs.Scorpion] = mapDir + "entities/enemy0.png";
-  entityList[EntityIDs.Spider] = mapDir + "entities/enemy1.png";
-  entityList[EntityIDs.SkeletonBoss] = mapDir + "entities/boss.png";
+  entityList[EntityIDs.Scorpion] = mapDir + "entities/scorpion.png";
+  entityList[EntityIDs.Spider] = mapDir + "entities/spider.png";
+  entityList[EntityIDs.SkeletonBoss] = mapDir + "entities/boss_skeleton.png";
   entityList[EntityIDs.Key] = mapDir + "entities/key.png";
   entityList[EntityIDs.Trap] = mapDir + "entities/trap.png";
   entityList[EntityIDs.Portal] = mapDir + "entities/portal.png";
   entityList[EntityIDs.Player] = mapDir + "entities/player.png";
-  entityList[EntityIDs.Wraith] = mapDir + "entities/enemy2.png";
-  entityList[EntityIDs.Octopus] = mapDir + "entities/enemy3.png";
-  entityList[EntityIDs.Ghost] = mapDir + "entities/enemy4.png";
-  entityList[EntityIDs.Dragon] = mapDir + "entities/enemy6.png";
+  entityList[EntityIDs.Wraith] = mapDir + "entities/wraith.png";
+  entityList[EntityIDs.Octopus] = mapDir + "entities/octopus.png";
+  entityList[EntityIDs.Ghost] = mapDir + "entities/ghost.png";
+  entityList[EntityIDs.Dragon] = mapDir + "entities/boss_dragon.png";
 
   for (let i = 0; i < entityList.length; i++) {
     entityColorList[i] = [];
@@ -665,6 +629,73 @@ class WorldMap extends BaseUIBlock {
     this.noiseMaxID = len;
     noiseVal = floor(noiseVal * this.noiseMaxID);
     return noiseVal;
+  }
+
+  checkIfLocationFree(x, y, tID, eID, sID) {
+    if (this.getEnemyAtPosition(x, y)) return false; //There's an enemy at the position
+    let ids = this.getIDs(x, y); //Get all necessary information about the target position
+    if (tID !== null && ids.tID !== tID) return false; //Texture ID is not matching, e.g. if enemy needs to spawn on Grass
+    if (eID !== null && ids.eID !== eID) return false; //Entity ID is not matching, e.g. if there's a key at that position
+    if (sID !== null && ids.sID !== sID) return false; //SubTexture ID is not matching, e.g. if enemy needs to spawn on Very Dark Tiles
+    return true; //Return true if everything matches the criteria
+  }
+
+  addEnemyToLocation(x, y, enemyType) {
+    if (this.handleEnemy(x, y, enemyType)) {
+      let enemy = enemies[enemies.length - 1];
+      enemy.initPositions();
+    } else {
+      console.log("Something went wrong when adding the enemy");
+    }
+  }
+
+  handleEnemy(x, y, entityID) {
+    switch (entityID) {
+      case EntityIDs.Scorpion:
+        enemies.push(new Scorpion(x, y));
+        entityCount.enemy.normal.total++;
+        break;
+      case EntityIDs.Spider:
+        enemies.push(new Spider(x, y));
+        entityCount.enemy.normal.total++;
+        break;
+      case EntityIDs.Ghost:
+        enemies.push(new Ghost(x, y));
+        entityCount.enemy.normal.total++;
+        break;
+      case EntityIDs.Wraith:
+        enemies.push(new Wraith(x, y));
+        entityCount.enemy.normal.total++;
+        break;
+      case EntityIDs.Octopus:
+        enemies.push(new Octopus(x, y));
+        entityCount.enemy.normal.total++;
+        break;
+      case EntityIDs.Dragon:
+        enemies.push(new Dragon(x, y));
+        entityCount.enemy.boss.total++;
+        break;
+      case EntityIDs.SkeletonBoss:
+        enemies.push(new SkeletonBoss(x, y));
+        entityCount.enemy.boss.total++;
+        break;
+      case EntityIDs.Key: //Key
+        entityCount.object.key.total++;
+        break;
+      case EntityIDs.Trap: //Trap
+        enemies.push(new Trap(x, y));
+        break;
+      case EntityIDs.Portal: //Spawner/Portal
+        entityCount.enemy.spawner.total++;
+        break;
+      case EntityIDs.Player:
+        player.position.x = x;
+        player.position.y = y;
+        break;
+      default:
+        return false;
+    }
+    return true;
   }
 
   getEnemyAtPosition(x, y) {
