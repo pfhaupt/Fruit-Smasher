@@ -10893,18 +10893,18 @@
                 class: 'p5.XML',
                 module: 'IO'
               },
-              hasChildren: {
-                name: 'hasChildren',
+              hasch: {
+                name: 'hasch',
                 class: 'p5.XML',
                 module: 'IO'
               },
-              listChildren: {
-                name: 'listChildren',
+              listch: {
+                name: 'listch',
                 class: 'p5.XML',
                 module: 'IO'
               },
-              getChildren: {
-                name: 'getChildren',
+              getch: {
+                name: 'getch',
                 params: [
                   {
                     name: 'name',
@@ -20618,7 +20618,7 @@
                                 this.language,
                                 ")' returned an object instead of string."
                               );
-                      } // if we got a separator we loop over children - else we just return object as is
+                      } // if we got a separator we loop over ch - else we just return object as is
                       // as having it set to false means no hierarchy so no lookup for nested values
 
                       if (keySeparator) {
@@ -57983,7 +57983,7 @@
            * Helper function for getElement and getElements.
            */
           _main.default.prototype._wrapElement = function(elt) {
-            var children = Array.prototype.slice.call(elt.children);
+            var ch = Array.prototype.slice.call(elt.ch);
             if (elt.tagName === 'INPUT' && elt.type === 'checkbox') {
               var converted = new _main.default.Element(elt, this);
               converted.checked = function() {
@@ -58002,8 +58002,8 @@
             } else if (elt.tagName === 'SELECT') {
               return this.createSelect(new _main.default.Element(elt, this));
             } else if (
-              children.length > 0 &&
-              children.every(function(c) {
+              ch.length > 0 &&
+              ch.every(function(c) {
                 return c.tagName === 'INPUT' || c.tagName === 'LABEL';
               })
             ) {
@@ -58712,7 +58712,7 @@
             };
 
             self._getOptionsArray = function() {
-              return Array.from(this.elt.children).filter(isRadioInput);
+              return Array.from(this.elt.ch).filter(isRadioInput);
             };
 
             self.option = function(value, label) {
@@ -59655,7 +59655,7 @@
            *
            * Attaches the element  as a child to the parent specified.
            * Accepts either a string ID, DOM node, or <a href="#/p5.Element">p5.Element</a>.
-           * If no argument is specified, an array of children DOM nodes is returned.
+           * If no argument is specified, an array of ch DOM nodes is returned.
            *
            * @method child
            * @returns {Node[]} an array of child nodes
@@ -60462,14 +60462,14 @@
              */
             Object.defineProperty(self, 'src', {
               get: function get() {
-                var firstChildSrc = self.elt.children[0].src;
+                var firstChildSrc = self.elt.ch[0].src;
                 var srcVal = self.elt.src === window.location.href ? '' : self.elt.src;
                 var ret = firstChildSrc === window.location.href ? srcVal : firstChildSrc;
                 return ret;
               },
               set: function set(newValue) {
-                for (var i = 0; i < self.elt.children.length; i++) {
-                  self.elt.removeChild(self.elt.children[i]);
+                for (var i = 0; i < self.elt.ch.length; i++) {
+                  self.elt.removeChild(self.elt.ch[i]);
                 }
                 var source = document.createElement('source');
                 source.src = newValue;
@@ -68856,12 +68856,12 @@
            * }
            *
            * function setup() {
-           *   let children = xml.getChildren('animal');
+           *   let ch = xml.getch('animal');
            *
-           *   for (let i = 0; i < children.length; i++) {
-           *     let id = children[i].getNum('id');
-           *     let coloring = children[i].getString('species');
-           *     let name = children[i].getContent();
+           *   for (let i = 0; i < ch.length; i++) {
+           *     let id = ch[i].getNum('id');
+           *     let coloring = ch[i].getString('species');
+           *     let name = ch[i].getContent();
            *     print(id + ', ' + coloring + ', ' + name);
            *   }
            * }
@@ -71937,12 +71937,12 @@
            * }
            *
            * function setup() {
-           *   let children = xml.getChildren('animal');
+           *   let ch = xml.getch('animal');
            *
-           *   for (let i = 0; i < children.length; i++) {
-           *     let id = children[i].getNum('id');
-           *     let coloring = children[i].getString('species');
-           *     let name = children[i].getContent();
+           *   for (let i = 0; i < ch.length; i++) {
+           *     let id = ch[i].getNum('id');
+           *     let coloring = ch[i].getString('species');
+           *     let name = ch[i].getContent();
            *     print(id + ', ' + coloring + ', ' + name);
            *   }
            * }
@@ -71989,8 +71989,8 @@
            * }
            *
            * function setup() {
-           *   let children = xml.getChildren('animal');
-           *   let parent = children[1].getParent();
+           *   let ch = xml.getch('animal');
+           *   let parent = ch[1].getParent();
            *   print(parent.getName());
            * }
            *
@@ -72084,10 +72084,10 @@
           };
 
           /**
-           * Checks whether or not the element has any children, and returns the result
+           * Checks whether or not the element has any ch, and returns the result
            * as a boolean.
            *
-           * @method hasChildren
+           * @method hasch
            * @return {boolean}
            * @example&lt;animal
            * <div class='norender'><code>
@@ -72108,24 +72108,24 @@
            * }
            *
            * function setup() {
-           *   print(xml.hasChildren());
+           *   print(xml.hasch());
            * }
            *
            * // Sketch prints:
            * // true
            * </code></div>
            */
-          _main.default.XML.prototype.hasChildren = function() {
-            return this.DOM.children.length > 0;
+          _main.default.XML.prototype.hasch = function() {
+            return this.DOM.ch.length > 0;
           };
 
           /**
-           * Get the names of all of the element's children, and returns the names as an
+           * Get the names of all of the element's ch, and returns the names as an
            * array of Strings. This is the same as looping through and calling <a href="#/p5.XML/getName">getName()</a>
            * on each child element individually.
            *
-           * @method listChildren
-           * @return {String[]} names of the children of the element
+           * @method listch
+           * @return {String[]} names of the ch of the element
            * @example&lt;animal
            * <div class='norender'><code>
            * // The following short XML file called "mammals.xml" is parsed
@@ -72145,14 +72145,14 @@
            * }
            *
            * function setup() {
-           *   print(xml.listChildren());
+           *   print(xml.listch());
            * }
            *
            * // Sketch prints:
            * // ["animal", "animal", "animal"]
            * </code></div>
            */
-          _main.default.XML.prototype.listChildren = function() {
+          _main.default.XML.prototype.listch = function() {
             var arr = [];
             for (var i = 0; i < this.DOM.childNodes.length; i++) {
               arr.push(this.DOM.childNodes[i].nodeName);
@@ -72161,13 +72161,13 @@
           };
 
           /**
-           * Returns all of the element's children as an array of <a href="#/p5.XML">p5.XML</a> objects. When
-           * the name parameter is specified, then it will return all children that match
+           * Returns all of the element's ch as an array of <a href="#/p5.XML">p5.XML</a> objects. When
+           * the name parameter is specified, then it will return all ch that match
            * that name.
            *
-           * @method getChildren
+           * @method getch
            * @param {String} [name] element name
-           * @return {p5.XML[]} children of the element
+           * @return {p5.XML[]} ch of the element
            * @example&lt;animal
            * <div class='norender'><code>
            * // The following short XML file called "mammals.xml" is parsed
@@ -72187,7 +72187,7 @@
            * }
            *
            * function setup() {
-           *   let animals = xml.getChildren('animal');
+           *   let animals = xml.getch('animal');
            *
            *   for (let i = 0; i < animals.length; i++) {
            *     print(animals[i].getContent());
@@ -72200,11 +72200,11 @@
            * // "Zebra"
            * </code></div>
            */
-          _main.default.XML.prototype.getChildren = function(param) {
+          _main.default.XML.prototype.getch = function(param) {
             if (param) {
               return elementsToP5XML(this.DOM.getElementsByTagName(param));
             } else {
-              return elementsToP5XML(this.DOM.children);
+              return elementsToP5XML(this.DOM.ch);
             }
           };
 
@@ -72217,7 +72217,7 @@
           }
 
           /**
-           * Returns the first of the element's children that matches the name parameter
+           * Returns the first of the element's ch that matches the name parameter
            * or the child of the given index.It returns undefined if no matching
            * child is found.
            *
@@ -72273,7 +72273,7 @@
               var _iteratorError = undefined;
               try {
                 for (
-                  var _iterator = this.DOM.children[Symbol.iterator](), _step;
+                  var _iterator = this.DOM.ch[Symbol.iterator](), _step;
                   !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
                   _iteratorNormalCompletion = true
                 ) {
@@ -72295,7 +72295,7 @@
                 }
               }
             } else {
-              return new _main.default.XML(this.DOM.children[param]);
+              return new _main.default.XML(this.DOM.ch[param]);
             }
           };
 
@@ -72333,7 +72333,7 @@
            *   child.setContent('Platypus');
            *   xml.addChild(child);
            *
-           *   let animals = xml.getChildren('animal');
+           *   let animals = xml.getch('animal');
            *   print(animals[animals.length - 1].getContent());
            * }
            *
@@ -72376,9 +72376,9 @@
            *
            * function setup() {
            *   xml.removeChild('animal');
-           *   let children = xml.getChildren();
-           *   for (let i = 0; i < children.length; i++) {
-           *     print(children[i].getContent());
+           *   let ch = xml.getch();
+           *   for (let i = 0; i < ch.length; i++) {
+           *     print(ch[i].getContent());
            *   }
            * }
            *
@@ -72395,9 +72395,9 @@
            *
            * function setup() {
            *   xml.removeChild(1);
-           *   let children = xml.getChildren();
-           *   for (let i = 0; i < children.length; i++) {
-           *     print(children[i].getContent());
+           *   let ch = xml.getch();
+           *   for (let i = 0; i < ch.length; i++) {
+           *     print(ch[i].getContent());
            *   }
            * }
            *
@@ -72409,8 +72409,8 @@
           _main.default.XML.prototype.removeChild = function(param) {
             var ind = -1;
             if (typeof param === 'string') {
-              for (var i = 0; i < this.DOM.children.length; i++) {
-                if (this.DOM.children[i].tagName === param) {
+              for (var i = 0; i < this.DOM.ch.length; i++) {
+                if (this.DOM.ch[i].tagName === param) {
                   ind = i;
                   break;
                 }
@@ -72419,7 +72419,7 @@
               ind = param;
             }
             if (ind !== -1) {
-              this.DOM.removeChild(this.DOM.children[ind]);
+              this.DOM.removeChild(this.DOM.ch[ind]);
             }
           };
 
@@ -72847,7 +72847,7 @@
            * </code></div>
            */
           _main.default.XML.prototype.setContent = function(content) {
-            if (!this.DOM.children.length) {
+            if (!this.DOM.ch.length) {
               this.DOM.textContent = content;
             }
           };

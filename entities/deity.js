@@ -20,8 +20,9 @@ class Deity {
     this.expIncrease = 1.05;
     this.skillPoints = 0;
     this.skillPointsPerLevel = 5;
+    this.lastActionID = 28;
 
-    this.attributes = this.defineAttributes();
+    this.attr = this.defineAttributes();
 
     //Range for dealing damage to an enemy is [Damage*min;Damage*max]
     this.damageRange = {
@@ -37,65 +38,85 @@ class Deity {
 
     this.lastAction = "None";
     this.statusEffects = {
-      isDead: false,
-      isParalyzed: false,
-      isPoisoned: false,
-      isEntangled: false,
-      isBurning: false
+      dead: {
+        curr: false,
+        stacks: 0
+      },
+      paralyzed: {
+        curr: false,
+        stacks: 0
+      },
+      poisoned: {
+        curr: false,
+        stacks: 0
+      },
+      entangled: {
+        curr: false,
+        stacks: 0
+      },
+      burning: {
+        curr: false,
+        stacks: 0
+      }
     };
-    this.paralyzedMoves = 0;
-    this.poisonStacks = 0;
-    this.burnStacks = 0;
 
     this.calculateTotalAttributes();
   }
 
   resetMoveCount() {
-    this.attributes[AttributeIDs.MoveCount].resetCurrent();
+    this.attr[AttrIDs.MoveCount].resetCurrent();
   }
 
   update(other, dt) {}
 
+  updateHP(val) {
+    this.attr[AttrIDs.Hitpoint].current = constrain(this.attr[AttrIDs.Hitpoint].current + val, 0, this.attr[AttrIDs.Hitpoint].total);
+    if (this.attr[AttrIDs.Hitpoint].current === 0) {
+      this.statusEffects.dead.curr = true;
+      this.die();
+    }
+  }
+
   calculateTotalAttributes() {
-    for (let i = 0; i < this.attributes.length; i++) {
-      let a = this.attributes[i];
+    for (let i = 0; i < this.attr.length; i++) {
+      let a = this.attr[i];
       a.calculateTotal();
     }
   }
 
   defineAttributes() {
-    let attributes = [];
-    attributes.push(new Attribute(this, "Damage", 5, 0.2, 0.1));
-    attributes.push(new Attribute(this, "Energy", 100, 5, 2));
-    attributes.push(new Attribute(this, "Hitpoint", 100, 10, 5));
-    attributes.push(new Attribute(this, "Regen", 0.2, 0.1, 0.01));
-    attributes.push(new Attribute(this, "Speed", 1, 0.1, 0.01));
-    attributes.push(new Attribute(this, "Accuracy", 1, 0.02, 0.01));
-    attributes.push(new Attribute(this, "Evasion", 1, 0.015, 0.01));
-    attributes.push(new Attribute(this, "Experience", 1, 0.0, 0.002));
-    attributes.push(new Attribute(this, "Sight", 15, 0.0, 0.1));
-    attributes.push(new Attribute(this, "Move Count", 5, 0.0, 0.05));
-    attributes.push(new Attribute(this, "Paralyze", 0, 0.0, 0.001));
-    attributes.push(new Attribute(this, "Poison", 0, 0.0, 0.001));
-    attributes.push(new Attribute(this, "Entangle", 0, 0.0, 0.001));
-    attributes.push(new Attribute(this, "Burn", 0, 0.0, 0.001));
-    return attributes;
+    let attr = [];
+    attr.push(new Attribute(this, "Damage", 5, 0.2, 0.1));
+    attr.push(new Attribute(this, "Energy", 100, 5, 2));
+    attr.push(new Attribute(this, "Hitpoint", 100, 10, 5));
+    attr.push(new Attribute(this, "Regen", 0.2, 0.1, 0.01));
+    attr.push(new Attribute(this, "Speed", 1, 0.1, 0.01));
+    attr.push(new Attribute(this, "Accuracy", 1, 0.02, 0.01));
+    attr.push(new Attribute(this, "Evasion", 1, 0.015, 0.01));
+    attr.push(new Attribute(this, "Experience", 1, 0.0, 0.002));
+    attr.push(new Attribute(this, "Sight", 15, 0.0, 0.1));
+    attr.push(new Attribute(this, "Move Count", 5, 0.0, 0.05));
+    attr.push(new Attribute(this, "Paralyze", 0, 0.0, 0.001));
+    attr.push(new Attribute(this, "Poison", 0, 0.0, 0.001));
+    attr.push(new Attribute(this, "Entangle", 0, 0.0, 0.001));
+    attr.push(new Attribute(this, "Burn", 0, 0.0, 0.001));
+    return attr;
   }
 
   addAttribute(att, count) {
     let possibleLevels = Math.min(count, this.skillPoints);
-    this.attributes[att].addSkillLevel(possibleLevels);
+    this.attr[att].addSkillLevel(possibleLevels);
     this.skillPoints -= possibleLevels;
   }
 
   removeAttribute(att, count) {
-    let possibleLevels = Math.min(count, this.attributes[att].skillLevel);
-    this.attributes[att].addSkillLevel(-possibleLevels);
+    let possibleLevels = Math.min(count, this.attr[att].skillLevel);
+    this.attr[att].addSkillLevel(-possibleLevels);
     this.skillPoints += possibleLevels;
   }
 
   inViewRange(other) {
-    let viewRange = this.attributes[AttributeIDs.Sight].total;
+    let viewRange = this.attr[AttrIDs.Sight].total;
     let xPos = this.position.x - floor(viewRange / 2);
     let yPos = this.position.y - floor(viewRange / 2);
     return (other.position.x >= xPos &&
@@ -105,55 +126,55 @@ class Deity {
   }
 
   checkDeath() {
-    return this.attributes[AttributeIDs.Hitpoint].current <= 0;
+    return this.attr[AttrIDs.Hitpoint].current <= 0;
   }
 
   activatedTrap() {
-    this.attributes[AttributeIDs.Hitpoint].current *= 0.9;
+    this.attr[AttrIDs.Hitpoint].current *= 0.9;
   }
 
   hasHitpointsBelow(val) {
-    return this.attributes[AttributeIDs.Hitpoint].current < val * this.attributes[AttributeIDs.Hitpoint].total;
+    return this.attr[AttrIDs.Hitpoint].current < val * this.attr[AttrIDs.Hitpoint].total;
   }
 
   hasDodgedAttack(other) {
-    if (this.attributes[AttributeIDs.Evasion].total > other.attributes[AttributeIDs.Evasion].total) {
+    if (this.attr[AttrIDs.Evasion].total > other.attr[AttrIDs.Accuracy].total) {
       return Math.random(100) < GlobalChance.Evade;
     }
     return false;
   }
 
   checkParalyze() {
-    if (this.statusEffects.isParalyzed) {
-      this.paralyzedMoves--;
-      if (random() < 0.01) this.paralyzedMoves = 0;
-      this.statusEffects.isParalyzed = this.paralyzedMoves > 0;
-      return this.statusEffects.isParalyzed;
+    if (this.statusEffects.paralyzed.curr) {
+      this.statusEffects.paralyzed.stacks--;
+      if (random() < 0.01) this.statusEffects.paralyzed.stacks = 0;
+      this.statusEffects.paralyzed.curr = this.statusEffects.paralyzed.stacks > 0;
+      return this.statusEffects.paralyzed.curr;
     } else {
-      this.paralyzedMoves = 0;
+      this.statusEffects.paralyzed.stacks = 0;
       return false;
     }
   }
 
   applyPoison() {
-    this.updateHP(-1 * this.poisonStacks);
-    return this.statusEffects.isDead;
+    this.updateHP(-1 * this.statusEffects.poisoned.stacks);
+    return this.statusEffects.dead.curr;
   }
 
   checkPoison() {
-    if (this.statusEffects.isPoisoned) {
-      this.poisonStacks--;
-      this.statusEffects.isPoisoned = this.poisonStacks > 0;
-      return this.statusEffects.isPoisoned;
+    if (this.statusEffects.poisoned.curr) {
+      this.statusEffects.poisoned.stacks--;
+      this.statusEffects.poisoned.curr = this.statusEffects.poisoned.stacks > 0;
+      return this.statusEffects.poisoned.curr;
     } else {
-      this.statusEffects.poisonStacks = 0;
+      this.statusEffects.poisoned.stacks = 0;
       return false;
     }
   }
 
   checkEntanglement() {
-    if (this.statusEffects.isEntangled) {
-      this.statusEffects.isEntangled = false;
+    if (this.statusEffects.entangled.curr) {
+      this.statusEffects.entangled.curr = false;
       return true;
     } else {
       return false;
@@ -161,48 +182,129 @@ class Deity {
   }
 
   applyBurn() {
-    this.updateHP(-1 * this.burnStacks);
-    return this.statusEffects.isDead;
+    this.updateHP(-1 * this.statusEffects.burning.stacks);
+    return this.statusEffects.dead.curr;
   }
 
   checkBurn() {
-    if (this.statusEffects.isBurning) {
-      this.burnStacks--;
-      this.statusEffects.isBurning = this.burnStacks > 0;
-      return this.statusEffects.isBurning;
+    if (this.statusEffects.burning.curr) {
+      this.statusEffects.burning.stacks--;
+      this.statusEffects.burning.curr = this.statusEffects.burning.stacks > 0;
+      return this.statusEffects.burning.curr;
     } else {
-      this.burnStacks = 0;
+      this.statusEffects.burning.stacks = 0;
       return false;
     }
   }
 
   poison() {
-    this.statusEffects.isPoisoned = true;
-    this.poisonStacks++;
-    this.lastAction = "Poisoned (" + pl("Stack", this.poisonStacks) + ")";
+    this.statusEffects.poisoned.curr = true;
+    this.statusEffects.poisoned.stacks++;
+    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Poisoned"]);
   }
 
   paralyze() {
-    if (this.statusEffects.isParalyzed) return;
-    this.lastAction = "Paralyzed";
-    this.statusEffects.isParalyzed = true;
-    this.paralyzedMoves = 5;
+    if (this.statusEffects.paralyzed.curr) return;
+    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Paralyzed"]);
+    this.statusEffects.paralyzed.curr = true;
+    this.statusEffects.paralyzed.stacks = 5;
   }
 
   entangle() {
-    if (this.statusEffects.isEntangled) return;
-    this.lastAction = "Entangled";
-    this.statusEffects.isEntangled = true;
+    if (this.statusEffects.entangled.curr) return;
+    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Entangled"]);
+    this.statusEffects.entangled.curr = true;
   }
 
   burn() {
-    this.lastAction = "Burned";
-    this.statusEffects.isBurning = true;
-    this.burnStacks += 3;
+    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Burned"]);
+    this.statusEffects.burning.curr = true;
+    this.statusEffects.burning.stacks += 3;
+  }
+
+  attack(other) {
+    if (this.applyBurn()) return;
+    if (this.applyPoison()) return;
+    if (this.checkParalyze()) return;
+    if (this.checkEntanglement()) return;
+    this.attr[AttrIDs.Energy].current = constrain(this.attr[AttrIDs.Energy].current - ActionCost.NormalAction, 0, this.attr[AttrIDs.Energy].total);
+    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Normal Attack"]);
+    let minDmg = this.attr[AttrIDs.Damage].total * this.damageRange.min,
+      maxDmg = this.attr[AttrIDs.Damage].total * this.damageRange.max;
+    let dmg = minDmg + Math.random() * (maxDmg - minDmg);
+    if (other.hp !== 0) {
+      if (other.hasDodgedAttack(this)) {
+        mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Missed Attack"]);
+        return;
+      }
+      if (this.attr[AttrIDs.Paralyze].total > 0) {
+        let r = Math.random();
+        if (r < this.attr[AttrIDs.Paralyze].total) {
+          other.paralyze();
+        }
+      }
+      if (this.attr[AttrIDs.Poison].total > 0) {
+        let r = Math.random();
+        if (r < this.attr[AttrIDs.Poison].total) {
+          other.poison();
+        }
+      }
+      if (this.attr[AttrIDs.SpiderWeb].total > 0) {
+        let r = Math.random();
+        if (r < this.attr[AttrIDs.SpiderWeb].total) {
+          other.entangle();
+        }
+      }
+      if (this.attr[AttrIDs.Burn].total > 0) {
+        let r = Math.random();
+        if (r < this.attr[AttrIDs.Burn].total) {
+          other.burn();
+        }
+      }
+      other.updateHP(-dmg);
+    }
+  }
+
+  quickAttack(other) {
+    if (this.applyBurn()) return;
+    if (this.applyPoison()) return;
+    if (this.checkParalyze()) return;
+    if (this.checkEntanglement()) return;
+    this.attr[AttrIDs.Energy].current = constrain(this.attr[AttrIDs.Energy].current - ActionCost.QuickAction, 0, this.attr[AttrIDs.Energy].total);
+    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Quick Attack"]);
+    let r = ~~(Math.random() * 3) + 1;
+    for (let i = 0; i < r; i++) {
+      if (other.statusEffects.dead.curr) return;
+      let minDmg = this.attr[AttrIDs.Damage].total * this.damageRange.min,
+        maxDmg = this.attr[AttrIDs.Damage].total * this.damageRange.max;
+      let dmg = minDmg + Math.random() * (maxDmg - minDmg);
+      if (other.hp !== 0)
+        other.updateHP(-dmg);
+    }
+  }
+
+  heal(other) {
+    if (this.applyBurn()) return;
+    if (this.checkPoison()) return;
+    if (this.checkParalyze()) return;
+    this.attr[AttrIDs.Energy].current = constrain(this.attr[AttrIDs.Energy].current - ActionCost.HealAction, 0, this.attr[AttrIDs.Energy].total);
+    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Heal"]);
+    let minHeal = this.attr[AttrIDs.Damage].total * this.healRange.min,
+      maxHeal = this.attr[AttrIDs.Damage].total * this.healRange.max;
+    let heal = minHeal + Math.random() * (maxHeal - minHeal);
+    this.updateHP(heal);
+  }
+
+  wait() {
+    if (this.applyBurn()) return;
+    if (this.checkParalyze()) return;
+    if (this.applyPoison()) return;
+    this.attr[AttrIDs.Energy].current = constrain(this.attr[AttrIDs.Energy].current - ActionCost.WaitAction, 0, this.attr[AttrIDs.Energy].total);
+    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Waiting"]);
   }
 
   addExperience(other) {
-    this.experience += other.expReward * this.attributes[AttributeIDs.Experience].total;
+    this.experience += other.expReward * this.attr[AttrIDs.Experience].total;
     if (this.experience >= this.expForLvlUp) this.levelUp();
   }
 
@@ -247,94 +349,5 @@ class Deity {
     this.skillPoints += this.skillPointsPerLevel * (r - c);
 
     this.calculateTotalAttributes();
-  }
-
-  attack(other) {
-    if (this.applyBurn()) return;
-    if (this.applyPoison()) return;
-    if (this.checkParalyze()) return;
-    if (this.checkEntanglement()) return;
-    this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.NormalAction, 0, this.attributes[AttributeIDs.Energy].total);
-    this.lastAction = "Normal Attack";
-    let minDmg = this.attributes[AttributeIDs.Damage].total * this.damageRange.min,
-      maxDmg = this.attributes[AttributeIDs.Damage].total * this.damageRange.max;
-    let dmg = minDmg + Math.random() * (maxDmg - minDmg);
-    if (other.hp !== 0) {
-      if (other.hasDodgedAttack(this)) {
-        this.lastAction = "Missed Attack";
-        return;
-      }
-      if (this.attributes[AttributeIDs.Paralyze].total > 0) {
-        let r = Math.random();
-        if (r < this.attributes[AttributeIDs.Paralyze].total) {
-          other.paralyze();
-        }
-      }
-      if (this.attributes[AttributeIDs.Poison].total > 0) {
-        let r = Math.random();
-        if (r < this.attributes[AttributeIDs.Poison].total) {
-          other.poison();
-        }
-      }
-      if (this.attributes[AttributeIDs.SpiderWeb].total > 0) {
-        let r = Math.random();
-        if (r < this.attributes[AttributeIDs.SpiderWeb].total) {
-          other.entangle();
-        }
-      }
-      if (this.attributes[AttributeIDs.Burn].total > 0) {
-        let r = Math.random();
-        if (r < this.attributes[AttributeIDs.Burn].total) {
-          other.burn();
-        }
-      }
-      other.updateHP(-dmg);
-    }
-  }
-
-  quickAttack(other) {
-    if (this.applyBurn()) return;
-    if (this.applyPoison()) return;
-    if (this.checkParalyze()) return;
-    if (this.checkEntanglement()) return;
-    this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.QuickAction, 0, this.attributes[AttributeIDs.Energy].total);
-    this.lastAction = "Quick Attack";
-    let r = ~~(Math.random() * 3) + 1;
-    for (let i = 0; i < r; i++) {
-      if (other.isDead) return;
-      let minDmg = this.attributes[AttributeIDs.Damage].total * this.damageRange.min,
-        maxDmg = this.attributes[AttributeIDs.Damage].total * this.damageRange.max;
-      let dmg = minDmg + Math.random() * (maxDmg - minDmg);
-      if (other.hp !== 0)
-        other.updateHP(-dmg);
-    }
-  }
-
-  heal(other) {
-    if (this.applyBurn()) return;
-    if (this.checkPoison()) return;
-    if (this.checkParalyze()) return;
-    this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.HealAction, 0, this.attributes[AttributeIDs.Energy].total);
-    this.lastAction = "Heal";
-    let minHeal = this.attributes[AttributeIDs.Damage].total * this.healRange.min,
-      maxHeal = this.attributes[AttributeIDs.Damage].total * this.healRange.max;
-    let heal = minHeal + Math.random() * (maxHeal - minHeal);
-    this.updateHP(heal);
-  }
-
-  wait() {
-    if (this.applyBurn()) return;
-    if (this.checkParalyze()) return;
-    if (this.applyPoison()) return;
-    this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.WaitAction, 0, this.attributes[AttributeIDs.Energy].total);
-    this.lastAction = "Waiting";
-  }
-
-  updateHP(val) {
-    this.attributes[AttributeIDs.Hitpoint].current = constrain(this.attributes[AttributeIDs.Hitpoint].current + val, 0, this.attributes[AttributeIDs.Hitpoint].total);
-    if (this.attributes[AttributeIDs.Hitpoint].current === 0) {
-      this.statusEffects.isDead = true;
-      this.die();
-    }
   }
 }

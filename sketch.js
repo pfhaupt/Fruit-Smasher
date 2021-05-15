@@ -39,7 +39,7 @@ function setup() {
   mainWindow.resize();
   requestAnimationFrame(drawStuff);
 
-  loadMap(0);
+  loadDefaultMap(0);
 
   //loadImages();
   //map = loadMap(currentZone);
@@ -68,12 +68,12 @@ function mouseReleased() {
     let inv = mainWindow.currentSubMenu;
     let part = 1;
     let end = itemCount;
-    if (mouseX < inv.children[1].xAbsToScreen) {
+    if (mouseX < inv.ch[1].xAbsToScreen) {
       part = 0;
       end = equipSlotCount;
     }
     for (let i = 0; i < end; i++) {
-      let itemSlot = inv.children[part].children[i];
+      let itemSlot = inv.ch[part].ch[i];
       if (mouseX > itemSlot.xAbsToScreen && mouseX < itemSlot.xAbsToScreen + itemSlot.wAbsToScreen &&
         mouseY > itemSlot.yAbsToScreen && mouseY < itemSlot.yAbsToScreen + itemSlot.hAbsToScreen) {
         let slotID = part * equipSlotCount + i;

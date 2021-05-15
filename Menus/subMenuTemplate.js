@@ -9,7 +9,7 @@ class MenuTemplate {
     this.yAbsToScreen = 0;
     this.wAbsToScreen = 0;
     this.hAbsToScreen = 0;
-    this.children = []; //Alle Elemente eines Fensters hier rein, wenn möglich
+    this.ch = []; //Alle Elemente eines Fensters hier rein, wenn möglich
     this.hidden = true;
     this.aspectRatio = 0;
   }
@@ -21,28 +21,28 @@ class MenuTemplate {
     stroke(102);
     rect(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
     pop();
-    for (var c of this.children)
+    for (var c of this.ch)
       if (typeof c !== "undefined" && c !== null)
         c.displayOnce();
   }
 
   displayEveryFrame() {
     if (this.hidden) return;
-    for (var c of this.children)
+    for (var c of this.ch)
       if (typeof c !== "undefined" && c !== null)
         c.displayEveryFrame();
   }
 
   show() {
     this.hidden = false;
-    for (let c of this.children)
+    for (let c of this.ch)
       if (typeof c !== "undefined" && c !== null)
         c.show();
   }
 
   hide() {
     this.hidden = true;
-    for (let c of this.children)
+    for (let c of this.ch)
       if (typeof c !== "undefined" && c !== null)
         c.hide();
   }
@@ -65,7 +65,7 @@ class MenuTemplate {
         this.yAbsToScreen = this.yAbsToScreen + (this.tempH - this.hAbsToScreen) / 2.0;
       }
     }
-    for (var c of this.children)
+    for (var c of this.ch)
       if (typeof c !== "undefined" && c !== null)
         c.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
   }

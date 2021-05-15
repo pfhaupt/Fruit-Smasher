@@ -27,10 +27,6 @@ let SubTextureIDs = {
 };
 
 let mapDir = "MapStuff/usedTextures/";
-let dim = 10;
-let mapSize = 1000;
-let tileSize = mapSize / dim;
-let minimap;
 let textureColorList = [];
 let entityColorList = [];
 let entityNames = [];
@@ -43,141 +39,17 @@ function generateDefaultMap() {
   dim = 10;
   tileSize = mapSize / dim;
 
-  let m = mainWindow.subMenus[0].children[0];
+  let m = mainWindow.subMenus[0].ch[0];
   let xrel = m.xRelToParent;
   let yrel = m.yRelToParent;
   let hrel = m.hRelToParent;
   let wrel = m.wRelToParent;
-  mainWindow.subMenus[0].children[0] = new WorldMap(10, 0, 0, 0, 1, 1);
-  mainWindow.subMenus[0].children[0].xRelToParent = xrel;
-  mainWindow.subMenus[0].children[0].yRelToParent = yrel;
-  mainWindow.subMenus[0].children[0].hRelToParent = hrel;
-  mainWindow.subMenus[0].children[0].wRelToParent = wrel;
-  mainWindow.subMenus[0].children[0].updateImages(0, 0);
-}
-
-function loadActualMap(sav) {
-  enemies = [];
-  entityCount = {
-    enemy: {
-      normal: {
-        current: 0,
-        total: 0
-      },
-      boss: {
-        current: 0,
-        total: 0
-      },
-      spawner: {
-        current: 0,
-        total: 0
-      }
-    },
-    object: {
-      key: {
-        current: 0,
-        total: 0
-      }
-    }
-  }
-
-  let newMap = new WorldMap(0, 0);
-  let mapFile = sav;
-  dim = mapFile.width;
-  tileSize = mapSize / dim;
-  newMap.width = dim;
-  newMap.height = dim;
-  mainWindow.subMenus[0].children[0].children[1].clear();
-
-  let d = dim;
-
-  let getID = (a) => {
-    return {
-      tileID: round((a - (a % 50)) / 50),
-      entityID: a % 50
-    };
-  };
-  sav.loadPixels();
-  newMap.tiles = new Array(d);
-  for (let x = 0; x < d; x++) {
-    newMap.tiles[x] = [];
-    for (let y = 0; y < d; y++) {
-      newMap.tiles[x][y] = new TileSet();
-      let id = mapFile.pixels[(y * dim + x) * 4];
-      let ids = getID(id);
-      if (ids.tileID !== 0) newMap.tiles[x][y].set(ids.tileID);
-      if (ids.entityID !== 0) newMap.tiles[x][y].setEntity(ids.entityID);
-      if (ids.entityID >= 1 && ids.entityID <= 7) newMap.tiles[x][y].setEnemyID(enemies.length);
-      newMap.tiles[x][y].setTex(newMap.getNoise2D(x, y));
-      mainWindow.subMenus[0].children[0].children[0].handleEnemy(x, y, ids.entityID);
-    }
-  }
-
-  let m = mainWindow.subMenus[0].children[0].children[0];
-  let xrel = m.xRelToParent;
-  let yrel = m.yRelToParent;
-  let hrel = m.hRelToParent;
-  let wrel = m.wRelToParent;
-  mainWindow.subMenus[0].children[0].children[0] = newMap;
-  mainWindow.subMenus[0].children[0].children[0].xRelToParent = xrel;
-  mainWindow.subMenus[0].children[0].children[0].yRelToParent = yrel;
-  mainWindow.subMenus[0].children[0].children[0].hRelToParent = hrel;
-  mainWindow.subMenus[0].children[0].children[0].wRelToParent = wrel;
-
-  mainWindow.subMenus[0].children[0].children[0].cachedTiles = [];
-
-
-  let viewRange = player.attributes[AttributeIDs.Sight].getTotal();
-  let xPos = player.position.x - floor(viewRange / 2);
-  let yPos = player.position.y - floor(viewRange / 2);
-
-  let w1 = 1 / viewRange;
-  for (let i = 0; i < viewRange; i++) {
-    mainWindow.subMenus[0].children[0].children[0].cachedTiles[i] = [];
-    for (let j = 0; j < viewRange; j++) {
-      let posWithOffX = xPos + i;
-      let posWithOffY = yPos + j;
-      mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j] = {
-        tile: null,
-        entity: null
-      };
-      if (posWithOffX >= 0 && posWithOffX < mainWindow.subMenus[0].children[0].children[0].tiles.length && posWithOffY >= 0 && posWithOffY < mainWindow.subMenus[0].children[0].children[0].tiles.length) {
-        let t = mainWindow.subMenus[0].children[0].children[0].tiles[posWithOffX][posWithOffY];
-        t.visible = true;
-        mainWindow.subMenus[0].children[0].children[1].updatePixels(posWithOffX, posWithOffY);
-        let tID = t.tileID;
-        let eID = t.entityID;
-        let sID = t.subTexID;
-        mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].tile = new CustomImage(textureList[tID][sID], 0, 0, w1, w1);
-        if (eID !== 0) mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].entity = new CustomImage(entityList[eID], 0, 0, w1, w1);
-      } else {
-        let sID = mainWindow.subMenus[0].children[0].children[0].getNoise2D(posWithOffX, posWithOffY);
-        mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].tile = new CustomImage(mapDir + "textures/void_tiles/void" + sID + ".png", 0, 0, w1, w1);
-        mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].entity = null;
-      }
-      mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].tile.hide();
-      if (mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].entity) mainWindow.subMenus[0].children[0].children[0].cachedTiles[i][j].entity.hide();
-    }
-  }
-
-  for (let enemy of enemies) enemy.updatePositions(enemy.position.x, enemy.position.y);
-
-  mainWindow.subMenus[0].children[0].children[0].updateImages(0, 0);
-  mainWindow.resize();
-  mainWindow.displayOnce();
-  entityCount.enemy.boss.current = entityCount.enemy.boss.total;
-  entityCount.enemy.normal.current = entityCount.enemy.normal.total;
-  entityCount.enemy.spawner.current = entityCount.enemy.spawner.total;
-  entityCount.object.key.current = entityCount.object.key.total;
-  player.resetMoveCount();
-  mainWindow.subMenus[0].children[1].setAction(ActionScreen.Idle);
-}
-
-function loadMap(zone) {
-  mainWindow.subMenus[0].children[0].children[0].hide();
-  let saveName = "MapStuff/maps/test" + zone + ".png";
-  //if (!isLocalhost) saveName = "Fruit-Smasher/" + saveName;
-  loadImage(saveName, loadActualMap, generateDefaultMap);
+  mainWindow.subMenus[0].ch[0] = new WorldMap(10, 0, 0, 0, 1, 1);
+  mainWindow.subMenus[0].ch[0].xRelToParent = xrel;
+  mainWindow.subMenus[0].ch[0].yRelToParent = yrel;
+  mainWindow.subMenus[0].ch[0].hRelToParent = hrel;
+  mainWindow.subMenus[0].ch[0].wRelToParent = wrel;
+  mainWindow.subMenus[0].ch[0].updateImages(0, 0);
 }
 
 function getAverageColor(img, i, j) {
@@ -296,9 +168,9 @@ class Minimap extends BaseUIBlock {
         minimap.set(x * w + i, y * h + j, colorList[id]);
       }
     }*/
-    if (!mainWindow.subMenus[0].children[0].children[0].tiles[x][y].visible) return;
-    mainWindow.subMenus[0].children[0].children[0].tiles[x][y].visible = true;
-    let map = mainWindow.subMenus[0].children[0].children[0].tiles;
+    if (!mainWindow.subMenus[0].ch[0].ch[0].tiles[x][y].visible) return;
+    mainWindow.subMenus[0].ch[0].ch[0].tiles[x][y].visible = true;
+    let map = mainWindow.subMenus[0].ch[0].ch[0].tiles;
     let w = this.content.width / map.length;
 
     let tID = map[x][y].tileID;
@@ -350,7 +222,7 @@ class WorldMap extends BaseUIBlock {
     for (let i = 0; i < this.width; i++) {
       this.tiles[i] = [];
       for (let j = 0; j < this.height; j++) {
-        this.tiles[i][j] = new TileSet(i, j);
+        this.tiles[i][j] = new TileSet();
       }
     }
     this.cachedTiles = [];
@@ -433,7 +305,7 @@ class WorldMap extends BaseUIBlock {
   }
 
   updateCacheMap(x, y, id) {
-    let viewRange = player.attributes[AttributeIDs.Sight].total;
+    let viewRange = player.attr[AttrIDs.Sight].total;
     let xPos = player.position.x - floor(viewRange / 2);
     let yPos = player.position.y - floor(viewRange / 2);
     let w1 = 1 / viewRange;
@@ -445,6 +317,7 @@ class WorldMap extends BaseUIBlock {
       if (id !== 0) {
         t.entity = new CustomImage(entityList[id], x1 * w1, y1 * w1, w1, w1);
         t.entity.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+        this.makeThicker();
         t.entity.show();
         t.entity.displayOnce();
       }
@@ -454,7 +327,7 @@ class WorldMap extends BaseUIBlock {
   }
 
   updateImages(x, y) {
-    let viewRange = player.attributes[AttributeIDs.Sight].total;
+    let viewRange = player.attr[AttrIDs.Sight].total;
     let xPos = player.position.x - floor(viewRange / 2);
     let yPos = player.position.y - floor(viewRange / 2);
     let w1 = 1 / viewRange;
@@ -480,8 +353,8 @@ class WorldMap extends BaseUIBlock {
             let sID = this.tiles[newX][newY].subTexID;
             tmpArray[i][j].tile = new CustomImage(textureList[tID][sID], 0, 0, w1, w1);
             if (eID !== 0) tmpArray[i][j].entity = new CustomImage(entityList[eID], 0, 0, w1, w1);
-            mainWindow.subMenus[0].children[0].children[0].tiles[newX][newY].visible = true;
-            mainWindow.subMenus[0].children[0].children[1].updatePixels(newX, newY);
+            mainWindow.subMenus[0].ch[0].ch[0].tiles[newX][newY].visible = true;
+            mainWindow.subMenus[0].ch[0].ch[1].updatePixels(newX, newY);
           } else {
             let sID = this.getNoise2D(newX, newY);
             tmpArray[i][j].tile = new CustomImage(mapDir + "textures/void_tiles/void" + sID + ".png", 0, 0, w1, w1);
@@ -540,12 +413,13 @@ class WorldMap extends BaseUIBlock {
       }
     }
 
+    this.makeThicker();
     this.displayOnce();
   }
 
   forceUpdate() {
     console.log("Forcing Cached Tiles Update");
-    let viewRange = player.attributes[AttributeIDs.Sight].total;
+    let viewRange = player.attr[AttrIDs.Sight].total;
     let xPos = player.position.x - floor(viewRange / 2);
     let yPos = player.position.y - floor(viewRange / 2);
     let w1 = 1 / viewRange;
@@ -578,17 +452,46 @@ class WorldMap extends BaseUIBlock {
         }
         this.cachedTiles[i][j].tile.xRelToParent = i * w1;
         this.cachedTiles[i][j].tile.yRelToParent = j * w1;
-        this.cachedTiles[i][j].tile.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
         if (this.cachedTiles[i][j].entity) {
           this.cachedTiles[i][j].entity.xRelToParent = i * w1;
           this.cachedTiles[i][j].entity.yRelToParent = j * w1;
-          this.cachedTiles[i][j].entity.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
         }
       }
     }
-    this.show();
-    this.displayOnce();
-    mainWindow.subMenus[0].children[0].children[1].displayOnce();
+    this.makeThicker();
+  }
+
+  makeThicker() {
+    let scalingFactor = 28 / 256;
+    let oldH, oldW, oldX, oldY;
+    let newX, newY, newW, newH;
+    let w1 = 1 / this.cachedTiles.length;
+    for (let i = 0; i < this.cachedTiles.length; i++) {
+      for (let j = 0; j < this.cachedTiles[i].length; j++) {
+        let ct = this.cachedTiles[i][j].tile;
+        let ce = this.cachedTiles[i][j].entity;
+        oldW = w1;
+        oldH = w1;
+        oldX = i * w1;
+        oldY = j * w1;
+        newW = oldW * (1 + scalingFactor);
+        newH = oldH * (1 + scalingFactor);
+        newX = oldX - (newW - oldW) / 2;
+        newY = oldY - (newH - oldH) / 2;
+        ct.xRelToParent = newX;
+        ct.yRelToParent = newY;
+        ct.hRelToParent = newH;
+        ct.wRelToParent = newW;
+        ct.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+        if (ce) {
+          ce.xRelToParent = newX;
+          ce.yRelToParent = newY;
+          ce.hRelToParent = newH;
+          ce.wRelToParent = newW;
+          ce.resize(this.xAbsToScreen, this.yAbsToScreen, this.wAbsToScreen, this.hAbsToScreen);
+        }
+      }
+    }
   }
 
   set(x, y, id) {
@@ -623,10 +526,7 @@ class WorldMap extends BaseUIBlock {
 
   getNoise2D(i, j) {
     let noiseVal = noise(i * this.xMul + this.xOffs, j * this.yMul + this.yOffs);
-    let len;
-    if (i < 0 || j < 0 || i >= this.width || j >= this.height) len = textureList[3].length + 1;
-    else len = textureList[this.tiles[i][j].tileID].length + 1;
-    this.noiseMaxID = len;
+    let len = 4;
     noiseVal = floor(noiseVal * this.noiseMaxID);
     return noiseVal;
   }

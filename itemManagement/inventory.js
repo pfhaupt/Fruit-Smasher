@@ -6,17 +6,17 @@ class Inventory extends MenuTemplate {
     this.itemsPerPage = this.itemsPerLine ** 2;
     this.aspectRatio = 1 / (Math.min(itemCount, this.itemsPerPage) / this.itemsPerPage);
 
-    this.children = new Array(itemCount);
+    this.ch = new Array(itemCount);
     let w1 = 1.0 / this.itemsPerLine;
     let h1 = w1 * this.aspectRatio;
     for (let i = 0; i < itemCount; i++) {
       let x = i % this.itemsPerLine;
       let y = floor(i / this.itemsPerLine);
-      this.children[i] = new ItemSlot(17 + i, x * w1, y * h1, w1, h1, null);
+      this.ch[i] = new ItemSlot(17 + i, x * w1, y * h1, w1, h1, null);
     }
     for (let i = 0; i < itemCount; i++) {
       if (typeof itemList[i] !== "undefined" && itemList[i] !== null) {
-        this.children[i].setItem(itemList[i]);
+        this.ch[i].setItem(itemList[i]);
       }
     }
 

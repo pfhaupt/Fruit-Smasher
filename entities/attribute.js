@@ -1,4 +1,4 @@
-let AttributeIDs = {
+let AttrIDs = {
   Damage: 0,
   Energy: 1,
   Hitpoint: 2,

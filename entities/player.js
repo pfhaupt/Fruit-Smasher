@@ -1,16 +1,16 @@
 class Player extends Deity {
   constructor() {
     super();
-
+    this.lastActionID = 8;
     this.chestCount = [];
     for (var i = 0; i < 4 * maxZone; i++) this.chestCount[i] = 0;
   }
 
   checkMovement(keyCode) {
-    if (this.attributes[AttributeIDs.MoveCount].current === 0) return;
-    let map = mainWindow.subMenus[SubMenu.Field].children[0].children[0];
-    let minimap = mainWindow.subMenus[SubMenu.Field].children[0].children[1];
-    let action = mainWindow.subMenus[SubMenu.Field].children[1];
+    if (this.attr[AttrIDs.MoveCount].current === 0) return;
+    let map = mainWindow.subMenus[SubMenu.Field].ch[0].ch[0];
+    let minimap = mainWindow.subMenus[SubMenu.Field].ch[0].ch[1];
+    let action = mainWindow.subMenus[SubMenu.Field].ch[1];
     if (action.getCurrentAction() === "Combat") return;
 
     if (this.applyBurn()) {
@@ -78,7 +78,7 @@ class Player extends Deity {
       }
       return;
     }
-    this.attributes[AttributeIDs.MoveCount].current--;
+    this.attr[AttrIDs.MoveCount].current--;
     action.setAction(ActionScreen.Idle);
 
     //Set Player on Map
@@ -99,16 +99,17 @@ class Player extends Deity {
   }
 
   die() {
-    let action = mainWindow.subMenus[SubMenu.Field].children[1];
+    let action = mainWindow.subMenus[SubMenu.Field].ch[1];
     action.setAction(ActionScreen.Defeat);
   }
 
   revive() {
-    for (let att of this.attributes) {
+    for (let att of this.attr) {
       att.calculateTotal();
       att.resetCurrent();
     }
-    console.log("hello");
+    this.statusEffects.dead.curr = false;
+    mainWindow.displayOnce();
   }
 
   checkChestDrop(enemy) {
@@ -132,12 +133,12 @@ class Player extends Deity {
   flee(other) {
     if (this.applyBurn()) return;
     if (this.applyPoison()) return;
-    this.attributes[AttributeIDs.Energy].current = constrain(this.attributes[AttributeIDs.Energy].current - ActionCost.FleeAction, 0, this.attributes[AttributeIDs.Energy].total);
-    this.lastAction = "Attempted to flee.";
+    this.attr[AttrIDs.Energy].current = constrain(this.attr[AttrIDs.Energy].current - ActionCost.FleeAction, 0, this.attr[AttrIDs.Energy].total);
+    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Attempted to flee."]);
     let fleeChance = getFleeChance(player, other);
     if (this.checkParalyze()) fleeChance *= 0.5;
     if (this.checkEntanglement()) fleeChance = 0.0;
-    if (random() < fleeChance) mainWindow.subMenus[SubMenu.Field].children[1].setAction(ActionScreen.PlayedFled);
+    if (random() < fleeChance) mainWindow.subMenus[SubMenu.Field].ch[1].setAction(ActionScreen.PlayedFled);
   }
 }
 

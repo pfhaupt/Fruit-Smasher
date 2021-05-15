@@ -1,4 +1,4 @@
-let maxZone = 7;
+let maxZone = 8;
 
 let itemsPerZone = 10;
 let itemCount = maxZone * itemsPerZone;
@@ -50,7 +50,7 @@ function generateItems() {
       else if (index >= 6 && index < 8) id = 6;
       else if (index >= 8) id = 7;
       let name = itemTypeName[id];
-      let imgSrc = "images/items/Chestplate0.png";
+      let imgSrc = "images/items/" + name + "" + z + ".png";
       itemList[i + z * itemsPerZone] = new Item(i + z * itemsPerZone, getRandomName(i), imgSrc, itemType[itemTypeName[id % itemTypeName.length]], 1000, bonus, boost, effect);
     }
   }
@@ -74,19 +74,19 @@ function getRandomEffect(len) {
 
 class Item {
   constructor(id, name, imgSrc, equipmentSlot, maxLevel, boost, bonus, effect) {
-    this.id = id ?? -1;
-    this.name = name ?? "";
+    this.id = id;
+    this.name = name;
     this.img = createImg(imgSrc, "Image doesn't exist yet");
     this.img.hide();
-    this.itemType = equipmentSlot ?? -1;
+    this.itemType = (typeof equipmentSlot === "undefined" || equipmentSlot === null) ? -1 : equipmentSlot;
     this.level = 0;
     this.maxLevel = maxLevel;
     this.unlocked = false;
     this.canDrop = true;
-    this.boost = boost ?? [];
-    this.baseBonus = bonus ?? [];
+    this.boost = (typeof boost === "undefined" || equipmentSlot === null) ? [] : boost;
+    this.baseBonus = (typeof bonus === "undefined" || equipmentSlot === null) ? [] : bonus;
     this.currentBonus = this.baseBonus;
-    this.effect = effect ?? [];
+    this.effect = (typeof effect === "undefined" || equipmentSlot === null) ? [] : effect;
 
     /*
     Grundidee:

@@ -1,19 +1,6 @@
 TODO-LIST / "Have no idea? Do this"-List
 
 Necessary Features:
-  - Balancing
-  -> Please introduce real enemies and balance their stats so that they become useful
-  -> Player dies in like 4 rounds, too hard
-
-  - Spawners
-  -> Entities that spawn Enemies, for more fun that doesn't end in 3 rounds
-  -> Shouldn't be too hard to fight, but also not too easy
-  -> Kinda necessary to advance, but not mandatory
-
-  - Add Saving/Loading
-  -> What to save... What to load? Enemies? Map? map_played.png?
-  -> Save/Load Buttons in Options, perhaps even Export/Import?
-
   - Quests and Tutorials
   -> Give the player something to do
 
@@ -32,9 +19,17 @@ Free time? Do this:
   - Draw Item images D:
   -> It has to be done at some point
 
+  - Balancing
+  -> Please introduce real enemies and balance their stats so that they become useful
+  -> Player dies in like 4 rounds, too hard
+
 Nice to have / QoL:
   - Add the Music
   -> Once done, add a Mute Button to Options
+  
+  - Improve Saving/Loading
+  -> 500kB iS tOo MuCh, pLeAsE ImPrOvE
+
 
   - Advanced Stat Breakdown
   -> Display what Stats are made of

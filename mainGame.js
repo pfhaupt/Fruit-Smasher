@@ -20,12 +20,20 @@ function disableGameLoop() {
 }
 
 function initEnemyMove() {
-  player.attributes[AttributeIDs.MoveCount].current = 0;
+  enemyTurn = true;
+  player.attr[AttrIDs.MoveCount].current = 0;
   player.applyPoison();
   enemyMove();
 }
 
-enemiesMoved = 0;
+function endRound() {
+  if (enemyTurn) return;
+  initEnemyMove();
+  mainWindow.displayOnce();
+}
+
+let enemiesMoved = 0;
+let enemyTurn = false;
 
 function enemyMove() {
   enemiesMoved = 0;
@@ -34,9 +42,10 @@ function enemyMove() {
       enemiesMoved++;
       if (enemiesMoved === enemies.length) {
         // Here we're done
-        //mainWindow.subMenus[0].children[0].children[0].forceUpdate();
+        //mainWindow.subMenus[0].ch[0].ch[0].forceUpdate();
         player.resetMoveCount();
         mainWindow.displayOnce();
+        enemyTurn = false;
       }
     });
   }
@@ -56,8 +65,8 @@ function gameLoop() {
 }
 
 function getEstimatedRoundsTillDeath(from, to) {
-  if (to.attributes[AttributeIDs.Damage].total === 0) return 1000;
-  return (from.attributes[AttributeIDs.Hitpoint].current / to.attributes[AttributeIDs.Damage].total);
+  if (to.attr[AttrIDs.Damage].total === 0) return 1000;
+  return (from.attr[AttrIDs.Hitpoint].current / to.attr[AttrIDs.Damage].total);
 }
 
 function getFleeChance(from, to) {

@@ -145,13 +145,13 @@ class Text extends BaseUIBlock {
     this.txtSize = floor(this.wAbsToScreen / this.textLengthInPixels);
     this.txtSize = Math.min(this.txtSize, this.hAbsToScreen * 0.8);
     this.txtSize = Math.min(this.txtSize, this.maxTxtSize);
+    this.content.style('font-size', this.txtSize + 'px');
   }
 
   resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs) {
     super.resize(parentXAbs, parentYAbs, parentWAbs, parentHAbs);
     this.setTextLength();
     this.setTextSize();
-    this.content.style('font-size', this.txtSize + 'px');
     this.content.style('margin', (this.hAbsToScreen / 2) + 'px 0px');
     //this.content.center();
   }
@@ -173,6 +173,27 @@ class Text extends BaseUIBlock {
   }
 }
 
+class SwapableText extends Text {
+  constructor(messageArray, x, y, w, h, a = 'center', format = true, maxFontSize = defaultFontSize) {
+    super(messageArray, x, y, w, h, a, format, maxFontSize);
+    this.messages = messageArray;
+    this.setText(1);
+  }
+
+  setText(i) {
+    if (i < 0 || i > this.messages.length) super.setText([""]);
+    super.setText(this.messages[i]);
+  }
+
+  displayEveryFrame() {
+    super.displayEveryFrame();
+  }
+
+  displayOnce() {
+    super.displayOnce();
+  }
+}
+
 class CustomImage extends BaseUIBlock {
   constructor(n, x, y, w, h, ar = 1) {
     super(x, y, w, h);
@@ -184,7 +205,7 @@ class CustomImage extends BaseUIBlock {
 
 class MainMenuButton extends Button {
   constructor(name, x, y, w, h, id) {
-    super(name, x, y, w, h, function() {
+    super(name, x, y, w, h, function () {
       mainWindow.showMenu(id);
       mainWindow.resize();
       mainWindow.displayOnce();
@@ -192,12 +213,32 @@ class MainMenuButton extends Button {
   }
 }
 
+class FileInput extends Button {
+  constructor(name, x, y, w, h, fun, s = defaultFontSize) {
+    super(name, x, y, w, h, fun, s);
+    this.content.elt.remove();
+    this.content = createFileInput(loadSaveFile);
+    this.content.style('font-size', this.txtSize + 'px');
+    this.content.style('font-weight', 'bold');
+    this.content.style('font-family', 'monospace');
+    this.content.style('display', 'inline-flex');
+    this.content.style('justify-content', 'center');
+    this.content.style('align-items', 'center');
+    this.content.style('padding', '0.5em var(--padding-x)');
+    this.content.style('border-width', '2px');
+    this.content.style('border-style', 'solid');
+    this.content.style('background', 'rgba(255, 150, 0, 0.8)');
+    this.content.style('opacity', '0.8');
+    this.content.style('border-color', ' rgba(0, 0, 255, 0.8)');
+  }
+}
+
 class ItemSlot extends BaseUIBlock {
   constructor(id, x, y, w, h, item, itemTypeID = -1) {
     super(x, y, w, h);
     this.slotID = id;
-    this.item = item ?? null;
-    this.itemID = item?.id ?? -1;
+    this.item = (typeof item === "undefined" || item === null) ? null : item;
+    this.itemID = ((typeof item === "undefined" || item === null) || typeof item.id === "undefined" || item.id === null) ? -1 : item.id;
     this.itemTypeID = itemTypeID;
     this.mouseOver = false;
     if (item === null || item.img === null) this.content = null;
@@ -349,8 +390,8 @@ function swapItems(id1, id2) {
   //Get both ItemSlots
   if (id1 >= equipSlotCount && id2 >= equipSlotCount) {
     //Both Items in Inventory
-    slot1 = inv.children[1].children[id1 - equipSlotCount];
-    slot2 = inv.children[1].children[id2 - equipSlotCount];
+    slot1 = inv.ch[1].ch[id1 - equipSlotCount];
+    slot2 = inv.ch[1].ch[id2 - equipSlotCount];
     item1 = slot1.itemID;
     item2 = slot2.itemID;
     slot1.setItemByID(item2);
@@ -358,16 +399,16 @@ function swapItems(id1, id2) {
     return;
   } else if (id1 >= equipSlotCount && id2 < equipSlotCount) {
     //Item One in Inventory, Item Two in Equipment
-    slot1 = inv.children[1].children[id1 - equipSlotCount];
-    slot2 = inv.children[0].children[id2];
+    slot1 = inv.ch[1].ch[id1 - equipSlotCount];
+    slot2 = inv.ch[0].ch[id2];
   } else if (id1 < equipSlotCount && id2 >= equipSlotCount) {
     //Item One in Equipment, Item Two in Inventory
-    slot1 = inv.children[0].children[id1];
-    slot2 = inv.children[1].children[id2 - equipSlotCount];
+    slot1 = inv.ch[0].ch[id1];
+    slot2 = inv.ch[1].ch[id2 - equipSlotCount];
   } else if (id1 < equipSlotCount && id2 < equipSlotCount) {
     //Both Items in Equipment
-    slot1 = inv.children[0].children[id1];
-    slot2 = inv.children[0].children[id2];
+    slot1 = inv.ch[0].ch[id1];
+    slot2 = inv.ch[0].ch[id2];
   }
 
   //Is swapping Items possible? (E.g. can you equip a Sword in the Shield slot?)
@@ -399,6 +440,7 @@ function roundToSpecificDecimalLength(val, digits) {
 }
 
 let replacementChar = "0";
+
 function toFixedDecimalLength(val, digits) {
   if (typeof val !== "number") return val;
   var splitted = (val + "").split(".");
