@@ -139,7 +139,9 @@ class Deity {
 
   hasDodgedAttack(other) {
     if (this.attr[AttrIDs.Evasion].total > other.attr[AttrIDs.Accuracy].total) {
-      return Math.random(100) < GlobalChance.Evade;
+      let r = random() * 100;
+      let b = r < GlobalChance.Evade;
+      return b;
     }
     return false;
   }
@@ -222,17 +224,12 @@ class Deity {
     this.statusEffects.burning.stacks += 3;
   }
 
-  attack(other) {
-    if (this.applyBurn()) return;
-    if (this.applyPoison()) return;
-    if (this.checkParalyze()) return;
-    if (this.checkEntanglement()) return;
-    this.attr[AttrIDs.Energy].current = constrain(this.attr[AttrIDs.Energy].current - ActionCost.NormalAction, 0, this.attr[AttrIDs.Energy].total);
-    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Normal Attack"]);
+  simpleAttack(other) {
     let minDmg = this.attr[AttrIDs.Damage].total * this.damageRange.min,
       maxDmg = this.attr[AttrIDs.Damage].total * this.damageRange.max;
     let dmg = minDmg + Math.random() * (maxDmg - minDmg);
-    if (other.hp !== 0) {
+    if (!other.hasHitpointsBelow(0)) {
+      console.log("Ouch " + this.constructor.name);
       if (other.hasDodgedAttack(this)) {
         mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Missed Attack"]);
         return;
@@ -265,6 +262,16 @@ class Deity {
     }
   }
 
+  attack(other) {
+    if (this.applyBurn()) return;
+    if (this.applyPoison()) return;
+    if (this.checkParalyze()) return;
+    if (this.checkEntanglement()) return;
+    this.attr[AttrIDs.Energy].current = constrain(this.attr[AttrIDs.Energy].current - ActionCost.NormalAction, 0, this.attr[AttrIDs.Energy].total);
+    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Normal Attack"]);
+    this.simpleAttack(other);
+  }
+
   quickAttack(other) {
     if (this.applyBurn()) return;
     if (this.applyPoison()) return;
@@ -275,11 +282,7 @@ class Deity {
     let r = ~~(Math.random() * 3) + 1;
     for (let i = 0; i < r; i++) {
       if (other.statusEffects.dead.curr) return;
-      let minDmg = this.attr[AttrIDs.Damage].total * this.damageRange.min,
-        maxDmg = this.attr[AttrIDs.Damage].total * this.damageRange.max;
-      let dmg = minDmg + Math.random() * (maxDmg - minDmg);
-      if (other.hp !== 0)
-        other.updateHP(-dmg);
+      this.simpleAttack(other);
     }
   }
 

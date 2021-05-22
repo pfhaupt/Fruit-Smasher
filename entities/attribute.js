@@ -32,6 +32,7 @@ class Attribute {
   }
 
   getTotal() {
+    this.calculateTotal();
     return this.total;
   }
 

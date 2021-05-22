@@ -46,7 +46,7 @@ function setup() {
   //generateMinimap();
 
   mainWindow.displayOnce();
-  noLoop();
+  //noLoop();
 }
 
 function drawStuff() {

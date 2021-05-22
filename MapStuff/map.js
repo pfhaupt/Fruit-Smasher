@@ -508,11 +508,12 @@ class WorldMap extends BaseUIBlock {
   }
 
   getIDs(x, y) {
-    if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
+    if (x < 0 || y < 0 || x >= this.tiles.length || y >= this.tiles[0].length) {
       return {
         tID: -1,
         sID: -1,
         eID: -1,
+        enemyID: -1,
       }
     } else {
       let t = this.tiles[x][y];
@@ -520,6 +521,7 @@ class WorldMap extends BaseUIBlock {
         tID: t.tileID,
         sID: t.subTexID,
         eID: t.entityID,
+        enID: t.enemyID
       }
     }
   }
@@ -611,6 +613,13 @@ class TileSet {
     this.entityID = 0;
     this.enemyID = -1;
     this.visible = false;
+  }
+
+  setAll(a, b, c, d) {
+    this.set(a);
+    this.setEntity(b);
+    this.setTex(c);
+    this.setEnemyID(d);
   }
 
   setEntity(i) {

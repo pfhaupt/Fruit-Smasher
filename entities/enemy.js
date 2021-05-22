@@ -196,6 +196,13 @@ class Enemy extends Deity {
     return dir;
   }
 
+  //Default: Counts towards Kill Quest
+  //Overload in enemy classes for individual behavior
+  //like boss kills
+  checkIfViableForQuest() {
+    player.currentQuest.trackProgress(QuestType.Kill);
+  }
+
   //Default: Update Minimap, Map, Tiles, etc.
   //Overload in enemy classes for individual behavior
   //like being invisible unless you're close to the player
@@ -209,6 +216,7 @@ class Enemy extends Deity {
 
   performRandomAction(other) {
     let r = Math.random() * 100;
+    if (this.statusEffects.dead.curr) return;
     for (let action of Object.values(this.possibleActions)) {
       if (r < action.chance) {
         action.trigger(this, other);
@@ -230,6 +238,7 @@ class Enemy extends Deity {
 
   die() {
     //Do stuff on the tile map, enemy list, player stats....
+    this.statusEffects.dead.curr = true;
     let map = mainWindow.subMenus[SubMenu.Field].ch[0].ch[0];
     let minimap = mainWindow.subMenus[SubMenu.Field].ch[0].ch[1];
     let action = mainWindow.subMenus[SubMenu.Field].ch[1];
@@ -252,6 +261,7 @@ class Enemy extends Deity {
     }
     //Player gets some stuff for successfully killing an enemy
     player.addExperience(this);
+    this.checkIfViableForQuest();
     //We completed the action, show Victory Screen
     action.setAction(ActionScreen.Victory);
     //Refresh everything
@@ -262,6 +272,10 @@ class Enemy extends Deity {
 class Boss extends Enemy {
   constructor(x, y) {
     super(x, y);
+  }
+
+  checkIfViableForQuest() {
+    player.currentQuest.trackProgress(QuestType.BossKill);
   }
 }
 
@@ -615,13 +629,20 @@ class Spawner extends Enemy {
   }
 }
 
-class Trap {
+class Trap extends Enemy {
   constructor(x, y) {
-    this.position = {
-      x: x,
-      y: y,
+    super(x, y);
+  }
+
+  getDirection() {
+    return {
+      x: 0,
+      y: 0
     };
-    this.placeInMap = enemies.length;
+  }
+
+  legalMove() {
+    return true;
   }
 
   initMove() {

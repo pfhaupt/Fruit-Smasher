@@ -4,6 +4,8 @@ class Player extends Deity {
     this.lastActionID = 8;
     this.chestCount = [];
     for (var i = 0; i < 4 * maxZone; i++) this.chestCount[i] = 0;
+
+    this.currentQuest = new Quest(this, QuestType.Kill);
   }
 
   checkMovement(keyCode) {

@@ -1,3 +1,10 @@
+let version = {
+  a: 0,
+  b: 0,
+  c: 0,
+  d: 1
+}
+
 function loadActualDefaultMap(sav) {
   enemies = [];
   entityCount = {
@@ -121,128 +128,560 @@ function loadDefaultMap(zone) {
   loadImage(saveName, loadActualDefaultMap, generateDefaultMap);
 }
 
+function loadActualSaveFile(img) {
+  //Init Pointer so we always know where we are in the SaveArray
+  let currentPixelPointer = 0;
+
+  //We need to get pixel values, so load them
+  img.loadPixels();
+
+  //Just to be safe we create a copy of the array and work with that
+  let saveArr = [...img.pixels];
+
+  //Helper function, gets collection of [slots] pixel channels, and sums them up
+  //Example:
+  //2 slots: Total value = slot1 * 256 + slot2
+  //3 slots: Total value = slot1 * 256 * 256 + slot2 * 256 + slot3
+  let getPixelValues = (slots) => {
+    let total = 0;
+    let pow256 = Math.pow(256, slots - 1);
+    for (let i = slots - 1; i > 0; i--) {
+      let p = getPixelValue();
+      total += pow256 * p;
+      pow256 /= 256;
+    }
+    total += getPixelValue();
+    return total;
+  }
+
+  //Helper function, gets single pixel channel value
+  let getPixelValue = () => {
+    let curr = currentPixelPointer;
+    if ((curr + 1) % 4 === 0) {
+      currentPixelPointer++;
+      return getPixelValue();
+    }
+    currentPixelPointer++;
+    return saveArr[curr];
+  }
+
+  //Get version number!
+  let v = new Array(4);
+  for (let i = 0; i < v.length; i++) {
+    v[i] = getPixelValue();
+  }
+
+  //Get map width and height
+  let len = getPixelValue();
+  let w = getPixelValues(len);
+  let h = getPixelValues(len);
+  console.log("Loading Map starts at ", currentPixelPointer);
+  //Temp Array for Map Data
+  let mapArr = new Array(w * h * 4);
+  for (let i = 0; i < mapArr.length; i++) {
+    mapArr[i] = getPixelValue();
+  }
+  //console.log(mapArr);
+
+  //Save Enemy Positions on the way
+  let enemyLength = getPixelValue();
+  let enemiesLength = getPixelValues(enemyLength);
+  let enemyPositions = new Array(enemiesLength);
+
+  //Fill actual map
+  let m = new WorldMap(w, 0, map.xRelToParent, map.yRelToParent, map.wRelToParent, map.hRelToParent);
+  for (let x = 0; x < w; x++) {
+    for (let y = 0; y < h; y++) {
+      let id = (x * h + y) * 4;
+      let enID = mapArr[id + 3] - 1; //-1 because Default is -1, so we add one when saving because PNG can't handle negs
+      let eID = mapArr[id + 1];
+      if (enID !== -1) { //Enemy found!
+        //We don't need to store the enemy position in the save
+        //because we can easily restore it here
+        enemyPositions[enID] = {
+          x,
+          y,
+          eID
+        };
+      }
+      //Overwrite default tiles with actual data
+      m.tiles[x][y].setAll(
+        mapArr[id], //Set Tex
+        mapArr[id + 1], //Set Entity
+        mapArr[id + 2], //Set SubTex
+        enID); //Set Enemy
+    }
+  }
+  //console.log(m.tiles);
+
+  console.log("Loading Enemies starts at ", currentPixelPointer);
+  //If everything went good, we're here.
+  let maxLevelSlotCount = getPixelValue();
+  let slotsPerEnemy = getPixelValue();
+  let slotsForGeneralEnemyStuff = getPixelValue();
+  let slotsForEachAttribute = getPixelValue();
+  let attributeLength = getPixelValue();
+  let statusLength = getPixelValue();
+
+  //Helper Arrays for creating and naming enemies
+  let tmpDeity = new Deity();
+  let EnemyClassNames = Object.keys(EntityIDs);
+  let EnemyStatusEffects = Object.keys(tmpDeity.statusEffects);
+
+  //Our new Enemy Array
+  let tmpEnemies = new Array(enemies.length);
+
+  for (let i = 0; i < tmpEnemies.length; i++) {
+    let stuff = enemyPositions[i];
+    //Wonky way of dynamically creating enemy class
+    tmpEnemies[i] = eval("new " + EnemyClassNames[stuff.eID] + "(stuff.x, stuff.y)");
+    let lvl = getPixelValues(maxLevelSlotCount);
+    tmpEnemies[i].level = lvl;
+    let name = enemyNames[getPixelValue()];
+    tmpEnemies[i].name = name;
+    //Grab the next few pixel values and fill the attributes
+    for (let j = 0; j < attributeLength; j++) {
+      let curr = getPixelValues(slotsForEachAttribute);
+      let total = getPixelValues(slotsForEachAttribute);
+      tmpEnemies[i].attr[j].current = curr;
+      tmpEnemies[i].attr[j].total = total;
+
+      //If stuff bugs out, this line is probably wrong
+      tmpEnemies[i].attr[j].perLevel = (total - curr) / lvl;
+    }
+    //Grab the next few pixel values and fill the status effects
+    for (let j = 0; j < statusLength; j++) {
+      let curr = getPixelValue();
+      let stacks = getPixelValue();
+      tmpEnemies[i].statusEffects[EnemyStatusEffects[j]].curr = curr === 1;
+      tmpEnemies[i].statusEffects[EnemyStatusEffects[j]].stacks = stacks;
+    }
+  }
+
+  console.log("Loading Player starts at ", currentPixelPointer);
+  //Our new Player
+  let tmpPlayer = new Player();
+
+  //Get the player data
+  let playerLevel = getPixelValues(maxLevelSlotCount);
+  tmpPlayer.level = playerLevel;
+  for (let i = 0; i < attributeLength; i++) {
+    let curr = getPixelValues(slotsForEachAttribute);
+    let total = getPixelValues(slotsForEachAttribute);
+    tmpPlayer.attr[i].current = curr;
+    tmpPlayer.attr[i].total = total;
+
+    tmpPlayer.attr[i].perLevel = (total - curr) / playerLevel;
+  }
+
+  console.log("Calculating Block Safety starts at ", currentPixelPointer);
+  let blockAmount = getPixelValue();
+  let blockSizeLength = getPixelValue();
+  let blockSize = getPixelValues(blockSizeLength);
+
+  let blockSumCalculated = new Array(blockAmount);
+  blockSumCalculated.fill(0);
+  let blockSumStored = new Array(blockAmount);
+  blockSumStored.fill(0);
+  let currentBlockPointer = 0;
+
+  for (let i = 0; i < blockAmount; i++) {
+    for (let j = 0; j < blockSize; j++) {
+      blockSumCalculated[i] += saveArr[currentBlockPointer];
+      currentBlockPointer++;
+    }
+    
+    let blockSlotLength = getPixelValue();
+    let blocksum = getPixelValues(blockSlotLength);
+    blockSumStored[i] = blocksum;
+  }
+  let blockCheckPassed = true;
+  for (let i = 0; i < blockAmount; i++) {
+    if (blockSumStored[i] !== blockSumCalculated[i]) {
+      console.log("Block " + i + " doesn't seem to match.");
+      blockCheckPassed = false;
+    }
+    console.log(blockSumStored[i] === blockSumCalculated[i]);
+  }
+
+  let pointerLength = getPixelValue();
+  let currentPixelPointerTmp = currentPixelPointer;
+  let savedCurrentPixelPointer = getPixelValues(pointerLength);
+  //Safety check
+  //If this fails either save corrupted or loading failed
+  if (!blockCheckPassed)
+    console.log("EHEHHHHHH");
+  if (savedCurrentPixelPointer !== currentPixelPointerTmp)
+    console.log("AHHHHHHHHHHHHH");
+  else
+    console.log("Pointers match up in the end. Looks like a valid save file.");
+
+  console.log("The map dimensions are " + w + "x" + h);
+  console.log("version: " + v);
+}
+
 function loadSaveFile(file) {
   mainWindow.showMenu(SubMenu.Field);
   let map = mainWindow.subMenus[SubMenu.Field].ch[0].ch[0];
-  if (file.subtype !== "json") {
-    console.log("Wrong File");
+  if (file.type === "image") {
+    //Thanks for that forum post
+    //https://forum.processing.org/two/discussion/15752/accessing-pixel-data-from-an-image-loaded-in-the-browser
+    loadImage(file.data, loadActualSaveFile);
     return;
   }
 
+  /*
+    mainWindow.showMenu(SubMenu.Field);
+    let map = mainWindow.subMenus[SubMenu.Field].ch[0].ch[0];
+    if (file.subtype !== "json") {
+      console.log("Wrong File");
+      return;
+    }
 
-  let saveObj = JSON.retrocycle(JSON.parse(atob(file.data)));
-  console.log(saveObj);
 
-  enemies = [];
+    let saveObj = JSON.retrocycle(JSON.parse(atob(file.data)));
+    console.log(saveObj);
 
-  mainWindow.subMenus[SubMenu.Field].ch[0].ch[1].clear();
+    enemies = [];
 
-  //enemies = [...saveObj.enemies];
-  entityCount = {
-    ...saveObj.entityCount
-  };
+    mainWindow.subMenus[SubMenu.Field].ch[0].ch[1].clear();
 
-  player.experience = saveObj.player.experience;
-  player.level = saveObj.player.level;
-  player.chestCount = [...saveObj.player.chestCount];
-  player.position = {
-    ...saveObj.player.position
-  };
-
-  for (let i = 0; i < player.attr.length; i++) {
-    if (saveObj.player.attr[i] && saveObj.player.attr[i].skillLevel)
-      player.attr[i].skillLevel = saveObj.player.attr[i].skillLevel;
-    else
-      player.attr[i].skillLevel = 0;
-    player.attr[i].calculateTotal();
-  }
-
-  let statusEffectKeyed = Object.keys(saveObj.player.statusEffects);
-  for (let i = 0; i < statusEffectKeyed.length; i++) {
-    player.statusEffects[statusEffectKeyed[i]] = {
-      ...saveObj.player.statusEffects[statusEffectKeyed[i]]
+    //enemies = [...saveObj.enemies];
+    entityCount = {
+      ...saveObj.entityCount
     };
-  }
 
-  map.tiles = [];
-  map.width = saveObj.map.width;
-  map.height = saveObj.map.height;
-  for (let x = 0; x < saveObj.map.width; x++) {
-    map.tiles[x] = [];
-    for (let y = 0; y < saveObj.map.height; y++) {
-      let t = new TileSet();
-      t.set(saveObj.map.pixels[(y * saveObj.map.width + x) * 4]);
-      t.setEntity(saveObj.map.pixels[(y * saveObj.map.width + x) * 4 + 1]);
-      t.setTex(saveObj.map.pixels[(y * saveObj.map.width + x) * 4 + 2]);
-      t.setEnemyID(saveObj.map.pixels[(y * saveObj.map.width + x) * 4 + 3] - 1);
-      if (map.handleEnemy(x, y, saveObj.map.pixels[(y * saveObj.map.width + x) * 4 + 1])) {
-        console.log("Placed Entity.");
-      }
-      map.tiles[x][y] = t;
+    player.experience = saveObj.player.experience;
+    player.level = saveObj.player.level;
+    player.chestCount = [...saveObj.player.chestCount];
+    player.position = {
+      ...saveObj.player.position
+    };
+
+    for (let i = 0; i < player.attr.length; i++) {
+      if (saveObj.player.attr[i] && saveObj.player.attr[i].skillLevel)
+        player.attr[i].skillLevel = saveObj.player.attr[i].skillLevel;
+      else
+        player.attr[i].skillLevel = 0;
+      player.attr[i].calculateTotal();
     }
-  }
 
-  map.forceUpdate();
-  for (let x = 0; x < map.cachedTiles.length; x++) {
-    for (let y = 0; y < map.cachedTiles[x].length; y++) {
-      map.cachedTiles[x][y].tile.hide();
-      if (map.cachedTiles[x][y].entity) map.cachedTiles[x][y].entity.hide();
+    let statusEffectKeyed = Object.keys(saveObj.player.statusEffects);
+    for (let i = 0; i < statusEffectKeyed.length; i++) {
+      player.statusEffects[statusEffectKeyed[i]] = {
+        ...saveObj.player.statusEffects[statusEffectKeyed[i]]
+      };
     }
-  }
 
-
-  let viewRange = player.attr[AttrIDs.Sight].getTotal();
-  let xPos = player.position.x - floor(viewRange / 2);
-  let yPos = player.position.y - floor(viewRange / 2);
-
-  for (let x = 0; x < map.cachedTiles.length; x++) {
-    for (let y = 0; y < map.cachedTiles[x].length; y++) {
-      let posWithOffX = xPos + x;
-      let posWithOffY = yPos + y;
-      if (posWithOffX >= 0 && posWithOffX < map.width && posWithOffY >= 0 && posWithOffY < map.height) {
-        map.tiles[posWithOffX][posWithOffY].visible = true;
-        mainWindow.subMenus[0].ch[0].ch[1].updatePixels(posWithOffX, posWithOffY);
+    map.tiles = [];
+    map.width = saveObj.map.width;
+    map.height = saveObj.map.height;
+    for (let x = 0; x < saveObj.map.width; x++) {
+      map.tiles[x] = [];
+      for (let y = 0; y < saveObj.map.height; y++) {
+        let t = new TileSet();
+        t.set(saveObj.map.pixels[(y * saveObj.map.width + x) * 4]);
+        t.setEntity(saveObj.map.pixels[(y * saveObj.map.width + x) * 4 + 1]);
+        t.setTex(saveObj.map.pixels[(y * saveObj.map.width + x) * 4 + 2]);
+        t.setEnemyID(saveObj.map.pixels[(y * saveObj.map.width + x) * 4 + 3] - 1);
+        if (map.handleEnemy(x, y, saveObj.map.pixels[(y * saveObj.map.width + x) * 4 + 1])) {
+          console.log("Placed Entity.");
+        }
+        map.tiles[x][y] = t;
       }
     }
-  }
 
-  for (let enemy of enemies) enemy.updatePositions(enemy.position.x, enemy.position.y);
+    map.forceUpdate();
+    for (let x = 0; x < map.cachedTiles.length; x++) {
+      for (let y = 0; y < map.cachedTiles[x].length; y++) {
+        map.cachedTiles[x][y].tile.hide();
+        if (map.cachedTiles[x][y].entity) map.cachedTiles[x][y].entity.hide();
+      }
+    }
 
-  map.show();
-  windowResized();
+
+    let viewRange = player.attr[AttrIDs.Sight].getTotal();
+    let xPos = player.position.x - floor(viewRange / 2);
+    let yPos = player.position.y - floor(viewRange / 2);
+
+    for (let x = 0; x < map.cachedTiles.length; x++) {
+      for (let y = 0; y < map.cachedTiles[x].length; y++) {
+        let posWithOffX = xPos + x;
+        let posWithOffY = yPos + y;
+        if (posWithOffX >= 0 && posWithOffX < map.width && posWithOffY >= 0 && posWithOffY < map.height) {
+          map.tiles[posWithOffX][posWithOffY].visible = true;
+          mainWindow.subMenus[0].ch[0].ch[1].updatePixels(posWithOffX, posWithOffY);
+        }
+      }
+    }
+
+    for (let enemy of enemies) enemy.updatePositions(enemy.position.x, enemy.position.y);
+
+    map.show();
+    windowResized();
+    */
 }
 
 function saveMap() {
+  //Following SavingAMap.png
+  //Our own definition on how to save the map
   let map = mainWindow.subMenus[SubMenu.Field].ch[0].ch[0];
-  let saveName1 = "map" + currentZone + "_played.json";
-  let saveImg = createImage(map.width, map.height);
+
+  let saveName = "map" + currentZone + "_played.png";
+  let tmpDeity = new Deity();
+  let slotsForGeneralEnemyStuff = 3;
+  let slotsForEachAttribute = 2;
+  let attributeLength = tmpDeity.attr.length;
+  let statusLength = tmpDeity.statusEffects.length;
+  let dimLength = 2;
+
+  let slotsPerEnemy = 0;
+  //One Slot Per Enemy Per Level
+  slotsPerEnemy += slotsForGeneralEnemyStuff;
+  //Saving every attribute base, perLevel
+  //two slots so max is 65535 base, 65535 perLevel
+  //or 255^3 base, 255 perLevel
+  slotsPerEnemy += tmpDeity.attr.length * 2 * slotsForEachAttribute;
+  //Saving every status effect
+  slotsPerEnemy += Object.keys(tmpDeity.statusEffects).length * 2;
+  //Save all enemies, plus the player
+  let totalEntitiesToSave = enemies.length + 1;
+  //How many slots do we actually need?
+  let totalSlotsForEntities = totalEntitiesToSave * slotsPerEnemy;
+  //1 pixel per tile, 4 slots per pixel
+  let mapSizeTotal = map.width * map.height * 4;
+  let versionSpace = 4; //Last 4 slots for version number
+
+  let totalSlotSize = totalSlotsForEntities + mapSizeTotal + versionSpace;
+  //3 because 2 slots for entity count, 1 for enemy length
+  totalSlotSize += 3;
+  //Then another 4 slots for map width and map height
+  //-> Max Height for map is now 65535x65535
+  totalSlotSize += 4;
+  console.log(totalSlotSize);
+
+  //We can't use the Alpha Channel
+  totalSlotSize *= 4 / 3;
+
+  //The area of our "rectangle" (our image) is just the sqrt of how many
+  //slots we want to save divided by 4
+  //Divide by 4 because p5js has 4 slots per pixel (RGBA)
+  let minDim = sqrt(totalSlotSize / 4);
+
+  //Giving us a bit of free Space to work with
+  let actualDim = ceil(minDim);
+
+  console.log("Our image is " + actualDim + " pixels wide and high");
+  //The actual save file
+  let saveImg = createImage(actualDim, actualDim);
+
+  let currentPixelPointer = 0;
   saveImg.loadPixels();
-  for (let x = 0; x < saveImg.width; x++) {
-    for (let y = 0; y < saveImg.height; y++) {
-      saveImg.pixels[(y * saveImg.width + x) * 4] = map.tiles[x][y].tileID;
-      saveImg.pixels[(y * saveImg.width + x) * 4 + 1] = map.tiles[x][y].entityID;
-      saveImg.pixels[(y * saveImg.width + x) * 4 + 2] = map.tiles[x][y].subTexID;
-      saveImg.pixels[(y * saveImg.width + x) * 4 + 3] = map.tiles[x][y].enemyID + 1;
+
+  //Helper function for setting multiple pixel channels at once
+  //For that it divides the value in steps of 256, because channels are 8bit
+  //Example:
+  //(1000, 2):
+  //slot1 = floor(1000 / 256) = 3
+  //slot2 = 1000 % 256 = 232
+  //(85000, 3):
+  //slot1 = floor(85000 / 256^2) % 256 = 1
+  //slot2 = floor(85000 / 256) % 256 = 76
+  //slot3 = 85000 % 256 = 8
+  //Function saves [1, 76, 8] at corresponding index
+  let setPixels = (value, slots) => {
+    let pow256 = Math.pow(256, slots - 1);
+    for (let i = slots - 1; i > 0; i--) {
+      setPixel(floor(value / pow256) % 256);
+      pow256 /= 256;
+    }
+    setPixel(value % 256);
+  }
+
+  //Helper function for setting a single pixel channel
+  let setPixel = (value) => {
+    if ((currentPixelPointer + 1) % 4 === 0) {
+      saveImg.pixels[currentPixelPointer] = 255;
+      currentPixelPointer++;
+    }
+    saveImg.pixels[currentPixelPointer] = value;
+    currentPixelPointer++;
+  }
+
+  let getSlotLength = (value) => {
+    return ceil(log(value) / log(256));
+  }
+
+  //Set version
+  setPixel(version.a);
+  setPixel(version.b);
+  setPixel(version.c);
+  setPixel(version.d);
+
+  //Save Map dimensions
+  setPixel(dimLength);
+  setPixels(map.width, dimLength);
+  setPixels(map.height, dimLength);
+  //setPixel(floor(map.width / 256));
+  //setPixel(map.width % 256);
+  //setPixel(floor(map.height / 256));
+  //setPixel(map.height % 256);
+  for (let x = 0; x < map.width; x++) {
+    for (let y = 0; y < map.height; y++) {
+      let t = map.getIDs(x, y);
+      setPixel(t.tID);
+      setPixel(t.eID);
+      setPixel(t.sID);
+      //Default is -1 (no enemy), but PNG can't handle that
+      setPixel(t.enID + 1);
     }
   }
+  console.log("Setting length and slots at ", currentPixelPointer);
+  //How many slots do I need for my enemies?
+  let enemyLength = getSlotLength(enemies.length);
+  setPixel(enemyLength);
+  setPixels(enemies.length, enemyLength);
+  //Max Level 256^maxLevelSlotCount-1
+  let maxLevelSlotCount = 2;
+  setPixel(maxLevelSlotCount);
+  setPixel(slotsPerEnemy);
+  setPixel(slotsForGeneralEnemyStuff);
+  setPixel(slotsForEachAttribute);
+  setPixel(attributeLength);
+  setPixel(statusLength);
+
+  //Save all enemies
+  console.log("Enemies start at ", currentPixelPointer);
+  for (let i = 0; i < enemies.length; i++) {
+    setPixels(enemies[i].level, maxLevelSlotCount);
+    setPixel(enemyNames.indexOf(enemies[i].name));
+    for (let j = 0; j < enemies[i].attr.length; j++) {
+      let a = enemies[i].attr[j];
+      let curr = a.getCurrent();
+      let total = a.getTotal();
+      //Each attribute gets [slotsForEachAttribute] channels for their
+      //current and total value
+      //So max is 256^slotsForEachAttribute-1 HP, for example
+      setPixels(curr, slotsForEachAttribute);
+      setPixels(total, slotsForEachAttribute);
+    }
+    for (let j = 0; j < enemies[i].statusEffects.length; j++) {
+      //Save each status effect
+      //Has Effect = 1, Has Not Effect = 0
+      //Max Stacks of eny Effect = 255
+      //To be fair I don't expect anyone to have more than 255 burn or poison stacks
+      //If this ever gets possible, change accordingly
+      let s = enemies[i].statusEffects[j];
+      setPixel(int(s.curr));
+      setPixel(s.stacks);
+    }
+  }
+
+  //Save Player similar to enemies
+  //Store Attributes and Status Effects
+  console.log("Player starts at ", currentPixelPointer);
+  setPixels(player.level, maxLevelSlotCount);
+  for (let i = 0; i < player.attr.length; i++) {
+    let a = player.attr[i];
+    let curr = a.getCurrent();
+    let total = a.getTotal();
+    setPixels(curr, slotsForEachAttribute);
+    setPixels(total, slotsForEachAttribute);
+  }
+
+  for (let j = 0; j < player.statusEffects.length; j++) {
+    //Save each status effect
+    let s = player.statusEffects[j];
+    setPixel(int(s.curr));
+    setPixel(s.stacks);
+  }
+
   saveImg.updatePixels();
-  //save(saveImg, saveName0);
+  saveImg.loadPixels();
 
-  let saveObj = {
-    player: player,
-    enemies: enemies,
-    entityCount: entityCount,
-    map: saveImg,
-  };
-  saveObj = JSON.decycle(saveObj);
-  let txt = JSON.stringify(saveObj);
-  save(btoa(txt), saveName1);
+  //Safety Check Number 1
+  //Divide all stuff before this line into [blockAmount] segments
+  //Take sum of each segment
+  //Store that sum
+  //When loading, calculate sum again, compare to stored sum
+  //If just one block fails, something went wrong
+  //Possible "Somethings":
+  //-Block Calculation upon Saving
+  //-Corrupted Block Storing in Save
+  //-Block Calculation upon Loading
+  //-Corrupted Block Accessing in Loading
+  console.log("Blocking starts at ", currentPixelPointer);
+  let blockAmount = 10;
+  let totalBlockSize = floor(currentPixelPointer / blockAmount) * blockAmount;
+  let blockSize = totalBlockSize / blockAmount;
+  //Set important stuff so we can later get it back in loading
+  setPixel(blockAmount);
+  setPixel(getSlotLength(blockSize));
+  setPixels(blockSize, getSlotLength(blockSize));
+
+  //Create Sum of Blocks
+  let blockSum = new Array(blockAmount);
+  blockSum.fill(0);
+  let currentBlockPointer = 0;
+  for (let i = 0; i < blockAmount; i++) {
+    for (let j = 0; j < blockSize; j++) {
+      blockSum[i] += saveImg.pixels[currentBlockPointer];
+      currentBlockPointer++;
+    }
+
+    //Set Each Sum of Blocks in Save Image
+    let blockSlotLength = getSlotLength(blockSum[i]);
+    setPixel(blockSlotLength);
+    setPixels(blockSum[i], blockSlotLength);
+  }
+
+  console.log("Saving Pixel Pointer at ", currentPixelPointer);
+  //Safety Check Number 3
+  //Last entry saves currentPixelPointer
+  //So that the save can see if everything went correct
+  let pointerLength = getSlotLength(currentPixelPointer);
+  setPixel(pointerLength);
+  setPixels(currentPixelPointer, pointerLength);
+
+  //Make sure to fill the last pixel transparency for whatever we're setting
+  while ((currentPixelPointer + 1) % 4 !== 0) setPixel(0);
+  setPixel(0);
+
+  saveImg.updatePixels();
+  console.log(saveImg.pixels);
+
+  save(saveImg, saveName);
+  /*
+   let map = mainWindow.subMenus[SubMenu.Field].ch[0].ch[0];
+   let saveName1 = "map" + currentZone + "_played.json";
+   let saveImg1 = createImage(map.width, map.height);
+   saveImg1.loadPixels();
+   for (let x = 0; x < saveImg1.width; x++) {
+     for (let y = 0; y < saveImg1.height; y++) {
+       saveImg1.pixels[(y * saveImg1.width + x) * 4] = map.tiles[x][y].tileID;
+       saveImg1.pixels[(y * saveImg1.width + x) * 4 + 1] = map.tiles[x][y].entityID;
+       saveImg1.pixels[(y * saveImg1.width + x) * 4 + 2] = map.tiles[x][y].subTexID;
+       saveImg1.pixels[(y * saveImg1.width + x) * 4 + 3] = map.tiles[x][y].enemyID + 1;
+     }
+   }
+   saveImg1.updatePixels();
+   //save(saveImg, saveName0);
+
+   let saveObj = {
+     player: player,
+     enemies: enemies,
+     entityCount: entityCount,
+     map: saveImg1,
+   };
+   saveObj = JSON.decycle(saveObj);
+   //let txt = JSON.stringify(saveObj);
+   save(atob(txt), saveName1);
+   */
+   
 }
-
 
 class OptionMenu extends MenuTemplate {
   constructor(name, x, y, w, h) {
     super(name, x, y, w, h);
-
   }
 }

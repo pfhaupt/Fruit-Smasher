@@ -6,7 +6,8 @@ let ActionScreen = {
   Chest: 4,
   PlayedFled: 5,
   EnemyFled: 6,
-  Trap: 7
+  Trap: 7,
+  Quest: 8,
 };
 
 let ActionCost = {
@@ -29,6 +30,7 @@ class ActionOverview extends MenuTemplate {
     this.subActions.push(new PlayerFleeAction("PlayerFled", 0, 0, 1, 1));
     this.subActions.push(new EnemyFleeAction("EnemyFled", 0, 0, 1, 1));
     this.subActions.push(new TrapAction("TrapActivated", 0, 0, 1, 1));
+    this.subActions.push(new QuestAction("QuestCompleted", 0, 0, 1, 1, ));
     this.currentAction = this.subActions[ActionScreen.Idle];
   }
 
@@ -78,9 +80,7 @@ class Action extends MenuTemplate {
 class IdleAction extends Action {
   constructor(n, x, y, w, h) {
     super(n, x, y, w, h);
-    this.ch.push(new Text(["Nothing going on here ¯\\_(ツ)_/¯"], 0, 0, 1, 0.1));
-
-    this.ch.push(new UICollection("StatusOverview", 0, 0.1, 1, 0.1, [
+    this.ch.push(new UICollection("StatusOverview", 0, 0.0, 1, 0.1, [
       [CustomImage, "images/statusEffects/StatusBurning.png", 1],
       [Text, ["player.statusEffects.burning.stacks", "x"]],
       [CustomImage, "images/statusEffects/StatusParalyzed.png", 1],
@@ -102,13 +102,13 @@ class IdleAction extends Action {
         [1],
       ]
     ]));
-    for (let i = 1; i < this.ch[1].ch.length; i += 2) {
-      this.ch[1].ch[i].format = false;
+    for (let i = 1; i < this.ch[0].ch.length; i += 2) {
+      this.ch[0].ch[i].format = false;
     }
 
-    this.ch.push(new Text(["This leads to the following effects:"], 0, 0.2, 1, 0.025));
+    this.ch.push(new Text(["This leads to the following effects:"], 0, 0.1, 1, 0.025));
 
-    this.ch.push(new UICollection("Legend", 0, 0.225, 1, 0.15, [
+    this.ch.push(new UICollection("Legend", 0, 0.125, 1, 0.15, [
       [Text, ["player.statusEffects.burning.stacks", " burn damage received per move."]],
       [SwapableText, [
         ["You are paralyzed! ", "You can't do anything for ", "player.statusEffects.paralyzed.stacks", " moves."],
@@ -127,15 +127,25 @@ class IdleAction extends Action {
         [1, 1, 1, 1, 0.25, 0.75]
       ]
     ]));
-    this.ch[3].ch[1].format = false;
-    this.ch[3].ch[2].format = false;
+    this.ch[2].ch[1].format = false;
+    this.ch[2].ch[2].format = false;
+
+    this.ch.push(new UICollection("Quest", 0, 0.275, 1, 0.2, [
+      [Text, ["Current Quest: ", "player.currentQuest.getName()"]],
+      [Text, ["Current Progress: ", "player.currentQuest.getProgress()"]]
+    ], [
+      [1],
+      [
+        [1, 1]
+      ]
+    ]));
 
     this.ch.push(new Button("End Round", 0.3, 0.8, 0.4, 0.1, endRound));
   }
 
   displayOnce() {
-    this.ch[3].ch[1].setText(1 - int(player.statusEffects.paralyzed.curr));
-    this.ch[3].ch[2].setText(1 - int(player.statusEffects.entangled.curr));
+    this.ch[2].ch[1].setText(1 - int(player.statusEffects.paralyzed.curr));
+    this.ch[2].ch[2].setText(1 - int(player.statusEffects.entangled.curr));
     super.displayOnce();
   }
 }
@@ -413,5 +423,16 @@ class TrapAction extends Action {
   constructor(n, x, y, w, h) {
     super(n, x, y, w, h);
     this.ch.push(new Text(["IF YOU CAN READ THIS THE TRAP DIED!"], 0, 0, 1, 1));
+  }
+}
+
+class QuestAction extends Action {
+  constructor(n, x, y, w, h) {
+    super(n, x, y, w, h);
+    this.ch.push(new Text(["You completed a Quest!"], 0, 0, 1, 0.1));
+
+    this.ch.push(new Button("Dismiss", 0.3, 0.7, 0.4, 0.1, () => {
+      mainWindow.subMenus[SubMenu.Field].ch[1].setAction(ActionScreen.Idle);
+    }));
   }
 }
