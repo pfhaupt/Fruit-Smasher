@@ -216,7 +216,7 @@ class Enemy extends Deity {
 
   performRandomAction(other) {
     let r = Math.random() * 100;
-    if (this.statusEffects.dead.curr) return;
+    if (this.statusEffects[StatEffIDs.Dead].curr) return;
     for (let action of Object.values(this.possibleActions)) {
       if (r < action.chance) {
         action.trigger(this, other);
@@ -238,7 +238,7 @@ class Enemy extends Deity {
 
   die() {
     //Do stuff on the tile map, enemy list, player stats....
-    this.statusEffects.dead.curr = true;
+    this.statusEffects[StatEffIDs.Dead].curr = true;
     let map = mainWindow.subMenus[SubMenu.Field].ch[0].ch[0];
     let minimap = mainWindow.subMenus[SubMenu.Field].ch[0].ch[1];
     let action = mainWindow.subMenus[SubMenu.Field].ch[1];
@@ -349,7 +349,7 @@ class Scorpion extends Enemy {
 
   defineAttributes() {
     let attr = super.defineAttributes();
-    attr[AttrIDs.Poison] = new Attribute(this, "Poison", 0.3, 0.0, 0.001);
+    attr[AttrIDs.Poison] = new Attribute(this, "Poison", 0.3, 0.0, 0.0);
     return attr;
   }
 }
@@ -382,10 +382,10 @@ class Ghost extends Enemy {
 
   defineAttributes() {
     let attr = super.defineAttributes();
-    attr[AttrIDs.Damage] = new Attribute(this, "Damage", 1, 0.03, 0.1);
-    attr[AttrIDs.Hitpoint] = new Attribute(this, "Hitpoint", 10, 1, 1);
-    attr[AttrIDs.Evasion] = new Attribute(this, "Evasion", 5, 0.03, 0.01);
-    attr[AttrIDs.Sight] = new Attribute(this, "Sight", 9, 0.0, 0.1);
+    attr[AttrIDs.Damage] = new Attribute(this, "Damage", 1, 0.03, 0.0);
+    attr[AttrIDs.Hitpoint] = new Attribute(this, "Hitpoint", 10, 1, 0.0);
+    attr[AttrIDs.Evasion] = new Attribute(this, "Evasion", 5, 0.03, 0.0);
+    attr[AttrIDs.Sight] = new Attribute(this, "Sight", 9, 0.0, 0.0);
     return attr;
   }
 }
@@ -458,10 +458,10 @@ class Wraith extends Enemy {
 
   defineAttributes() {
     let attr = super.defineAttributes();
-    attr[AttrIDs.Damage] = new Attribute(this, "Damage", 1, 0.2, 0.1);
-    attr[AttrIDs.Hitpoint] = new Attribute(this, "Hitpoint", 50, 10, 5);
-    attr[AttrIDs.Evasion] = new Attribute(this, "Evasion", 5, 0.03, 0.01);
-    attr[AttrIDs.Sight] = new Attribute(this, "Sight", 9, 0.0, 0.1);
+    attr[AttrIDs.Damage] = new Attribute(this, "Damage", 1, 0.2, 0.0);
+    attr[AttrIDs.Hitpoint] = new Attribute(this, "Hitpoint", 50, 10, 0);
+    attr[AttrIDs.Evasion] = new Attribute(this, "Evasion", 5, 0.03, 0.00);
+    attr[AttrIDs.Sight] = new Attribute(this, "Sight", 9, 0.0, 0.0);
     attr[AttrIDs.Paralyze] = new Attribute(this, "Paralyze", 0.1, 0.0, 0.0);
     return attr;
   }

@@ -290,7 +290,7 @@ function loadActualSaveFile(img) {
       blockSumCalculated[i] += saveArr[currentBlockPointer];
       currentBlockPointer++;
     }
-    
+
     let blockSlotLength = getPixelValue();
     let blocksum = getPixelValues(blockSlotLength);
     blockSumStored[i] = blocksum;
@@ -326,7 +326,8 @@ function loadSaveFile(file) {
   if (file.type === "image") {
     //Thanks for that forum post
     //https://forum.processing.org/two/discussion/15752/accessing-pixel-data-from-an-image-loaded-in-the-browser
-    loadImage(file.data, loadActualSaveFile);
+    loadImage(file.data, loadDataArray);
+    //loadImage(file.data, loadActualSaveFile);
     return;
   }
 
@@ -422,6 +423,349 @@ function loadSaveFile(file) {
     */
 }
 
+function createDataArray() {
+  let map = mainWindow.subMenus[SubMenu.Field].ch[0].ch[0];
+  let nName = {
+    Map: 0,
+    Enemies: 1,
+    Player: 2
+  };
+  let saveFile = {
+    nodes: []
+  };
+
+  saveFile.nodes.push([]); //Push Map
+  saveFile.nodes.push([]); //Push Enemies
+  saveFile.nodes.push([]); //Push Player
+
+  let tMap = saveFile.nodes[nName.Map];
+  let tEnemies = saveFile.nodes[nName.Enemies];
+  let tPlayer = saveFile.nodes[nName.Player];
+
+  tMap.push([]); //Push Info to Map
+  tMap.push([]); //Push Tiles to Map
+
+  let tInfo = tMap[0];
+  tInfo.push(currentZone);
+  tInfo.push(map.width);
+  tInfo.push(map.height);
+
+  let tileLength = [];
+
+  let lenBitMaskTex = ceil(log(Object.keys(TextureIDs).length) / log(2));
+  let lenBitMaskEnt = ceil(log(Object.keys(EntityIDs).length) / log(2));
+  let lenBitMaskSubTex = ceil(log(Object.keys(SubTextureIDs).length) / log(2));
+  let lenBitMaskEnemy = ceil(log(enemies.length) / log(2));
+
+  tileLength.push(lenBitMaskTex);
+  tileLength.push(lenBitMaskEnt);
+  tileLength.push(lenBitMaskSubTex);
+  tileLength.push(lenBitMaskEnemy);
+
+  tInfo.push(tileLength);
+
+  console.log(lenBitMaskTex, lenBitMaskEnt, lenBitMaskSubTex, lenBitMaskEnemy);
+
+  let tTiles = tMap[1];
+  for (let x = 0; x < map.width; x++) {
+    for (let y = 0; y < map.height; y++) {
+      let t = map.getIDs(x, y);
+      if (t.tID === -1) {
+        tTiles.push(0);
+        continue;
+      }
+      let n = 0;
+      n |= t.tID;
+      n <<= lenBitMaskEnt;
+      n |= t.eID;
+      n <<= lenBitMaskSubTex;
+      n |= t.sID;
+      n <<= lenBitMaskEnemy;
+      n |= (t.enID + 1);
+      tTiles.push(n);
+    }
+  }
+
+  for (let i = 0; i < enemies.length; i++) {
+    let e = enemies[i];
+    let enemyContent = [];
+    enemyContent.push(e.level);
+    enemyContent.push(enemyNames.indexOf(e.name));
+
+    let eAttributes = [];
+    for (let i = 0; i < e.attr.length; i++) {
+      let a = e.attr[i];
+      let attrContent = [];
+      attrContent.push(a.getBaseValue());
+      attrContent.push(a.getCurrent());
+      attrContent.push(a.getTotal());
+
+      eAttributes.push(attrContent);
+    }
+    enemyContent.push(eAttributes);
+
+    let eStatusEffects = [];
+    for (let i = 0; i < e.statusEffects.length; i++) {
+      let s = e.statusEffects[i];
+      let statContent = [];
+      statContent.push(s.getCurrentAsInt());
+      statContent.push(s.getStackCount());
+      statContent.push(s.getImmunityAsInt());
+
+      eStatusEffects.push(statContent);
+    }
+    enemyContent.push(eStatusEffects);
+
+    tEnemies.push(enemyContent);
+  }
+
+  let playerContent = [];
+  playerContent.push(player.level);
+  let pAttributes = [];
+  for (let i = 0; i < player.attr.length; i++) {
+    let a = player.attr[i];
+    let attrContent = [];
+    attrContent.push(a.getBaseValue());
+    attrContent.push(a.getCurrent());
+    attrContent.push(a.getTotal());
+
+    pAttributes.push(attrContent);
+  }
+  playerContent.push(pAttributes);
+
+  let pStatusEffects = [];
+  for (let i = 0; i < player.statusEffects.length; i++) {
+    let s = player.statusEffects[i];
+    let statContent = [];
+    statContent.push(s.getCurrentAsInt());
+    statContent.push(s.getStackCount());
+    statContent.push(s.getImmunityAsInt());
+
+    pStatusEffects.push(statContent);
+  }
+  playerContent.push(pStatusEffects);
+
+  saveFile.nodes[nName.Player] = [...playerContent];
+
+  console.log(saveFile);
+
+  let recordDepth = 0;
+  let getMaxDepth = (arr, depth) => {
+    if (arr instanceof Array) {
+      for (let i = 0; i < arr.length; i++) {
+        getMaxDepth(arr[i], depth + 1);
+      }
+    }
+    recordDepth = max(recordDepth, depth);
+  }
+  getMaxDepth(saveFile.nodes, 0);
+  console.log(recordDepth);
+
+  let getSlotLength = (value) => {
+    if (value < 256) return 1;
+    return ceil(log(value) / log(256));
+  }
+
+  let setArrayValue = (arr, value, setLen = true) => {
+    let len = getSlotLength(value);
+    if (setLen) arr.push(len);
+    let pow256 = Math.pow(256, len - 1);
+    for (let i = len - 1; i > 0; i--) {
+      arr.push(floor(value / pow256) % 256);
+      pow256 /= 256;
+    }
+    arr.push(value % 256);
+  }
+
+  let isInt = (n) => {
+    return n % 1 === 0;
+  }
+  let count = 0;
+  let TreeToNumberArray = (value, depth) => {
+    if (value instanceof Array) {
+      //"value" is array
+      let header = [];
+      header[0] = depth; //Identifier Depth
+      let dataArr = new Array(value.length);
+      dataArr.fill([]);
+      for (let i = 0; i < value.length; i++) {
+        dataArr[i] = TreeToNumberArray(value[i], depth - 1);
+      }
+      setArrayValue(header, dataArr.length);
+      for (let i = 0; i < dataArr.length; i++) {
+        setArrayValue(header, dataArr[i].length);
+      }
+      for (let i = 0; i < dataArr.length; i++) {
+        for (let j = 0; j < dataArr[i].length; j++) {
+          header.push(dataArr[i][j]);
+        }
+      }
+      if (depth === 4) console.log(header);
+      return header;
+    } else {
+      //"value" is some number
+      // * 10_000 because we have small float numbers
+      let val = 10;
+      let valIsInt = isInt(val);
+      let data = [];
+      data[0] = 80; //Identifier Data
+      data[0] *= (2 - int(valIsInt));
+      //if val is int identifier is 80
+      //if val is float identifier is 160
+      val *= 1 + int(!valIsInt) * 9999;
+      let len = getSlotLength(val);
+      data[0] += len;
+      setArrayValue(data, val, false);
+      //console.log(data);
+      count++;
+      return data;
+    }
+  }
+
+  let a = TreeToNumberArray(saveFile.nodes, recordDepth);
+  for (let i = 0; i< a.length; i++) 
+    if(a[i] === 4) console.log(i);
+  console.log(a);
+
+  let currentPixelPointer = 0;
+  let setPixel = (value) => {
+    if ((currentPixelPointer + 1) % 4 === 0) {
+      saveImg.pixels[currentPixelPointer] = 255;
+      currentPixelPointer++;
+    }
+    saveImg.pixels[currentPixelPointer] = value;
+    currentPixelPointer++;
+  }
+
+  let imageDim = ceil(sqrt(a.length / 3));
+  let saveImg = createImage(imageDim, imageDim);
+  console.log(imageDim);
+  saveImg.loadPixels();
+  for (let i = 0; i < a.length; i++) {
+    setPixel(a[i]);
+  }
+  saveImg.updatePixels();
+  console.log(saveImg.pixels);
+  save(saveImg, "test.png");
+}
+
+function loadDataArray(img) {
+  img.loadPixels();
+  let saveArr = img.pixels.filter(function(_, i) {
+    return (i + 1) % 4;
+  });
+  console.log(saveArr);
+
+  let getPixelValues = (index, slots) => {
+    let total = 0;
+    let pow256 = Math.pow(256, slots - 1);
+    for (let i = slots - 1; i > 0; i--) {
+      let p = getPixelValue(index);
+      total += pow256 * p;
+      pow256 /= 256;
+      index++;
+    }
+    total += getPixelValue(index);
+    return total;
+  }
+
+  //Helper function, gets single pixel channel value
+  let getPixelValue = (index) => {
+    return saveArr[index];
+  }
+
+  let getValue = (index) => {
+    let val = getPixelValues(index + 1, saveArr[index]);
+    return val;
+  }
+
+  let getSingleValueAtPointer = () => {
+    return getPixelValue(currentPointer);
+  }
+
+  let increasePointer = (howMuch) => {
+    currentPointer += howMuch;
+  }
+
+  let getHeaderLength = () => {
+    let prevPointer = currentPointer;
+    increasePointer(1);
+    let len1 = getSingleValueAtPointer();
+    let amt = getValue(currentPointer);
+    increasePointer(len1 + 1);
+    for (let i = 0; i < amt; i++) {
+      let l = getSingleValueAtPointer();
+      increasePointer(l + 1);
+    }
+    let len = currentPointer - prevPointer;
+    currentPointer = prevPointer;
+    return len;
+  }
+
+  let saveTree = [];
+  let currDepth = 0;
+  let State = {
+    STOPPED: -1,
+    DEFAULT: 0,
+    READING: 1,
+    FILLARRAY: 2,
+    INCREASEDEPTH: 3,
+    DECREASEDEPTH: 4
+  };
+  let currentState = State.INIT;
+  let currentValue = 0;
+  let tmpArrays = [];
+  let currentPointer = 0;
+  let currentDepth = 0;
+  let stopped = false;
+  while (!stopped) {
+    switch (currentState) {
+      case State.INCREASEDEPTH:
+        currentDepth++;
+        currentState = State.DEFAULT;
+        break;
+      case State.DECREASEDEPTH:
+        currentDepth--;
+        currentState = State.DEFAULT;
+        break;
+
+      case State.INIT:
+        let headerLen = getHeaderLength();
+        increasePointer(1);
+        let len = getSingleValueAtPointer();
+        let arrLen = getValue(currentPointer);
+        increasePointer(len + 1);
+
+        let startPos = headerLen;
+
+        for (let i = 0; i < arrLen; i++) {
+          tmpArrays[i] = [];
+          let arr = [];
+          len = getSingleValueAtPointer();
+          currentValue = getValue(currentPointer);
+          increasePointer(len + 1);
+          arr[0] = startPos;
+          arr[1] = currentValue;
+          startPos += currentValue;
+          tmpArrays[i].push(arr);
+        }
+        console.log(arrLen, tmpArrays);
+
+        currentState = State.STOPPED;
+        break;
+      case State.READING:
+        currentValue = getValueAtPointer();
+        break;
+      case State.FILLARRAY:
+
+        break;
+      case State.STOPPED:
+        stopped = true;
+        break;
+    }
+  }
+}
+
 function saveMap() {
   //Following SavingAMap.png
   //Our own definition on how to save the map
@@ -470,6 +814,7 @@ function saveMap() {
 
   //Giving us a bit of free Space to work with
   let actualDim = ceil(minDim);
+  actualD += 1;
 
   console.log("Our image is " + actualDim + " pixels wide and high");
   //The actual save file
@@ -677,7 +1022,7 @@ function saveMap() {
    //let txt = JSON.stringify(saveObj);
    save(atob(txt), saveName1);
    */
-   
+
 }
 
 class OptionMenu extends MenuTemplate {

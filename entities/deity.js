@@ -37,28 +37,7 @@ class Deity {
     };
 
     this.lastAction = "None";
-    this.statusEffects = {
-      dead: {
-        curr: false,
-        stacks: 0
-      },
-      paralyzed: {
-        curr: false,
-        stacks: 0
-      },
-      poisoned: {
-        curr: false,
-        stacks: 0
-      },
-      entangled: {
-        curr: false,
-        stacks: 0
-      },
-      burning: {
-        curr: false,
-        stacks: 0
-      }
-    };
+    this.statusEffects = this.defineStatusEffects();
 
     this.calculateTotalAttributes();
   }
@@ -72,7 +51,7 @@ class Deity {
   updateHP(val) {
     this.attr[AttrIDs.Hitpoint].current = constrain(this.attr[AttrIDs.Hitpoint].current + val, 0, this.attr[AttrIDs.Hitpoint].total);
     if (this.attr[AttrIDs.Hitpoint].current === 0) {
-      this.statusEffects.dead.curr = true;
+      this.statusEffects[StatEffIDs.Dead].curr = true;
       this.die();
     }
   }
@@ -82,6 +61,16 @@ class Deity {
       let a = this.attr[i];
       a.calculateTotal();
     }
+  }
+
+  defineStatusEffects() {
+    let sEff = [];
+    sEff.push(new StatusEffect(this, "Dead"));
+    sEff.push(new StatusEffect(this, "Paralyze"));
+    sEff.push(new StatusEffect(this, "Poison"));
+    sEff.push(new StatusEffect(this, "Entangle"));
+    sEff.push(new StatusEffect(this, "Burn"));
+    return sEff;
   }
 
   defineAttributes() {
@@ -147,36 +136,36 @@ class Deity {
   }
 
   checkParalyze() {
-    if (this.statusEffects.paralyzed.curr) {
-      this.statusEffects.paralyzed.stacks--;
-      if (random() < 0.01) this.statusEffects.paralyzed.stacks = 0;
-      this.statusEffects.paralyzed.curr = this.statusEffects.paralyzed.stacks > 0;
-      return this.statusEffects.paralyzed.curr;
+    if (this.statusEffects[StatEffIDs.Paralyze].curr) {
+      this.statusEffects[StatEffIDs.Paralyze].stacks--;
+      if (random() < 0.01) this.statusEffects[StatEffIDs.Paralyze].stacks = 0;
+      this.statusEffects[StatEffIDs.Paralyze].curr = this.statusEffects[StatEffIDs.Paralyze].stacks > 0;
+      return this.statusEffects[StatEffIDs.Paralyze].curr;
     } else {
-      this.statusEffects.paralyzed.stacks = 0;
+      this.statusEffects[StatEffIDs.Paralyze].stacks = 0;
       return false;
     }
   }
 
   applyPoison() {
-    this.updateHP(-1 * this.statusEffects.poisoned.stacks);
-    return this.statusEffects.dead.curr;
+    this.updateHP(-1 * this.statusEffects[StatEffIDs.Poison].stacks);
+    return this.statusEffects[StatEffIDs.Dead].curr;
   }
 
   checkPoison() {
-    if (this.statusEffects.poisoned.curr) {
-      this.statusEffects.poisoned.stacks--;
-      this.statusEffects.poisoned.curr = this.statusEffects.poisoned.stacks > 0;
-      return this.statusEffects.poisoned.curr;
+    if (this.statusEffects[StatEffIDs.Poison].curr) {
+      this.statusEffects[StatEffIDs.Poison].stacks--;
+      this.statusEffects[StatEffIDs.Poison].curr = this.statusEffects[StatEffIDs.Poison].stacks > 0;
+      return this.statusEffects[StatEffIDs.Poison].curr;
     } else {
-      this.statusEffects.poisoned.stacks = 0;
+      this.statusEffects[StatEffIDs.Poison].stacks = 0;
       return false;
     }
   }
 
   checkEntanglement() {
-    if (this.statusEffects.entangled.curr) {
-      this.statusEffects.entangled.curr = false;
+    if (this.statusEffects[StatEffIDs.Entangle].curr) {
+      this.statusEffects[StatEffIDs.Entangle].curr = false;
       return true;
     } else {
       return false;
@@ -184,44 +173,44 @@ class Deity {
   }
 
   applyBurn() {
-    this.updateHP(-1 * this.statusEffects.burning.stacks);
-    return this.statusEffects.dead.curr;
+    this.updateHP(-1 * this.statusEffects[StatEffIDs.Burn].stacks);
+    return this.statusEffects[StatEffIDs.Dead].curr;
   }
 
   checkBurn() {
-    if (this.statusEffects.burning.curr) {
-      this.statusEffects.burning.stacks--;
-      this.statusEffects.burning.curr = this.statusEffects.burning.stacks > 0;
-      return this.statusEffects.burning.curr;
+    if (this.statusEffects[StatEffIDs.Burn].curr) {
+      this.statusEffects[StatEffIDs.Burn].stacks--;
+      this.statusEffects[StatEffIDs.Burn].curr = this.statusEffects[StatEffIDs.Burn].stacks > 0;
+      return this.statusEffects[StatEffIDs.Burn].curr;
     } else {
-      this.statusEffects.burning.stacks = 0;
+      this.statusEffects[StatEffIDs.Burn].stacks = 0;
       return false;
     }
   }
 
   poison() {
-    this.statusEffects.poisoned.curr = true;
-    this.statusEffects.poisoned.stacks++;
+    this.statusEffects[StatEffIDs.Poison].curr = true;
+    this.statusEffects[StatEffIDs.Poison].stacks++;
     mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Poisoned"]);
   }
 
   paralyze() {
-    if (this.statusEffects.paralyzed.curr) return;
+    if (this.statusEffects[StatEffIDs.Paralyze].curr) return;
     mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Paralyzed"]);
-    this.statusEffects.paralyzed.curr = true;
-    this.statusEffects.paralyzed.stacks = 5;
+    this.statusEffects[StatEffIDs.Paralyze].curr = true;
+    this.statusEffects[StatEffIDs.Paralyze].stacks = 5;
   }
 
   entangle() {
-    if (this.statusEffects.entangled.curr) return;
+    if (this.statusEffects[StatEffIDs.Entangle].curr) return;
     mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Entangled"]);
-    this.statusEffects.entangled.curr = true;
+    this.statusEffects[StatEffIDs.Entangle].curr = true;
   }
 
   burn() {
     mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Burned"]);
-    this.statusEffects.burning.curr = true;
-    this.statusEffects.burning.stacks += 3;
+    this.statusEffects[StatEffIDs.Burn].curr = true;
+    this.statusEffects[StatEffIDs.Burn].stacks += 3;
   }
 
   simpleAttack(other) {
@@ -281,7 +270,7 @@ class Deity {
     mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Quick Attack"]);
     let r = ~~(Math.random() * 3) + 1;
     for (let i = 0; i < r; i++) {
-      if (other.statusEffects.dead.curr) return;
+      if (other.statusEffects[StatEffIDs.Dead].curr) return;
       this.simpleAttack(other);
     }
   }

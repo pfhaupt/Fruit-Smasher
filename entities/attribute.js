@@ -31,6 +31,10 @@ class Attribute {
     this.resetCurrent();
   }
 
+  getBaseValue() {
+    return this.baseValue;
+  }
+
   getTotal() {
     this.calculateTotal();
     return this.total;
@@ -61,5 +65,35 @@ class Attribute {
 
   calculateSkillBoost() {
     this.fromSkill = this.boostPerSkillLevel * this.skillLevel;
+  }
+}
+
+let StatEffIDs = {
+  Dead: 0,
+  Paralyze: 1,
+  Poison: 2,
+  Entangle: 3,
+  Burn: 4
+}
+
+class StatusEffect {
+  constructor(parent, name, immune = false) {
+    this.parent = parent;
+    this.name = name;
+    this.curr = false;
+    this.immune = false;
+    this.stacks = 0;
+  }
+
+  getCurrentAsInt() {
+    return int(this.curr);
+  }
+
+  getStackCount() {
+    return this.stacks;
+  }
+
+  getImmunityAsInt() {
+    return int(this.immune);
   }
 }

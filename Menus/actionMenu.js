@@ -82,13 +82,13 @@ class IdleAction extends Action {
     super(n, x, y, w, h);
     this.ch.push(new UICollection("StatusOverview", 0, 0.0, 1, 0.1, [
       [CustomImage, "images/statusEffects/StatusBurning.png", 1],
-      [Text, ["player.statusEffects.burning.stacks", "x"]],
+      [Text, ["player.statusEffects[StatEffIDs.Burn].stacks", "x"]],
       [CustomImage, "images/statusEffects/StatusParalyzed.png", 1],
-      [Text, ["player.statusEffects.paralyzed.stacks", "x"]],
+      [Text, ["player.statusEffects[StatEffIDs.Paralyze].stacks", "x"]],
       [CustomImage, "images/statusEffects/StatusEntangled.png", 1],
-      [Text, ["player.statusEffects.entangled.curr"]],
+      [Text, ["player.statusEffects[StatEffIDs.Entangle].curr"]],
       [CustomImage, "images/statusEffects/StatusPoisoned.png", 1],
-      [Text, ["player.statusEffects.poisoned.stacks", "x"]]
+      [Text, ["player.statusEffects[StatEffIDs.Poison].stacks", "x"]]
     ], [
       [1, 1, 1, 1, 1, 1, 1, 1],
       [
@@ -109,16 +109,16 @@ class IdleAction extends Action {
     this.ch.push(new Text(["This leads to the following effects:"], 0, 0.1, 1, 0.025));
 
     this.ch.push(new UICollection("Legend", 0, 0.125, 1, 0.15, [
-      [Text, ["player.statusEffects.burning.stacks", " burn damage received per move."]],
+      [Text, ["player.statusEffects[StatEffIDs.Burn].stacks", " burn damage received per move."]],
       [SwapableText, [
-        ["You are paralyzed! ", "You can't do anything for ", "player.statusEffects.paralyzed.stacks", " moves."],
+        ["You are paralyzed! ", "You can't do anything for ", "player.statusEffects[StatEffIDs.Paralyze].stacks", " moves."],
         ["You are not paralyzed! ", "You can freely move around."]
       ]],
       [SwapableText, [
         ["You are entangled! ", "You can't do anything!"],
         ["You are not entangled! ", " You can freely move around."]
       ]],
-      [Text, ["player.statusEffects.poisoned.stacks", " poison damage received per move."]],
+      [Text, ["player.statusEffects[StatEffIDs.Poison].stacks", " poison damage received per move."]],
       [EmptyElement],
       [Text, ["Note: ", "The effects of Paralyze and Entangle can stack."]]
     ], [
@@ -144,8 +144,8 @@ class IdleAction extends Action {
   }
 
   displayOnce() {
-    this.ch[2].ch[1].setText(1 - int(player.statusEffects.paralyzed.curr));
-    this.ch[2].ch[2].setText(1 - int(player.statusEffects.entangled.curr));
+    this.ch[2].ch[1].setText(1 - int(player.statusEffects[StatEffIDs.Paralyze].curr));
+    this.ch[2].ch[2].setText(1 - int(player.statusEffects[StatEffIDs.Entangle].curr));
     super.displayOnce();
   }
 }
@@ -321,7 +321,7 @@ class ActionBlockGroup extends MenuTemplate {
             currentlyFightingEnemy.performRandomAction(player);
           mainWindow.subMenus[SubMenu.Field].ch[1].displayOnce();
         }],
-        [Text, ["Attempt to flee the battle. Chance to flee: ", "getFleeChance(player, currentlyFightingEnemy) / (1 + int(player.statusEffects.paralyzed.curr)) * (1 - int(player.statusEffects.entangled.curr)) * 100", "%"]],
+        [Text, ["Attempt to flee the battle. Chance to flee: ", "getFleeChance(player, currentlyFightingEnemy) / (1 + int(player.statusEffects[StatEffIDs.Paralyze].curr)) * (1 - int(player.statusEffects[StatEffIDs.Entangle].curr)) * 100", "%"]],
         [Text, ["This is based on your HP and the Damage of the Enemy."]],
       ],
       [

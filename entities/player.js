@@ -110,7 +110,7 @@ class Player extends Deity {
       att.calculateTotal();
       att.resetCurrent();
     }
-    this.statusEffects.dead.curr = false;
+    this.statusEffects[StatEffIDs.Dead].curr = false;
     mainWindow.displayOnce();
   }
 
