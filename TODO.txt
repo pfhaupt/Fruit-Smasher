@@ -1,11 +1,6 @@
 TODO-LIST / "Have no idea? Do this"-List
 
 Necessary Features:
-  - Bug fix
-  -> Saving doesn't allow for fractions
-  -> Rewrite all attributes to work with integers
-  -> f.e. Wraith has 0.1 Paralyze, change to 10 and therefore change code if necessary
-
   - Quests and Tutorials
   -> Give the player something to do
 

@@ -430,17 +430,15 @@ function createDataArray() {
     Enemies: 1,
     Player: 2
   };
-  let saveFile = {
-    nodes: []
-  };
+  let saveFile = [];
 
-  saveFile.nodes.push([]); //Push Map
-  saveFile.nodes.push([]); //Push Enemies
-  saveFile.nodes.push([]); //Push Player
+  saveFile.push([]); //Push Map
+  saveFile.push([]); //Push Enemies
+  saveFile.push([]); //Push Player
 
-  let tMap = saveFile.nodes[nName.Map];
-  let tEnemies = saveFile.nodes[nName.Enemies];
-  let tPlayer = saveFile.nodes[nName.Player];
+  let tMap = saveFile[nName.Map];
+  let tEnemies = saveFile[nName.Enemies];
+  let tPlayer = saveFile[nName.Player];
 
   tMap.push([]); //Push Info to Map
   tMap.push([]); //Push Tiles to Map
@@ -486,10 +484,12 @@ function createDataArray() {
     }
   }
 
+  let entityNames = Object.keys(EntityIDs);
   for (let i = 0; i < enemies.length; i++) {
     let e = enemies[i];
     let enemyContent = [];
     enemyContent.push(e.level);
+    enemyContent.push(entityNames.indexOf(e.constructor.name));
     enemyContent.push(enemyNames.indexOf(e.name));
 
     let eAttributes = [];
@@ -545,7 +545,7 @@ function createDataArray() {
   }
   playerContent.push(pStatusEffects);
 
-  saveFile.nodes[nName.Player] = [...playerContent];
+  saveFile[nName.Player] = [...playerContent];
 
   console.log(saveFile);
 
@@ -558,8 +558,7 @@ function createDataArray() {
     }
     recordDepth = max(recordDepth, depth);
   }
-  getMaxDepth(saveFile.nodes, 0);
-  console.log(recordDepth);
+  getMaxDepth(saveFile, 0);
 
   let getSlotLength = (value) => {
     if (value < 256) return 1;
@@ -580,7 +579,7 @@ function createDataArray() {
   let isInt = (n) => {
     return n % 1 === 0;
   }
-  let count = 0;
+  let branchCounter = 0;
   let TreeToNumberArray = (value, depth) => {
     if (value instanceof Array) {
       //"value" is array
@@ -600,12 +599,11 @@ function createDataArray() {
           header.push(dataArr[i][j]);
         }
       }
-      if (depth === 4) console.log(header);
       return header;
     } else {
       //"value" is some number
       // * 10_000 because we have small float numbers
-      let val = 10;
+      let val = value;
       let valIsInt = isInt(val);
       let data = [];
       data[0] = 80; //Identifier Data
@@ -617,15 +615,13 @@ function createDataArray() {
       data[0] += len;
       setArrayValue(data, val, false);
       //console.log(data);
-      count++;
+      branchCounter++;
       return data;
     }
   }
 
-  let a = TreeToNumberArray(saveFile.nodes, recordDepth);
-  for (let i = 0; i< a.length; i++) 
-    if(a[i] === 4) console.log(i);
-  console.log(a);
+  let a = TreeToNumberArray(saveFile, recordDepth);
+  console.log("Reached " + branchCounter + " branch ends.");
 
   let currentPixelPointer = 0;
   let setPixel = (value) => {
@@ -639,7 +635,6 @@ function createDataArray() {
 
   let imageDim = ceil(sqrt(a.length / 3));
   let saveImg = createImage(imageDim, imageDim);
-  console.log(imageDim);
   saveImg.loadPixels();
   for (let i = 0; i < a.length; i++) {
     setPixel(a[i]);
@@ -651,378 +646,171 @@ function createDataArray() {
 
 function loadDataArray(img) {
   img.loadPixels();
-  let saveArr = img.pixels.filter(function(_, i) {
+  //We don't need the alpha channel, filter it
+  let saveArr = img.pixels.filter(function (_, i) {
     return (i + 1) % 4;
   });
-  console.log(saveArr);
+  //Convert from UInt8Array to normal Array so normal Array functions can be used
+  saveArr = [...saveArr];
 
-  let getPixelValues = (index, slots) => {
-    let total = 0;
-    let pow256 = Math.pow(256, slots - 1);
-    for (let i = slots - 1; i > 0; i--) {
-      let p = getPixelValue(index);
-      total += pow256 * p;
+  let getArrayValue = (arr, index) => {
+    let len = arr[index];
+    let val = 0;
+    let pow256 = Math.pow(256, len - 1);
+    index++;
+    for (let i = 0; i < len; i++) {
+      let v = arr[index];
+      val += v * pow256;
       pow256 /= 256;
       index++;
     }
-    total += getPixelValue(index);
-    return total;
-  }
-
-  //Helper function, gets single pixel channel value
-  let getPixelValue = (index) => {
-    return saveArr[index];
-  }
-
-  let getValue = (index) => {
-    let val = getPixelValues(index + 1, saveArr[index]);
     return val;
   }
 
-  let getSingleValueAtPointer = () => {
-    return getPixelValue(currentPointer);
+  let getSingleArrayValue = (arr, index) => {
+    return arr[index];
   }
 
-  let increasePointer = (howMuch) => {
-    currentPointer += howMuch;
-  }
-
-  let getHeaderLength = () => {
-    let prevPointer = currentPointer;
-    increasePointer(1);
-    let len1 = getSingleValueAtPointer();
-    let amt = getValue(currentPointer);
-    increasePointer(len1 + 1);
+  let getHeaderLength = (arr) => {
+    let len = 2 + getSingleArrayValue(arr, 1); //One for Identifier, One for Stored Length
+    let amt = getArrayValue(arr, 1);
+    let offset = len;
     for (let i = 0; i < amt; i++) {
-      let l = getSingleValueAtPointer();
-      increasePointer(l + 1);
+      let l = getSingleArrayValue(arr, offset) + 1;
+      len += l;
+      offset += l;
     }
-    let len = currentPointer - prevPointer;
-    currentPointer = prevPointer;
     return len;
   }
 
-  let saveTree = [];
-  let currDepth = 0;
-  let State = {
-    STOPPED: -1,
-    DEFAULT: 0,
-    READING: 1,
-    FILLARRAY: 2,
-    INCREASEDEPTH: 3,
-    DECREASEDEPTH: 4
-  };
-  let currentState = State.INIT;
-  let currentValue = 0;
-  let tmpArrays = [];
-  let currentPointer = 0;
-  let currentDepth = 0;
-  let stopped = false;
-  while (!stopped) {
-    switch (currentState) {
-      case State.INCREASEDEPTH:
-        currentDepth++;
-        currentState = State.DEFAULT;
-        break;
-      case State.DECREASEDEPTH:
-        currentDepth--;
-        currentState = State.DEFAULT;
-        break;
+  let saveFile = [...saveArr]; //Init saveFile
+  let branchCounter = 0; //Just for debugging purposes
 
-      case State.INIT:
-        let headerLen = getHeaderLength();
-        increasePointer(1);
-        let len = getSingleValueAtPointer();
-        let arrLen = getValue(currentPointer);
-        increasePointer(len + 1);
+  //Magic function that decodes our array
+  let NumberArrayToTree = (arr) => {
+    //overhead is unnecessary stuff that can be removed
+    //like header or trailing zeros
+    let overhead = arr.length;
+    let h = getHeaderLength(arr);
+    let amtLen = getSingleArrayValue(arr, 1);
+    //How many sub arrays do we have?
+    let amt = getArrayValue(arr, 1);
+    //lens stores start pos and length
+    let lens = [];
+    let index = 1 + amtLen + 1; //index is now at first subArr length
+    //for splicing
+    let currPos = h;
+    for (let i = 0; i < amt; i++) {
+      let info = [];
+      amtLen = getSingleArrayValue(arr, index);
+      //val stores length of sub array
+      let val = getArrayValue(arr, index);
+      //where does sub array start in array?
+      info.push(currPos);
+      //how long is sub array?
+      info.push(val);
+      //store info in lens array
+      lens.push(info);
+      //offset position
+      currPos += val;
+      //subtract from possible overhead
+      overhead -= val;
+      index += amtLen + 1;
+    }
 
-        let startPos = headerLen;
+    //Divide our array into sub arrays
+    let tmpArr = [];
+    for (let i = amt - 1; i >= 0; i--) {
+      let subArr = arr.splice(lens[i][0], lens[i][1]);
+      tmpArr.push(subArr);
+    }
 
-        for (let i = 0; i < arrLen; i++) {
-          tmpArrays[i] = [];
-          let arr = [];
-          len = getSingleValueAtPointer();
-          currentValue = getValue(currentPointer);
-          increasePointer(len + 1);
-          arr[0] = startPos;
-          arr[1] = currentValue;
-          startPos += currentValue;
-          tmpArrays[i].push(arr);
+    //because of splice we need to loop backwards through array
+    //so now the order of sub arrays in tree is flipped,
+    //that's why we need to undo the flip
+    for (let i = amt - 1; i >= 0; i--) {
+      arr.push(tmpArr[i]);
+    }
+
+    //remove overhead from array so only sub arrays are left over,
+    //shift() removes first element, that's okay because we
+    //used push() for sub-arrays, meaning sub-arrays always come last
+    for (let i = 0; i < overhead; i++) {
+      arr.shift();
+    }
+
+    //Recursively fill sub arrays until we hit data
+    for (let i = 0; i < arr.length; i++) {
+      let subArr = arr[i];
+      //if we have not hit data yet, fill sub array
+      if (!(subArr[0] === 0 || subArr[0] >= 80)) NumberArrayToTree(subArr);
+      else {
+        //we may have hit data here
+        let isFloat = subArr[0] >= 160; //Identifier Float
+        if (isFloat) {
+          subArr[0] -= 160;
+        } else {
+          subArr[0] -= 80;
         }
-        console.log(arrLen, tmpArrays);
-
-        currentState = State.STOPPED;
-        break;
-      case State.READING:
-        currentValue = getValueAtPointer();
-        break;
-      case State.FILLARRAY:
-
-        break;
-      case State.STOPPED:
-        stopped = true;
-        break;
-    }
-  }
-}
-
-function saveMap() {
-  //Following SavingAMap.png
-  //Our own definition on how to save the map
-  let map = mainWindow.subMenus[SubMenu.Field].ch[0].ch[0];
-
-  let saveName = "map" + currentZone + "_played.png";
-  let tmpDeity = new Deity();
-  let slotsForGeneralEnemyStuff = 3;
-  let slotsForEachAttribute = 2;
-  let attributeLength = tmpDeity.attr.length;
-  let statusLength = tmpDeity.statusEffects.length;
-  let dimLength = 2;
-
-  let slotsPerEnemy = 0;
-  //One Slot Per Enemy Per Level
-  slotsPerEnemy += slotsForGeneralEnemyStuff;
-  //Saving every attribute base, perLevel
-  //two slots so max is 65535 base, 65535 perLevel
-  //or 255^3 base, 255 perLevel
-  slotsPerEnemy += tmpDeity.attr.length * 2 * slotsForEachAttribute;
-  //Saving every status effect
-  slotsPerEnemy += Object.keys(tmpDeity.statusEffects).length * 2;
-  //Save all enemies, plus the player
-  let totalEntitiesToSave = enemies.length + 1;
-  //How many slots do we actually need?
-  let totalSlotsForEntities = totalEntitiesToSave * slotsPerEnemy;
-  //1 pixel per tile, 4 slots per pixel
-  let mapSizeTotal = map.width * map.height * 4;
-  let versionSpace = 4; //Last 4 slots for version number
-
-  let totalSlotSize = totalSlotsForEntities + mapSizeTotal + versionSpace;
-  //3 because 2 slots for entity count, 1 for enemy length
-  totalSlotSize += 3;
-  //Then another 4 slots for map width and map height
-  //-> Max Height for map is now 65535x65535
-  totalSlotSize += 4;
-  console.log(totalSlotSize);
-
-  //We can't use the Alpha Channel
-  totalSlotSize *= 4 / 3;
-
-  //The area of our "rectangle" (our image) is just the sqrt of how many
-  //slots we want to save divided by 4
-  //Divide by 4 because p5js has 4 slots per pixel (RGBA)
-  let minDim = sqrt(totalSlotSize / 4);
-
-  //Giving us a bit of free Space to work with
-  let actualDim = ceil(minDim);
-  actualD += 1;
-
-  console.log("Our image is " + actualDim + " pixels wide and high");
-  //The actual save file
-  let saveImg = createImage(actualDim, actualDim);
-
-  let currentPixelPointer = 0;
-  saveImg.loadPixels();
-
-  //Helper function for setting multiple pixel channels at once
-  //For that it divides the value in steps of 256, because channels are 8bit
-  //Example:
-  //(1000, 2):
-  //slot1 = floor(1000 / 256) = 3
-  //slot2 = 1000 % 256 = 232
-  //(85000, 3):
-  //slot1 = floor(85000 / 256^2) % 256 = 1
-  //slot2 = floor(85000 / 256) % 256 = 76
-  //slot3 = 85000 % 256 = 8
-  //Function saves [1, 76, 8] at corresponding index
-  let setPixels = (value, slots) => {
-    let pow256 = Math.pow(256, slots - 1);
-    for (let i = slots - 1; i > 0; i--) {
-      setPixel(floor(value / pow256) % 256);
-      pow256 /= 256;
-    }
-    setPixel(value % 256);
-  }
-
-  //Helper function for setting a single pixel channel
-  let setPixel = (value) => {
-    if ((currentPixelPointer + 1) % 4 === 0) {
-      saveImg.pixels[currentPixelPointer] = 255;
-      currentPixelPointer++;
-    }
-    saveImg.pixels[currentPixelPointer] = value;
-    currentPixelPointer++;
-  }
-
-  let getSlotLength = (value) => {
-    return ceil(log(value) / log(256));
-  }
-
-  //Set version
-  setPixel(version.a);
-  setPixel(version.b);
-  setPixel(version.c);
-  setPixel(version.d);
-
-  //Save Map dimensions
-  setPixel(dimLength);
-  setPixels(map.width, dimLength);
-  setPixels(map.height, dimLength);
-  //setPixel(floor(map.width / 256));
-  //setPixel(map.width % 256);
-  //setPixel(floor(map.height / 256));
-  //setPixel(map.height % 256);
-  for (let x = 0; x < map.width; x++) {
-    for (let y = 0; y < map.height; y++) {
-      let t = map.getIDs(x, y);
-      setPixel(t.tID);
-      setPixel(t.eID);
-      setPixel(t.sID);
-      //Default is -1 (no enemy), but PNG can't handle that
-      setPixel(t.enID + 1);
-    }
-  }
-  console.log("Setting length and slots at ", currentPixelPointer);
-  //How many slots do I need for my enemies?
-  let enemyLength = getSlotLength(enemies.length);
-  setPixel(enemyLength);
-  setPixels(enemies.length, enemyLength);
-  //Max Level 256^maxLevelSlotCount-1
-  let maxLevelSlotCount = 2;
-  setPixel(maxLevelSlotCount);
-  setPixel(slotsPerEnemy);
-  setPixel(slotsForGeneralEnemyStuff);
-  setPixel(slotsForEachAttribute);
-  setPixel(attributeLength);
-  setPixel(statusLength);
-
-  //Save all enemies
-  console.log("Enemies start at ", currentPixelPointer);
-  for (let i = 0; i < enemies.length; i++) {
-    setPixels(enemies[i].level, maxLevelSlotCount);
-    setPixel(enemyNames.indexOf(enemies[i].name));
-    for (let j = 0; j < enemies[i].attr.length; j++) {
-      let a = enemies[i].attr[j];
-      let curr = a.getCurrent();
-      let total = a.getTotal();
-      //Each attribute gets [slotsForEachAttribute] channels for their
-      //current and total value
-      //So max is 256^slotsForEachAttribute-1 HP, for example
-      setPixels(curr, slotsForEachAttribute);
-      setPixels(total, slotsForEachAttribute);
-    }
-    for (let j = 0; j < enemies[i].statusEffects.length; j++) {
-      //Save each status effect
-      //Has Effect = 1, Has Not Effect = 0
-      //Max Stacks of eny Effect = 255
-      //To be fair I don't expect anyone to have more than 255 burn or poison stacks
-      //If this ever gets possible, change accordingly
-      let s = enemies[i].statusEffects[j];
-      setPixel(int(s.curr));
-      setPixel(s.stacks);
+        //If isFloat, divide stored data by 10k
+        //else divide by 1, saving original data
+        arr[i] = getArrayValue(subArr, 0) / (1 + int(isFloat) * 9999);
+        branchCounter++;
+      }
     }
   }
 
-  //Save Player similar to enemies
-  //Store Attributes and Status Effects
-  console.log("Player starts at ", currentPixelPointer);
-  setPixels(player.level, maxLevelSlotCount);
-  for (let i = 0; i < player.attr.length; i++) {
-    let a = player.attr[i];
-    let curr = a.getCurrent();
-    let total = a.getTotal();
-    setPixels(curr, slotsForEachAttribute);
-    setPixels(total, slotsForEachAttribute);
-  }
+  NumberArrayToTree(saveFile); //Decode Array
+  console.log("Reached " + branchCounter + " branch ends.");
+  console.log(saveFile);
+  
+  //At this point saveFile contains the decoded Tree
 
-  for (let j = 0; j < player.statusEffects.length; j++) {
-    //Save each status effect
-    let s = player.statusEffects[j];
-    setPixel(int(s.curr));
-    setPixel(s.stacks);
-  }
+  let tMap = saveFile[0];
 
-  saveImg.updatePixels();
-  saveImg.loadPixels();
+  let tMapInfo = tMap[0];
+  let tCurrentZone = tMapInfo[0];
+  let tMapWidth = tMapInfo[1];
+  let tMapHeight = tMapInfo[2];
+  let tMaskLens = tMapInfo[3];
 
-  //Safety Check Number 1
-  //Divide all stuff before this line into [blockAmount] segments
-  //Take sum of each segment
-  //Store that sum
-  //When loading, calculate sum again, compare to stored sum
-  //If just one block fails, something went wrong
-  //Possible "Somethings":
-  //-Block Calculation upon Saving
-  //-Corrupted Block Storing in Save
-  //-Block Calculation upon Loading
-  //-Corrupted Block Accessing in Loading
-  console.log("Blocking starts at ", currentPixelPointer);
-  let blockAmount = 10;
-  let totalBlockSize = floor(currentPixelPointer / blockAmount) * blockAmount;
-  let blockSize = totalBlockSize / blockAmount;
-  //Set important stuff so we can later get it back in loading
-  setPixel(blockAmount);
-  setPixel(getSlotLength(blockSize));
-  setPixels(blockSize, getSlotLength(blockSize));
-
-  //Create Sum of Blocks
-  let blockSum = new Array(blockAmount);
-  blockSum.fill(0);
-  let currentBlockPointer = 0;
-  for (let i = 0; i < blockAmount; i++) {
-    for (let j = 0; j < blockSize; j++) {
-      blockSum[i] += saveImg.pixels[currentBlockPointer];
-      currentBlockPointer++;
+  let tMapTiles = tMap[1];
+  let getTileInfo = (n) => {
+    let vals = [];
+    let v = n;
+    let mask = 0;
+    for (let i = tMaskLens.length - 1; i >= 0; i--) {
+      mask = Math.pow(2, tMaskLens[i]) - 1;
+      vals.unshift(v & mask);
+      v >>= tMaskLens[i];
     }
-
-    //Set Each Sum of Blocks in Save Image
-    let blockSlotLength = getSlotLength(blockSum[i]);
-    setPixel(blockSlotLength);
-    setPixels(blockSum[i], blockSlotLength);
+    vals[3] -= 1; //we store enemyID + 1, now remove it
+    return vals;
   }
+  let tTiles = [];
+  let tEnemyPositions = [];
+  let tileIndex = 0;
+  for (let i = 0; i < tMapWidth; i++) {
+    tTiles.push([]);
+    for (let j = 0; j < tMapHeight; j++) {
+      let tileInfo = getTileInfo(tMapTiles[tileIndex]);
+      if (tileInfo[3] !== -1) {
+        //Enemy at that tile
+        tEnemyPositions[tileInfo[3]] = {
+          x: i,
+          y: j
+        };
+      }
+      tTiles[i].push(tileInfo);
+      tileIndex++;
+    }
+  }
+  console.log(tTiles);
 
-  console.log("Saving Pixel Pointer at ", currentPixelPointer);
-  //Safety Check Number 3
-  //Last entry saves currentPixelPointer
-  //So that the save can see if everything went correct
-  let pointerLength = getSlotLength(currentPixelPointer);
-  setPixel(pointerLength);
-  setPixels(currentPixelPointer, pointerLength);
+  let tEnemies = saveFile[1];
 
-  //Make sure to fill the last pixel transparency for whatever we're setting
-  while ((currentPixelPointer + 1) % 4 !== 0) setPixel(0);
-  setPixel(0);
 
-  saveImg.updatePixels();
-  console.log(saveImg.pixels);
-
-  save(saveImg, saveName);
-  /*
-   let map = mainWindow.subMenus[SubMenu.Field].ch[0].ch[0];
-   let saveName1 = "map" + currentZone + "_played.json";
-   let saveImg1 = createImage(map.width, map.height);
-   saveImg1.loadPixels();
-   for (let x = 0; x < saveImg1.width; x++) {
-     for (let y = 0; y < saveImg1.height; y++) {
-       saveImg1.pixels[(y * saveImg1.width + x) * 4] = map.tiles[x][y].tileID;
-       saveImg1.pixels[(y * saveImg1.width + x) * 4 + 1] = map.tiles[x][y].entityID;
-       saveImg1.pixels[(y * saveImg1.width + x) * 4 + 2] = map.tiles[x][y].subTexID;
-       saveImg1.pixels[(y * saveImg1.width + x) * 4 + 3] = map.tiles[x][y].enemyID + 1;
-     }
-   }
-   saveImg1.updatePixels();
-   //save(saveImg, saveName0);
-
-   let saveObj = {
-     player: player,
-     enemies: enemies,
-     entityCount: entityCount,
-     map: saveImg1,
-   };
-   saveObj = JSON.decycle(saveObj);
-   //let txt = JSON.stringify(saveObj);
-   save(atob(txt), saveName1);
-   */
-
+  let tPlayer = saveFile[2];
 }
 
 class OptionMenu extends MenuTemplate {
