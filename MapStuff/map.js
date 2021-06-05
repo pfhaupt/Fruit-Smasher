@@ -1,3 +1,4 @@
+let enemyTypeCount = 7;
 let EntityIDs = {
   None: 0,
   Spider: 1,

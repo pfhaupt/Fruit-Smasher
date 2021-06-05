@@ -131,12 +131,13 @@ class IdleAction extends Action {
     this.ch[2].ch[2].format = false;
 
     this.ch.push(new UICollection("Quest", 0, 0.275, 1, 0.2, [
-      [Text, ["Current Quest: ", "player.currentQuest.getName()"]],
-      [Text, ["Current Progress: ", "player.currentQuest.getProgress()"]]
+      [Text, ["Quest: ", "player.currentQuest.getName()"]],
+      [Text, ["player.currentQuest.getProgress()"]],
+      [Text, ["player.currentQuest.getHint()"]]
     ], [
       [1],
       [
-        [1, 1]
+        [1, 1, 1]
       ]
     ]));
 

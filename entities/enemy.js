@@ -58,39 +58,8 @@ class Enemy extends Deity {
 
     this.possibleActions = this.defineActions();
     this.normalizeActions();
-  }
-
-  //Default Actions
-  //NormalAttack f.e. happens 10 times as often as QuickAttack
-  //And 3.33 times as often as Heal
-  //Overload in enemy classes for individual behavior
-  defineActions() {
-    return {
-      NormalAttack: {
-        chance: 10,
-        trigger(from, to) {
-          from.attack(to);
-        }
-      },
-      QuickAttack: {
-        chance: 1,
-        trigger(from, to) {
-          from.quickAttack(to);
-        }
-      },
-      Heal: {
-        chance: 3,
-        trigger(from, to) {
-          from.heal(to);
-        }
-      },
-      Flee: {
-        chance: 1,
-        trigger(from, to) {
-          from.flee(to);
-        }
-      }
-    }
+    this.strengthIndex = 0;
+    this.calculateStrength();
   }
 
   normalizeActions() {
@@ -162,6 +131,43 @@ class Enemy extends Deity {
     mainWindow.subMenus[SubMenu.Field].displayOnce();
   }
 
+  calculateStrength() {
+    this.strengthIndex = this.getStrengthIndex();
+  }
+
+  //Default Actions
+  //NormalAttack f.e. happens 10 times as often as QuickAttack
+  //And 3.33 times as often as Heal
+  //Overload in enemy classes for individual behavior
+  defineActions() {
+    return {
+      NormalAttack: {
+        chance: 10,
+        trigger(from, to, simulate = false) {
+          return from.attack(to, simulate);
+        }
+      },
+      QuickAttack: {
+        chance: 1,
+        trigger(from, to, simulate = false) {
+          return from.quickAttack(to, simulate);
+        }
+      },
+      Heal: {
+        chance: 3,
+        trigger(from, to, simulate = false) {
+          return from.heal(to, simulate);
+        }
+      },
+      Flee: {
+        chance: 1,
+        trigger(from, to, simulate = false) {
+          return from.flee(to, simulate);
+        }
+      }
+    }
+  }
+
   //Default: Legal Move if not water and empty space
   //Overload in enemy classes for individual behavior
   //like only moving on Sand
@@ -200,7 +206,11 @@ class Enemy extends Deity {
   //Overload in enemy classes for individual behavior
   //like boss kills
   checkIfViableForQuest() {
-    player.currentQuest.trackProgress(QuestType.Kill);
+    player.checkQuestProgress(QuestType.Kill, EntityIDs[this.constructor.name]);
+  }
+
+  getStrengthIndex() {
+    return simulateFight(this, player);
   }
 
   //Default: Update Minimap, Map, Tiles, etc.
@@ -214,26 +224,28 @@ class Enemy extends Deity {
     minimap.updatePixels(this.position.x, this.position.y);
   }
 
-  performRandomAction(other) {
+  performRandomAction(other, simulate = false) {
     let r = Math.random() * 100;
     if (this.statusEffects[StatEffIDs.Dead].curr) return;
     for (let action of Object.values(this.possibleActions)) {
       if (r < action.chance) {
-        action.trigger(this, other);
-        return true;
+        return action.trigger(this, other, simulate);
       }
     }
     return false;
   }
 
-  flee(other) {
+  flee(other, simulate = false) {
     if (this.checkParalyze()) return;
     if (this.applyPoison()) return;
-    this.attr[AttrIDs.Energy].current = constrain(this.attr[AttrIDs.Energy].current - ActionCost.FleeAction, 0, this.attr[AttrIDs.Energy].total);
-    mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Attempted to flee."]);
-    let fleeChance = getFleeChance(player, other);
-    if (fleeChance < random()) mainWindow.subMenus[SubMenu.Field].ch[1].setAction(ActionScreen.EnemyFled);
-    //else console.log("It attempted to flee, but failed.");
+    if (!simulate) {
+      this.attr[AttrIDs.Energy].current = constrain(this.attr[AttrIDs.Energy].current - ActionCost.FleeAction, 0, this.attr[AttrIDs.Energy].total);
+      mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Attempted to flee."]);
+      let fleeChance = getFleeChance(player, other);
+      if (fleeChance < random()) mainWindow.subMenus[SubMenu.Field].ch[1].setAction(ActionScreen.EnemyFled);
+      //else console.log("It attempted to flee, but failed.");
+    }
+    return false;
   }
 
   die() {
@@ -272,10 +284,6 @@ class Enemy extends Deity {
 class Boss extends Enemy {
   constructor(x, y) {
     super(x, y);
-  }
-
-  checkIfViableForQuest() {
-    player.currentQuest.trackProgress(QuestType.BossKill);
   }
 }
 
@@ -474,7 +482,7 @@ class Octopus extends Enemy {
 
   defineActions() {
     return {
-      QuickAttack: {
+      SpecialAttack: {
         chance: 2,
         trigger(from, to) {
           let currHP = from.attr[AttrIDs.Hitpoint].current;

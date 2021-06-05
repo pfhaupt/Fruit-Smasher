@@ -66,7 +66,7 @@ function gameLoop() {
 
 function getEstimatedRoundsTillDeath(from, to) {
   if (to.attr[AttrIDs.Damage].total === 0) return 1000;
-  return (from.attr[AttrIDs.Hitpoint].current / to.attr[AttrIDs.Damage].total);
+  return (from.attr[AttrIDs.Hitpoint].getCurrent() / to.attr[AttrIDs.Damage].getTotal());
 }
 
 function getFleeChance(from, to) {
@@ -111,12 +111,15 @@ function nextZone() {
 let minLevel = currentZone * 10,
   maxLevel = minLevel + 9;
 
-function spawnEnemy() {
-  minLevel = currentZone * 10;
-  maxLevel = minLevel + 9;
-  let enemyLevel = Math.floor(random(minLevel, Math.max(minLevel, Math.min(player.level, maxLevel)) + 1));
-  let hp = 20 + 5 * enemyLevel;
-  let dmg = 1 + 1 * enemyLevel;
-  let regen = 0.1 * enemyLevel;
-  let atkSpeed = 1 + Math.floor(enemyLevel / 10);
+function simulateFight(from, to) {
+  let fromHP = from.attr[AttrIDs.Hitpoint].getTotal();
+  let fromDmg = from.attr[AttrIDs.Damage].getTotal();
+  let toHP = to.attr[AttrIDs.Hitpoint].getTotal();
+  let toDmg = to.attr[AttrIDs.Damage].getTotal();
+  let tillFromDies = fromHP / toDmg;
+  let tillToDies = toHP / fromDmg;
+  
+  let r = tillFromDies / tillToDies;
+
+  return r;
 }

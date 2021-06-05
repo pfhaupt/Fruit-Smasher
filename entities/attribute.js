@@ -41,6 +41,10 @@ class Attribute {
     if (arr[2]) this.total = arr[2];
   }
 
+  getStats() {
+    return [this.base, this.current, this.total];
+  }
+
   getTotal() {
     this.calculateTotal();
     return this.total;
@@ -100,7 +104,6 @@ class StatusEffect {
   }
   
   setStats(arr) {
-    
     if (arr[0]) this.curr = boolean(arr[0]);
     if (arr[1]) this.stacks = arr[1];
     if (arr[2]) this.immune = boolean(arr[2]);

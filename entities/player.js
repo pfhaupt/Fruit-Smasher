@@ -5,7 +5,7 @@ class Player extends Deity {
     this.chestCount = [];
     for (var i = 0; i < 4 * maxZone; i++) this.chestCount[i] = 0;
 
-    this.currentQuest = new Quest(this, QuestType.Kill);
+    this.currentQuest = this.getRandomQuest();
   }
 
   checkMovement(keyCode) {
@@ -54,7 +54,7 @@ class Player extends Deity {
     } else if (targetIDs.eID !== EntityIDs.None) {
       //Interact with Entity on Target position
 
-      if (targetIDs.eID >= 1 && targetIDs.eID <= 7) {
+      if (targetIDs.eID >= 1 && targetIDs.eID <= enemyTypeCount) {
         //Target contains an enemy
         //Find out which enemy
 
@@ -80,6 +80,10 @@ class Player extends Deity {
       }
       return;
     }
+
+    //Player can actually move here
+    this.checkQuestProgress(QuestType.Walk);
+
     this.attr[AttrIDs.MoveCount].current--;
     action.setAction(ActionScreen.Idle);
 
@@ -141,6 +145,14 @@ class Player extends Deity {
     if (this.checkParalyze()) fleeChance *= 0.5;
     if (this.checkEntanglement()) fleeChance = 0.0;
     if (random() < fleeChance) mainWindow.subMenus[SubMenu.Field].ch[1].setAction(ActionScreen.PlayedFled);
+  }
+
+  getRandomQuest() {
+    return new KillQuest(this);
+  }
+
+  checkQuestProgress(val, extras = null) {
+    this.currentQuest.checkProgress(val, extras);
   }
 }
 

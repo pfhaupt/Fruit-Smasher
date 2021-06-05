@@ -1,75 +1,115 @@
 let QuestType = {
-  Kill: 0,
-  BossKill: 1,
-  Collect: 2,
-  OpenChest: 3,
+  None: 0,
+  Kill: 1,
+  Walk: 2
 };
 
+let enemyDict = [
+  ["Spider", "Spiders"],
+  ["Scorpion", "Scorpions"],
+  ["Wraith", "Wraiths"],
+  ["Octopus", "Octopuses"],
+  ["Ghost", "Ghosts"],
+  ["Dragon", "Dragons"],
+  ["Skeleton Boss", "Skeleton Bosses"],
+]
+
 class Quest {
-  constructor(par, type) {
+  constructor(par) {
     this.parent = par;
-    this.type = type;
-    this.goal = this.generateGoal(this.type);
-    this.current = 0;
+    this.type = QuestType.None;
+    this.progress = 0;
+    this.goal = this.getGoal();
   }
 
-  trackProgress(t) {
-    if (t === this.type) this.current++;
-    if (this.current >= this.goal.amount) {
-      mainWindow.subMenus[SubMenu.Field].ch[1].setAction(ActionScreen.Quest);
-      let qArr = Object.values(QuestType);
-      this.type = qArr[~~(Math.random() * qArr.length)];
-      this.goal = this.generateGoal(this.type);
-      this.current = 0;
-    }
+  verifyQuestType(val) {
+    return this.type === val;
   }
 
-  generateGoal(type) {
-    switch (type) {
-      case QuestType.Kill:
-        return {
-          amount: ~~(Math.random() * 50) + 25,
-            target: ~~(Math.random() * 5) + 1
-        };
-      case QuestType.BossKill:
-        return {
-          amount: ~~(Math.random() * 4) + 2,
-            target: ~~(Math.random() * 2) + 6
-        };
-      case QuestType.Collect:
-        return {
-          amount: ~~(Math.random() * 50) + 25,
-            target: 30,
-        };
-      case QuestType.OpenChest:
-        return {
-          amount: ~~(Math.random() * 50) + 25,
-            target: 2,
-        };
-    }
+  checkProgress(val, extras = null) {
+    console.log(val, extras);
+    if (!this.verifyQuestType(val)) return;
+    this.evaluateProgress(extras);
+  }
+
+  evaluateProgress() {
+  }
+
+  getGoal() {
+    return -1;
   }
 
   getName() {
-    let qArr = Object.keys(EntityIDs);
-    let killTarget = "";
-    switch (this.type) {
-      case QuestType.Kill:
-        if (this.goal.target === EntityIDs.Octopus) killTarget = pl("Octopus", this.goal.amount, "Octopuses");
-        else killTarget = pl(qArr[this.goal.target], this.goal.amount);
-        return "Kill " + killTarget;
-      case QuestType.BossKill:
-        if (this.goal.target === EntityIDs.SkeletonBoss) killTarget = pl("Skeleton Boss", this.goal.amount, "Skeleton Bosses");
-        else killTarget = pl(qArr[this.goal.target], this.goal.amount);
-        return "Kill " + killTarget;
-      case QuestType.Collect:
-        return "Collect " + pl("item", this.goal.amount);
-      case QuestType.OpenChest:
-        return "Open " + pl("chest", this.goal.amount);
-    }
-
+    return "";
   }
 
   getProgress() {
-    return this.current + "/" + this.goal.amount;
+    return "";
+  }
+
+  getHint() {
+    return "Good luck completing this quest.";
   }
 }
+
+class KillQuest extends Quest {
+  constructor(par) {
+    super(par);
+    this.type = QuestType.Kill;
+    this.enemyType = ~~(Math.random() * enemyTypeCount + 1);
+  }
+
+  evaluateProgress(enemyType) {
+    if (this.enemyType !== enemyType) return;
+    this.progress++;
+    this.checkGoal();
+  }
+
+  checkGoal() {
+    
+  }
+
+  getGoal() {
+    return ~~(Math.random() * 5 + 3);
+  }
+
+  getName() {
+    return "Kill " + pl(enemyDict[this.enemyType - 1][0], this.goal, enemyDict[this.enemyType - 1][1]);
+  }
+
+  getProgress() {
+    return "Progress: " + this.progress + " / " + this.goal;
+  }
+
+  getHint() {
+    return "This should be self-explanatory.";
+  }
+}
+
+class WalkQuest extends Quest {
+  constructor(par) {
+    super(par);
+    this.type = QuestType.Walk;
+  }
+
+  evaluateProgress() {
+    this.progress = Math.abs(this.goal.x - this.parent.position.x) + Math.abs(this.goal.y - this.parent.position.y);
+  }
+
+  getProgress() {
+    return "Distance: " + this.progress + " tiles.";
+  }
+
+  getGoal() {
+    return {x: 10, y: 10};
+  }
+
+  getName() {
+    return "Move to (" + this.goal.x + "," + this.goal.y + ")";
+  }
+
+  getHint() {
+    return "Walk to the given coordinates.";
+  }
+}
+

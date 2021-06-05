@@ -1,3 +1,4 @@
+//https://trello.com/b/Pp4OXQRR/todo-liste
 let version = {
   a: 0,
   b: 0,
@@ -461,6 +462,13 @@ function createDataArray() {
   tileLength.push(lenBitMaskEnemy);
 
   tInfo.push(tileLength);
+
+  let tVersion = [];
+  tVersion.push(version.a);
+  tVersion.push(version.b);
+  tVersion.push(version.c);
+  tVersion.push(version.d);
+  tInfo.push(tVersion);
 
   console.log(lenBitMaskTex, lenBitMaskEnt, lenBitMaskSubTex, lenBitMaskEnemy);
 
