@@ -46,6 +46,8 @@ function setup() {
   //generateMinimap();
 
   mainWindow.displayOnce();
+
+  availableQuests = generateQuests(player);
   //noLoop();
 }
 

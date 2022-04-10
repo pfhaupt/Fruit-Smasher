@@ -613,7 +613,7 @@ class Spawner extends Enemy {
   checkSpawn() {
     this.timeTillSpawn--;
     if (this.timeTillSpawn === 0) {
-      this.spawnEnemy(EntityIDs.Scorpion);
+      this.spawnEnemy();
       this.timeTillSpawn = 2 + ~~random(2); //2 or 3 rounds, based on random
     }
   }

@@ -218,7 +218,6 @@ class Deity {
       maxDmg = this.attr[AttrIDs.Damage].total * this.damageRange.max;
     let dmg = minDmg + Math.random() * (maxDmg - minDmg);
     if (!other.hasHitpointsBelow(0)) {
-      console.log("Ouch " + this.constructor.name);
       if (other.hasDodgedAttack(this)) {
         mainWindow.subMenus[SubMenu.Field].ch[1].subActions[ActionScreen.Combat].ch[1].ch[this.lastActionID].setText(["Missed Attack"]);
         return;

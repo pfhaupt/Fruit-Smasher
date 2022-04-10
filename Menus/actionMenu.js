@@ -347,6 +347,10 @@ class VictoryAction extends Action {
     this.ch.push(new CustomImage("images/victory.png", 0, 0, 1, 0.5, 1));
     this.ch.push(new Text(["Hello, you defeated a ", "currentlyFightingEnemy.constructor.name"], 0, 0.5, 1, 0.1));
     this.ch.push(new Text(["You got ", "currentlyFightingEnemy.level", " gold!"], 0, 0.6, 1, 0.1));
+
+    this.ch.push(new Button("Dismiss", 0.3, 0.7, 0.4, 0.1, () => {
+      mainWindow.subMenus[SubMenu.Field].ch[1].setAction(ActionScreen.Idle);
+    }));
   }
 }
 

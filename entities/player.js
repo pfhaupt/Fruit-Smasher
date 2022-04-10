@@ -82,7 +82,6 @@ class Player extends Deity {
     }
 
     //Player can actually move here
-    this.checkQuestProgress(QuestType.Walk);
 
     this.attr[AttrIDs.MoveCount].current--;
     action.setAction(ActionScreen.Idle);
@@ -101,6 +100,9 @@ class Player extends Deity {
     //Update real Player pos
     this.position.x = newX;
     this.position.y = newY;
+
+    this.checkQuestProgress(QuestType.Walk);
+    
     mainWindow.currentSubMenu.displayOnce();
   }
 
@@ -148,12 +150,20 @@ class Player extends Deity {
   }
 
   getRandomQuest() {
-    return new KillQuest(this);
+    return new KillQuest(this, 0);
   }
 
   checkQuestProgress(val, extras = null) {
     this.currentQuest.checkProgress(val, extras);
   }
+
+  completeQuest(quest) {
+    console.log("Ey");
+    if (quest.nextQuest === -1) this.currentQuest = this.getRandomQuest();
+    else if (quest.nextQuest > availableQuests.length) this.currentQuest = this.getRandomQuest();
+    else this.currentQuest = availableQuests[quest.nextQuest];
+    this.currentQuest.evaluateProgress();
+    }
 }
 
 

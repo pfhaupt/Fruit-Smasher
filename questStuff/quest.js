@@ -1,3 +1,15 @@
+let availableQuests;
+
+function generateQuests(player) {
+  let quests = [];
+  quests.push(new WalkQuest(player, 2));
+  quests.push(new KillQuest(player, 0));
+  quests.push(new KillQuest(player, 1));
+
+
+  return quests;
+}
+
 let QuestType = {
   None: 0,
   Kill: 1,
@@ -15,8 +27,9 @@ let enemyDict = [
 ]
 
 class Quest {
-  constructor(par) {
+  constructor(par, nextQuest = -1) {
     this.parent = par;
+    this.nextQuest = nextQuest;
     this.type = QuestType.None;
     this.progress = 0;
     this.goal = this.getGoal();
@@ -32,29 +45,30 @@ class Quest {
     this.evaluateProgress(extras);
   }
 
-  evaluateProgress() {
+  finishQuest() {
+    this.parent.completeQuest(this);
   }
 
+  //Default functions, overwrite in each quest subclass
+  evaluateProgress() {
+  }
   getGoal() {
     return -1;
   }
-
   getName() {
     return "";
   }
-
   getProgress() {
     return "";
   }
-
   getHint() {
     return "Good luck completing this quest.";
   }
 }
 
 class KillQuest extends Quest {
-  constructor(par) {
-    super(par);
+  constructor(par, nextQuest = -1) {
+    super(par, nextQuest);
     this.type = QuestType.Kill;
     this.enemyType = ~~(Math.random() * enemyTypeCount + 1);
   }
@@ -66,10 +80,13 @@ class KillQuest extends Quest {
   }
 
   checkGoal() {
-    
+    if (this.progress === this.goal) {
+      this.finishQuest();
+    }
   }
 
   getGoal() {
+    return 1;
     return ~~(Math.random() * 5 + 3);
   }
 
@@ -87,17 +104,23 @@ class KillQuest extends Quest {
 }
 
 class WalkQuest extends Quest {
-  constructor(par) {
-    super(par);
+  constructor(par, nextQuest = -1) {
+    super(par, nextQuest);
     this.type = QuestType.Walk;
   }
 
   evaluateProgress() {
     this.progress = Math.abs(this.goal.x - this.parent.position.x) + Math.abs(this.goal.y - this.parent.position.y);
+    this.checkGoal();
+  }
+  checkGoal() {
+    if (this.progress === 0) {
+      this.finishQuest();
+    }
   }
 
   getProgress() {
-    return "Distance: " + this.progress + " tiles.";
+    return "Distance: " + pl("tile", this.progress);
   }
 
   getGoal() {
@@ -112,4 +135,5 @@ class WalkQuest extends Quest {
     return "Walk to the given coordinates.";
   }
 }
+
 
